@@ -23,9 +23,22 @@
     <ClInclude Include="Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="default.vert" />
-    <None Include="default.frag" />
+    <None Include="lamp.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="lamp.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="materials.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="materials.vs">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
