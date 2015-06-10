@@ -24,8 +24,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void do_movement();
 
+// NOTE: the 9.7" 2048x1536 retina display area measures 196x157mm
+
 // Window dimensions
-const GLuint WIDTH = 800, HEIGHT = 600;
+const GLuint WIDTH = 2048, HEIGHT = 1536, WIDTHMM = 196, HEIGHTMM = 157;
 
 // Camera
 Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -51,8 +53,23 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 
+	// Choose the iPad retina display for full screen, if present
+	int count, widthMM, heightMM;
+	GLFWmonitor** monitors = glfwGetMonitors(&count);
+	GLFWmonitor* retinaDisplay = glfwGetPrimaryMonitor();
+	for(int i = 0; i < count; ++i)
+	{
+		glfwGetMonitorPhysicalSize(monitors[i], &widthMM, &heightMM);
+		std::cout << "Monitor " << i << ": " << widthMM << " x " << heightMM << std::endl;
+		if(widthMM == 722 && heightMM == 542)
+		{
+			retinaDisplay = monitors[i];
+			break;
+		}
+	}
+
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
+    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Hairy Slices", retinaDisplay, nullptr);
     glfwMakeContextCurrent(window);
 
     // Set the required callback functions
@@ -61,7 +78,7 @@ int main()
     glfwSetScrollCallback(window, scroll_callback);
 
     // GLFW Options
-    //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     // Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
     glewExperimental = GL_TRUE;
@@ -189,12 +206,13 @@ int main()
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 0.5f, 0.31f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 0.5f, 0.31f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"),  0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
-        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 32.0f);
+        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 200.0f);
 
         // Create camera transformations
         glm::mat4 view;
         view = camera.GetViewMatrix();
-        glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+        //glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
         // Get the uniform locations
         GLint modelLoc = glGetUniformLocation(lightingShader.Program, "model");
         GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
