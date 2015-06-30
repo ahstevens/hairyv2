@@ -8,90 +8,91 @@
 
 #include "SweepSurface.h"
 
-
 //------------- constructor -----------------------
 SweepSurface::SweepSurface()
 {
 	// default shape is an uninteresting square
-	polygon.push_back( glm::vec4( -0.5, -0.5, 0.0, 1.0 ) );
-	polygon.push_back( glm::vec4( 0.5, -0.5, 0.0, 1.0 ) );
-	polygon.push_back( glm::vec4( 0.5, 0.5, 0.0, 1.0 ) );
-	polygon.push_back( glm::vec4( -0.5, 0.5, 0.0, 1.0 ) );
+	polygon.push_back( vec2( -0.5, -0.5 ) );
+	polygon.push_back( vec2( 0.5, -0.5 ) );
+	polygon.push_back( vec2( 0.5, 0.5 ) );
+	polygon.push_back( vec2( -0.5, 0.5 ) );
 
 	// default path is straight along z axis
-	path.push_back( glm::vec4( 0.0, 0.0, 0.0, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -0.2, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -0.4, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -0.6, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -0.8, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -1.0, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -1.2, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -1.4, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -1.6, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -1.8, 1.0 ) );
-	path.push_back( glm::vec4( 0.0, 0.0, -2.0, 1.0 ) );
+	path.push_back( vec3( 0.0, 0.0, 0.0 ) );
+	path.push_back( vec3( 0.0, 0.0, -0.2 ) );
+	path.push_back( vec3( 0.0, 0.0, -0.4 ) );
+	path.push_back( vec3( 0.0, 0.0, -0.6 ) );
+	path.push_back( vec3( 0.0, 0.0, -0.8 ) );
+	path.push_back( vec3( 0.0, 0.0, -1.0 ) );
+	path.push_back( vec3( 0.0, 0.0, -1.2 ) );
+	path.push_back( vec3( 0.0, 0.0, -1.4 ) );
+	path.push_back( vec3( 0.0, 0.0, -1.6 ) );
+	path.push_back( vec3( 0.0, 0.0, -1.8 ) );
+	path.push_back( vec3( 0.0, 0.0, -2.0 ) );
 
 	// default scale is linear downscale to 0
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 0.9, 0.9 ) );
-	scales.push_back( glm::vec2( 0.8, 0.8 ) );
-	scales.push_back( glm::vec2( 0.7, 0.7 ) );
-	scales.push_back( glm::vec2( 0.6, 0.6 ) );
-	scales.push_back( glm::vec2( 0.5, 0.5 ) );
-	scales.push_back( glm::vec2( 0.4, 0.4 ) );
-	scales.push_back( glm::vec2( 0.3, 0.3 ) );
-	scales.push_back( glm::vec2( 0.2, 0.2 ) );
-	scales.push_back( glm::vec2( 0.1, 0.1 ) );
-	scales.push_back( glm::vec2( 0.0, 0.0 ) );
+	scales.push_back( vec2( 1.0, 1.0 ) );
+	scales.push_back( vec2( 0.9, 0.9 ) );
+	scales.push_back( vec2( 0.8, 0.8 ) );
+	scales.push_back( vec2( 0.7, 0.7 ) );
+	scales.push_back( vec2( 0.6, 0.6 ) );
+	scales.push_back( vec2( 0.5, 0.5 ) );
+	scales.push_back( vec2( 0.4, 0.4 ) );
+	scales.push_back( vec2( 0.3, 0.3 ) );
+	scales.push_back( vec2( 0.2, 0.2 ) );
+	scales.push_back( vec2( 0.1, 0.1 ) );
+	scales.push_back( vec2( 0.0, 0.0 ) );
 
 	// twist 180 degrees in the CCW direction
-	rotations.push_back( 0.0 );
-	rotations.push_back( -18 );
-	rotations.push_back( -36 );
-	rotations.push_back( -54 );
-	rotations.push_back( -72 );
-	rotations.push_back( -90 );
-	rotations.push_back( -108 );
-	rotations.push_back( -126 );
-	rotations.push_back( -144 );
-	rotations.push_back( -162 );
-	rotations.push_back( -180 );
-	rotations.push_back( -180 );
+	rotations.push_back( 0.0f );
+	rotations.push_back( -18.0f );
+	rotations.push_back( -36.0f );
+	rotations.push_back( -54.0f );
+	rotations.push_back( -72.0f );
+	rotations.push_back( -90.0f );
+	rotations.push_back( -108.0f );
+	rotations.push_back( -126.0f );
+	rotations.push_back( -144.0f );
+	rotations.push_back( -162.0f );
+	rotations.push_back( -180.0f );
+	rotations.push_back( -180.0f );
 
 	// make the points representing the ribs of the swept surface
 	makeRibs();
 	computePhongNormals();
 
-	wireframe = 0;
-	draw_path = 0;
-	draw_normals = 0;
+	draw_skin = true;
+	draw_wireframe = false;
+	draw_path = false;
+	draw_normals = false;
+	use_gradient = true;
+	geomChange = false;
+
+	pathLenMultiplier = 1.0;
 }
 
-SweepSurface::SweepSurface( std::vector<glm::vec2> poly,
-						    std::vector<glm::vec3> path,
-						    std::vector<glm::vec2> scales,
-						    std::vector<float> rots )
+SweepSurface::SweepSurface( std::vector<vec2> polygon,
+						    std::vector<vec3> path,
+						    std::vector<vec2> scales,
+						    std::vector<float> rotations )
 {
-	// convert 2D polygon points to vec4
-	std::vector<glm::vec2>::iterator it;
-	for( it = poly.begin(); it != poly.end(); it++ )
-		polygon.push_back( glm::vec4( *it, 0.0, 1.0 ) );
-
-	// convert 3D path points to vec4
-	std::vector<glm::vec3>::iterator it2;
-	for( it2 = path.begin(); it2 != path.end(); it2++ )
-			this->path.push_back( glm::vec4( *it2, 1.0 ) );
-
+	this->polygon = polygon;
+	this->path = path;
 	this->scales = scales;
-	rotations = rots;
+	this->rotations = rotations;
 
-	// make the points representing the ribs of the swept surface
+	// make the vertices representing the ribs of the swept surface
 	makeRibs();
 	computePhongNormals();
 
-	wireframe = 0;
-	draw_path = 0;
-	draw_normals = 0;
+	draw_skin = true;
+	draw_wireframe = false;
+	draw_path = false;
+	draw_normals = false;
+	use_gradient = true;
+	geomChange = false;
+
+	pathLenMultiplier = 1.0;
 }
 
 //------------- destructor -----------------------
@@ -100,51 +101,63 @@ SweepSurface::~SweepSurface()
 }
 
 // setter class for sweep surface 2D polygon
-void SweepSurface::updatePolygon( std::vector<glm::vec2> poly )
+void SweepSurface::updatePolygon( std::vector<vec2> polygon )
 {
-	// start fresh
-	polygon.clear();
+	this->polygon = polygon;
 
-	// convert 2D polygon points to vec4
-	std::vector<glm::vec2>::iterator it;
-	for( it = poly.begin(); it != poly.end(); it++ )
-		polygon.push_back( glm::vec4( *it, 0.0, 1.0 ) );
-
-	makeRibs();
-	computePhongNormals();
+	geomChange = true;
 }
 
 // setter class for sweep surface path
-void SweepSurface::updatePath( std::vector<glm::vec3> p )
+void SweepSurface::updatePath( std::vector<vec3> path )
 {
-	// start fresh
-	path.clear();
+	this->path = path;
 
-	// convert 3D path points to vec4
-	std::vector<glm::vec3>::iterator it2;
-	for( it2 = p.begin(); it2 != p.end(); it2++ )
-		path.push_back( glm::vec4( *it2, 1.0 ) );
-
-	makeRibs();
-	computePhongNormals();
+	geomChange = true;
 }
 
 // setter class for sweep surface 2D polygon scales
-void SweepSurface::updateScales( std::vector<glm::vec2> s )
+void SweepSurface::updateScales( std::vector<vec2> scales )
 {
-	scales = s;
+	this->scales = scales;
 
-	makeRibs();
-	computePhongNormals();
+	geomChange = true;
 }
 
 // setter class for sweep surface 2D polygon rotations (in degrees)
-void SweepSurface::updateRotations( std::vector<float> rots )
+void SweepSurface::updateScales( float scales )
 {
-	rotations = rots;
+	std::vector<vec2>::iterator it;
+	for( it = this->scales.begin(); it != this->scales.end(); it++ )
+		*it = vec2( scales, scales );
 
-	makeRibs();
-	computePhongNormals();
+	geomChange = true;
+}
+
+// setter class for sweep surface 2D polygon rotations (in degrees)
+void SweepSurface::updateRotations( std::vector<float> rotations )
+{
+	this->rotations = rotations;
+
+	geomChange = true;
+}
+
+// setter class for sweep surface 2D polygon rotations (in degrees)
+void SweepSurface::updateRotations( float rotations )
+{
+	std::vector<float>::iterator it;
+	for( it = this->rotations.begin(); it != this->rotations.end(); it++ )
+		*it = rotations;
+
+	geomChange = true;
+}
+
+// setter class for sweep surface 2D polygon rotations (in degrees)
+void SweepSurface::setPathLengthMultiplier( float m )
+{
+	pathLenMultiplier = m;
+
+	geomChange = true;
 }
 
 /*
@@ -156,51 +169,67 @@ void SweepSurface::updateRotations( std::vector<float> rots )
 void SweepSurface::makeRibs()
 {
 	// make sure points vector is empty before pushing new points
-	point_buffer.clear();
+	vertex_buffer.clear();
+
+	mat4 coordFrameTrans;
 
 	// for all points along the defined path
-	for( int i = 0; i < path.size(); i++ )
+	for( unsigned int i = 0; i < path.size(); i++ )
 	{
-		glm::vec3 w;
+		vec3 w;
 
-		if( i == 0 )
-			w = glm::vec3( 0.0, 0.0, 1.0 ); // normal z axis to start off
+		if( i == 0 ) {
+			if( path.size() > 1 ) {
+				w = normalize( vec3( path[ i ].x - path[ i + 1 ].x,
+					 path[ i ].y - path[ i + 1 ].y,
+					 path[ i ].z - path[ i + 1 ].z ) );
+			}
+			else {
+				w = vec3( 0.0, 0.0, 1.0 ); // normal z axis
+			}
+
+			// place origin of polygon at first rib, so we can make endcap
+			//for( std::vector<vec4>::iterator it = polygon.begin(); it != polygon.end(); it++ )
+				vertex_buffer.push_back( vec3( 0.0, 0.0, 0.0 ) );
+		}
 		else {
 			// current path point minus prev path point gives vector pointing
 			// towards prev polygon's center.
-			w = glm::normalize( glm::vec3( path[ i - 1 ].x - path[ i ].x,
+			w = normalize( vec3( path[ i - 1 ].x - path[ i ].x,
 								 path[ i - 1 ].y - path[ i ].y,
 								 path[ i - 1 ].z - path[ i ].z ) );
 		}
 
 		// calculate up vector for angle offset
-		glm::vec3 up = glm::vec3( -sin( glm::radians( rotations[ i ] ) ),
-						 cos( glm::radians( rotations[ i ] ) ),
+		vec3 up = vec3( -sin( radians( rotations[ i ] ) ),
+						 cos( radians( rotations[ i ] ) ),
 						 0.0 );
 
 		// u is orthogonal to up vector and w vector
-		glm::vec3 u = normalize( cross( up, w ) );
+		vec3 u = normalize( cross( up, w ) );
 
 		// v vector orthogonal to w vector and u vector
-		glm::vec3 v = normalize( cross( w, u ) );
+		vec3 v = normalize( cross( w, u ) );
 
 		// scale the polygon
 		u = scales[ i ].x * u;
 		v = scales[ i ].y * v;
 
 		// build coordinate frame transformation matrix at path point
-		glm::mat4 coordFrameTrans = glm::transpose( glm::mat4( glm::vec4( u, 0.0 ),
-												glm::vec4( v, 0.0 ),
-												glm::vec4( w, 0.0 ),
-												path[ i ] ) );
+		coordFrameTrans = transpose( mat4( vec4( u, 0.0 ),
+										   vec4( v, 0.0 ),
+										   vec4( w, 0.0 ),
+										   vec4( path[ i ], 1.0 ) * pathLenMultiplier ) );
 
 		// push back transformed polygon points as a new "rib" of the surface
-		std::vector<glm::vec4>::iterator it;
+		std::vector<vec2>::iterator it;
 		for( it = polygon.begin(); it != polygon.end(); it++ )
-		{
-			point_buffer.push_back( coordFrameTrans * ( *it ) );
-		}
+			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );
 	}
+
+	// place origin of polygon at last rib, so we can make endcap
+	//for( std::vector<vec4>::iterator it = polygon.begin(); it != polygon.end(); it++ )
+		vertex_buffer.push_back( vec3( coordFrameTrans * ( vec4( 0.0, 0.0, 0.0, 1.0 ) ) ) );
 }
 
 /*
@@ -212,36 +241,45 @@ void SweepSurface::computePhongNormals()
 	normal_buffer.clear();
 
 	int polySize = polygon.size();
-	int pntBuffSize = point_buffer.size();
+	int pntBuffSize = vertex_buffer.size();
 	float dotProd, cosTheta, theta;
-	glm::vec3 normal;
+	vec3 normal;
 	// vectors from current vertex to next vertex, previous vertex,
 	// adjacent vertex in the next or previous polygon, the adjacent
 	// previous vertex, and the adjacent next vertex
-	glm::vec4 vertCur, vecNext, vecPrev, vecAdj, vecAdjNext, vecAdjPrev;
+	vec3 vertCur, vecNext, vecPrev, vecAdj, vecAdjNext, vecAdjPrev;
 
-	for( int i = 0; i < pntBuffSize; i++ ) {
+	if( path.size() > 1 )
+		normal = normalize( vec3( path[ 0 ].x - path[ 1 ].x,
+			 path[ 0 ].y - path[ 1 ].y,
+			 path[ 0 ].z - path[ 1 ].z ) );
+	else
+		normal = vec3( 0.0, 0.0, 1.0 );
+
+	normal_buffer.push_back( normal );
+
+	for( int i = 1; i < pntBuffSize - 1; i++ ) {
 		normal.x = normal.y = normal.z = 0.0;
-		vertCur = point_buffer[ i ];
+		vertCur = vertex_buffer[ i ];
 
 		// calculate normals for faces on previous path side if not at begin
-		if( i >= polySize ) {
-			vecAdj = point_buffer[ i - polySize ] - vertCur;
+		if( i >= polySize + 1) {
+			vecAdj = vertex_buffer[ i - polySize ] - vertCur;
 			// check if i is first point in polygon to get proper prev point
-			if( ( i + 1 ) % polySize == 1 ) {
-				vecPrev = point_buffer[ i + polySize - 1 ] - vertCur;
+			if( i % polySize == 1 ) {
+				vecPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
 			}
 			else {
-				vecPrev = point_buffer[ i - 1 ] - vertCur;
+				vecPrev = vertex_buffer[ i - 1 ] - vertCur;
 			}
 			// check if i is last point in polygon to get proper next point
-			if( (i + 1) % polySize == 0 ) {
-				vecNext = point_buffer[ i - polySize + 1 ] - vertCur;
-				vecAdjNext = point_buffer[ i - 2 * polySize + 1 ] - vertCur;
+			if( i % polySize == 0 ) {
+				vecNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
+				vecAdjNext = vertex_buffer[ i - 2 * polySize + 1 ] - vertCur;
 			}
 			else {
-				vecNext = point_buffer[ i + 1 ] - vertCur;
-				vecAdjNext = point_buffer[ i - polySize + 1 ] - vertCur;
+				vecNext = vertex_buffer[ i + 1 ] - vertCur;
+				vecAdjNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
 			}
 
 			// weighted normal for triangle 1
@@ -255,7 +293,7 @@ void SweepSurface::computePhongNormals()
 				if( cosTheta >= -1 && cosTheta <= 1 )
 				{
 					theta = acos( cosTheta );
-					normal += theta * glm::cross( glm::vec3( vecAdj ), glm::vec3( vecPrev ) );
+					normal += theta * cross( vecAdj, vecPrev );
 				}
 			}
 
@@ -270,7 +308,7 @@ void SweepSurface::computePhongNormals()
 				if( cosTheta >= -1 && cosTheta <= 1 )
 				{
 					theta = acos( cosTheta );
-					normal += theta * glm::cross( glm::vec3( vecAdjNext ), glm::vec3( vecAdj ) );
+					normal += theta * cross( vecAdjNext, vecAdj );
 				}
 			}
 
@@ -285,29 +323,29 @@ void SweepSurface::computePhongNormals()
 				if( cosTheta >= -1 && cosTheta <= 1 )
 				{
 					theta = acos( cosTheta );
-					normal += theta * glm::cross( glm::vec3( vecNext ), glm::vec3( vecAdjNext ) );
+					normal += theta * cross( vecNext, vecAdjNext );
 				}
 			}
 		}
 
 		// calculate normals for faces on the next path side if not at end
-		if( i < pntBuffSize - polySize ) {
-			vecAdj = point_buffer[ i + polySize ] - vertCur;
+		if( i < pntBuffSize - polySize - 1 ) {
+			vecAdj = vertex_buffer[ i + polySize ] - vertCur;
 
 			// check if i is last point in polygon to get proper next point
-			if( (i + 1) % polySize == 0 )
-				vecNext = point_buffer[ i - polySize + 1 ] - vertCur;
+			if( i % polySize == 0 )
+				vecNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
 			else
-				vecNext = point_buffer[ i + 1 ] - vertCur;
+				vecNext = vertex_buffer[ i + 1 ] - vertCur;
 
 			// check if i is first point in polygon to get proper previous point
-			if( ( i + 1 ) % polySize == 1 ) {
-				vecPrev = point_buffer[ i + polySize - 1 ] - vertCur;
-				vecAdjPrev = point_buffer[ i + 2 * polySize - 1 ] - vertCur;
+			if( i % polySize == 1 ) {
+				vecPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
+				vecAdjPrev = vertex_buffer[ i + 2 * polySize - 1 ] - vertCur;
 			}
 			else {
-				vecPrev = point_buffer[ i - 1 ] - vertCur;
-				vecAdjPrev = point_buffer[ i + polySize - 1 ] - vertCur;
+				vecPrev = vertex_buffer[ i - 1 ] - vertCur;
+				vecAdjPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
 			}
 
 			// weighted normal for triangle 4
@@ -321,7 +359,7 @@ void SweepSurface::computePhongNormals()
 				if( cosTheta >= -1 && cosTheta <= 1 )
 				{
 					theta = acos( cosTheta );
-					normal += theta * glm::cross( glm::vec3( vecAdj ), glm::vec3( vecNext ) );
+					normal += theta * cross( vecAdj, vecNext );
 				}
 			}
 
@@ -336,7 +374,7 @@ void SweepSurface::computePhongNormals()
 				if( cosTheta >= -1 && cosTheta <= 1 )
 				{
 					theta = acos( cosTheta );
-					normal += theta * glm::cross( glm::vec3( vecAdjPrev ), glm::vec3( vecAdj ) );
+					normal += theta * cross( vecAdjPrev, vecAdj );
 				}
 			}
 
@@ -351,44 +389,92 @@ void SweepSurface::computePhongNormals()
 				if( cosTheta >= -1 && cosTheta <= 1 )
 				{
 					theta = acos( cosTheta );
-					normal += theta * glm::cross( glm::vec3( vecPrev ), glm::vec3( vecAdjPrev ) );
+					normal += theta * cross( vecPrev, vecAdjPrev );
 				}
 			}
 		}
 		// add normalized normal to the vector
-		normal_buffer.push_back( glm::vec4( glm::normalize( normal ), 0.0f ) );
+		normal_buffer.push_back( normalize( normal ) );
 	}
+
+	if( path.size() > 1 )
+		normal = normalize( vec3( path[ path.size() - 1 ].x - path[ path.size() - 2 ].x,
+			 path[ path.size() - 1 ].y - path[ path.size() - 2 ].y,
+			 path[ path.size() - 1 ].z - path[ path.size() - 2 ].z ) );
+	else
+		normal = vec3( 0.0, 0.0, -1.0 );
+
+	normal_buffer.push_back( normal );
 }
+
+void SweepSurface::pack()
+{
+	int polySize = polygon.size();
+	float *data = new float[ 3 * 2 * vertex_buffer.size() ];
+
+		for( int i = 0; i < polySize + 1; ++i) {			
+			glVertex3f( vertex_buffer[ i ].x,
+						vertex_buffer[ i ].y, 
+						vertex_buffer[ i ].z );
+			glNormal3f( normalFront.x, normalFront.y, normalFront.z );
+		}
+		u = 1.0f;
+		glTexCoord2f( u, v );
+		glNormal3f( normalFront.x, normalFront.y, normalFront.z );
+		glVertex3f( vertex_buffer[ 1 ].x,
+					vertex_buffer[ 1 ].y, 
+					vertex_buffer[ 1 ].z );
+}
+
+/*
+* enable skin mode
+*/
+void SweepSurface::enableSkin() { draw_skin = true; }
+
+/*
+* disable skin mode
+*/
+void SweepSurface::disableSkin() { draw_skin = false; }
 
 /*
  * enable wireframe mode
  */
-void SweepSurface::enableWireframe() { wireframe = 1; }
+void SweepSurface::enableWireframe() { draw_wireframe = true; }
 
 /*
  * disable wireframe mode
  */
-void SweepSurface::disableWireframe() { wireframe = 0; }
+void SweepSurface::disableWireframe() { draw_wireframe = false; }
 
 /*
  * enable drawing the Phong normals at the vertices
  */
-void SweepSurface::enableNormals() { draw_normals = 1; }
+void SweepSurface::enableNormals() { draw_normals = true; }
 
 /*
  * disable drawing the Phong normals at the vertices
  */
-void SweepSurface::disableNormals() { draw_normals = 0; }
+void SweepSurface::disableNormals() { draw_normals = false; }
 
 /*
  * enable drawing the path along which the surface sweeps
  */
-void SweepSurface::enablePath() { draw_path = 1; }
+void SweepSurface::enablePath() { draw_path = true; }
 
 /*
  * disable drawing the path along which the surface sweeps
  */
-void SweepSurface::disablePath() { draw_path = 0; }
+void SweepSurface::disablePath() { draw_path = false; }
+
+/*
+ * enable drawing the path along which the surface sweeps
+ */
+void SweepSurface::enablePathGradient() { use_gradient = true; }
+
+/*
+ * disable drawing the path along which the surface sweeps
+ */
+void SweepSurface::disablePathGradient() { use_gradient = false; }
 
 /*
  * Drawing method for wireframe mode. Disables textures and material properties
@@ -401,41 +487,43 @@ void SweepSurface::drawWireframe()
 
 	// disable lighting, textures, material properties
 	glDisable( GL_LIGHTING );
-	if( useTexture ) tex->disable();
-	if( useMaterial ) mat->disable();
+	//if( useTexture ) tex->disable();
+	//if( useMaterial ) mat->disable();
 
 	glColor3f( 1.0, 1.0, 1.0 ); // white wireframe
 
 	// draw polygon ribs using line loop
 	for( int i = 0; i < pathSize; i++ ) {
 		glBegin( GL_LINE_LOOP );
-			for( int j = polySize * i; j < polySize * ( i + 1 ); j++)
-				glVertex3f( point_buffer[ j ].x,
-						    point_buffer[ j ].y,
-							point_buffer[ j ].z );
+			for( int j = ( polySize * i ) + 1; j < polySize * ( i + 1 ) + 1; j++) {
+				glVertex3f( vertex_buffer[ j ].x,
+						    vertex_buffer[ j ].y,
+							vertex_buffer[ j ].z );
+			}
 		glEnd();
 	}
 
 	// draw wireframe for triangle skin mesh
 	for( int i = 0; i < pathSize - 1; i++ ) {
 		glBegin( GL_LINE_STRIP );
-			for( int j = polySize * i; j < polySize * ( i + 1 ); j++ ) {
-				glVertex3f( point_buffer[ j ].x,
-						    point_buffer[ j ].y,
-							point_buffer[ j ].z );
-				glVertex3f( point_buffer[ j + polySize ].x,
-							point_buffer[ j + polySize ].y,
-							point_buffer[ j + polySize ].z );
+			for( int j = ( polySize * i ) + 1; j < polySize * ( i + 1 ) + 1; j++ ) {
+				glVertex3f( vertex_buffer[ j ].x,
+						    vertex_buffer[ j ].y,
+							vertex_buffer[ j ].z );
+				glVertex3f( vertex_buffer[ j + polySize ].x,
+							vertex_buffer[ j + polySize ].y,
+							vertex_buffer[ j + polySize ].z );
 			}
 			// connect back to beginning points
-			glVertex3f( point_buffer[ polySize * i ].x,
-						point_buffer[ polySize * i ].y,
-						point_buffer[ polySize * i ].z );
-			glVertex3f( point_buffer[ polySize * ( i + 1) ].x,
-						point_buffer[ polySize * ( i + 1) ].y,
-						point_buffer[ polySize * ( i + 1) ].z );
+			glVertex3f( vertex_buffer[ ( polySize * i ) + 1 ].x,
+						vertex_buffer[ ( polySize * i ) + 1 ].y,
+						vertex_buffer[ ( polySize * i ) + 1 ].z );
+			glVertex3f( vertex_buffer[ polySize * ( i + 1) + 1 ].x,
+						vertex_buffer[ polySize * ( i + 1) + 1 ].y,
+						vertex_buffer[ polySize * ( i + 1) + 1 ].z );
 		glEnd();
 	}
+
 	glEnable( GL_LIGHTING );
 }
 
@@ -451,50 +539,91 @@ void SweepSurface::drawSkin()
 	int pathSize = path.size();
 
 	// initialize texture coordinates
-	float u, v = 0.0;
+	float u = 0.0, v = 0.0;
+
+	vec3 curVec, normalFront, normalBack;
+	normalFront = normal_buffer.front();
+	normalBack = normal_buffer.back();
+
+	// draw front endcap
+	glBegin( GL_TRIANGLE_FAN );
+		for( int i = 0; i < polySize + 1; ++i) {
+			u = i / (float) ( polySize + 1 );
+			glTexCoord2f( u, v );
+			glNormal3f( normalFront.x, normalFront.y, normalFront.z );
+			glVertex3f( vertex_buffer[ i ].x,
+						vertex_buffer[ i ].y, 
+						vertex_buffer[ i ].z );
+		}
+		u = 1.0f;
+		glTexCoord2f( u, v );
+		glNormal3f( normalFront.x, normalFront.y, normalFront.z );
+		glVertex3f( vertex_buffer[ 1 ].x,
+					vertex_buffer[ 1 ].y, 
+					vertex_buffer[ 1 ].z );
+	glEnd();	
 
 	// draw skin mesh using triangle strips
 	for( int i = 0; i < pathSize - 1; i++ ) {
 		glBegin( GL_TRIANGLE_STRIP );
-			for( int j = polySize * i; j < polySize * ( i + 1 ); j++ ) {
-				u = (float) ( j % polySize ) / polySize;
+			for( int j = ( polySize * i ) + 1; j < polySize * ( i + 1 ) + 1; j++ ) {
+				u = (float) ( ( j - 1 ) % polySize ) / polySize;
 				v = (float) i / ( pathSize - 1 );
 				glTexCoord2f( u, v );
 				glNormal3f( normal_buffer[ j ].x,
 						    normal_buffer[ j ].y,
 							normal_buffer[ j ].z );
-				glVertex3f( point_buffer[ j ].x,
-						    point_buffer[ j ].y,
-							point_buffer[ j ].z );
+				glVertex3f( vertex_buffer[ j ].x,
+						    vertex_buffer[ j ].y,
+							vertex_buffer[ j ].z );
 				v = (float) ( i + 1 ) / ( pathSize - 1 );
 				glTexCoord2f( u, v );
 				glNormal3f( normal_buffer[ j + polySize ].x,
 							normal_buffer[ j + polySize ].y,
 							normal_buffer[ j + polySize ].z );
-				glVertex3f( point_buffer[ j + polySize ].x,
-							point_buffer[ j + polySize ].y,
-							point_buffer[ j + polySize ].z );
+				glVertex3f( vertex_buffer[ j + polySize ].x,
+							vertex_buffer[ j + polySize ].y,
+							vertex_buffer[ j + polySize ].z );
 			}
 			// connect back to beginning polygon points to complete skin section
 			u = 1.0;
 			v = (float) i / ( pathSize - 1 );
 			glTexCoord2f( u, v );
-			glNormal3f( normal_buffer[ polySize * i ].x,
-						normal_buffer[ polySize * i ].y,
-						normal_buffer[ polySize * i ].z );
-			glVertex3f( point_buffer[ polySize * i ].x,
-						point_buffer[ polySize * i ].y,
-						point_buffer[ polySize * i ].z );
+			glNormal3f( normal_buffer[ ( polySize * i ) + 1 ].x,
+						normal_buffer[ ( polySize * i ) + 1 ].y,
+						normal_buffer[ ( polySize * i ) + 1 ].z );
+			glVertex3f( vertex_buffer[ ( polySize * i ) + 1 ].x,
+						vertex_buffer[ ( polySize * i ) + 1 ].y,
+						vertex_buffer[ ( polySize * i ) + 1 ].z );
 			v = (float) ( i + 1 ) / ( pathSize - 1 );
 			glTexCoord2f( u, v );
-			glNormal3f( normal_buffer[ polySize * ( i + 1) ].x,
-						normal_buffer[ polySize * ( i + 1) ].y,
+			glNormal3f( normal_buffer[ polySize * ( i + 1) + 1 ].x,
+						normal_buffer[ polySize * ( i + 1) + 1 ].y,
 						normal_buffer[ polySize * ( i + 1) ].z );
-			glVertex3f( point_buffer[ polySize * ( i + 1) ].x,
-						point_buffer[ polySize * ( i + 1) ].y,
-						point_buffer[ polySize * ( i + 1) ].z );
+			glVertex3f( vertex_buffer[ polySize * ( i + 1) + 1 ].x,
+						vertex_buffer[ polySize * ( i + 1) + 1 ].y,
+						vertex_buffer[ polySize * ( i + 1) + 1 ].z );
 		glEnd();
 	}
+
+	v = 0.99f;
+	// draw back endcap
+	glBegin( GL_TRIANGLE_FAN );
+		for( int i = 0; i < polySize + 1; ++i) {
+			u = i / (float) ( polySize + 1 );
+			glTexCoord2f( u, v );
+			glNormal3f( normalBack.x, normalBack.y, normalBack.z );
+			glVertex3f( vertex_buffer[ vertex_buffer.size() - 1 - i ].x,
+						vertex_buffer[ vertex_buffer.size() - 1 - i ].y, 
+						vertex_buffer[ vertex_buffer.size() - 1 - i ].z );
+		}
+		u = 1.0;
+		glTexCoord2f( u, v );
+		glNormal3f( normalBack.x, normalBack.y, normalBack.z );
+		glVertex3f( vertex_buffer[ vertex_buffer.size() - 2 ].x,
+					vertex_buffer[ vertex_buffer.size() - 2 ].y, 
+					vertex_buffer[ vertex_buffer.size() - 2 ].z );
+	glEnd();
 }
 
 /*
@@ -508,49 +637,49 @@ void SweepSurface::drawNormals()
 
 	// disable lighting, textures, material properties
 	glDisable( GL_LIGHTING );
-	if( useTexture ) tex->disable();
-	if( useMaterial ) mat->disable();
+	//if( useTexture ) tex->disable();
+	//if( useMaterial ) mat->disable();
 
 	glColor3f( 1.0, 1.0, 0.0 ); // yellow normals
 
 	for( int i = 0; i < pathSize - 1; i++ ) {
 		glBegin( GL_LINES );
-		for( int j = polySize * i; j < polySize * ( i + 1 ); j++ ) {
-			glVertex3f( point_buffer[ j ].x,
-						point_buffer[ j ].y,
-						point_buffer[ j ].z );
-			glVertex3f( (point_buffer[ j ] + normal_buffer[ j ]).x,
-						(point_buffer[ j ] + normal_buffer[ j ]).y,
-						(point_buffer[ j ] + normal_buffer[ j ]).z );
-			glVertex3f( point_buffer[ j + polySize ].x,
-						point_buffer[ j + polySize ].y,
-						point_buffer[ j + polySize ].z );
-			glVertex3f( (point_buffer[ j + polySize ]\
+		for( int j = ( polySize * i ) + 1; j < polySize * ( i + 1 ) + 1; j++ ) {
+			glVertex3f( vertex_buffer[ j ].x,
+						vertex_buffer[ j ].y,
+						vertex_buffer[ j ].z );
+			glVertex3f( (vertex_buffer[ j ] + normal_buffer[ j ]).x,
+						(vertex_buffer[ j ] + normal_buffer[ j ]).y,
+						(vertex_buffer[ j ] + normal_buffer[ j ]).z );
+			glVertex3f( vertex_buffer[ j + polySize ].x,
+						vertex_buffer[ j + polySize ].y,
+						vertex_buffer[ j + polySize ].z );
+			glVertex3f( (vertex_buffer[ j + polySize ]\
 							+ normal_buffer[ j + polySize ]).x,
-						(point_buffer[ j + polySize ]\
+						(vertex_buffer[ j + polySize ]\
 							+ normal_buffer[ j + polySize ]).y,
-						(point_buffer[ j + polySize ]\
+						(vertex_buffer[ j + polySize ]\
 							+ normal_buffer[ j + polySize ]).z );
 		}
-		// connect back to beginning point_buffer
-		glVertex3f( point_buffer[ polySize * i ].x,
-					point_buffer[ polySize * i ].y,
-					point_buffer[ polySize * i ].z );
-		glVertex3f( (point_buffer[ polySize * i ]\
-						+ normal_buffer[ polySize * i ]).x,
-					(point_buffer[ polySize * i ]\
-						+ normal_buffer[ polySize * i ]).y,
-					(point_buffer[ polySize * i ]\
-						+ normal_buffer[ polySize * i ]).z );
-		glVertex3f( point_buffer[ polySize * ( i + 1) ].x,
-					point_buffer[ polySize * ( i + 1) ].y,
-					point_buffer[ polySize * ( i + 1) ].z );
-		glVertex3f( (point_buffer[ polySize * ( i + 1) ]\
-						+ normal_buffer[ polySize * ( i + 1) ]).x,
-					(point_buffer[ polySize * ( i + 1) ]\
-						+ normal_buffer[ polySize * ( i + 1) ]).y,
-					(point_buffer[ polySize * ( i + 1) ]\
-						+ normal_buffer[ polySize * ( i + 1) ]).z );
+		// connect back to beginning vertex_buffer
+		glVertex3f( vertex_buffer[ ( polySize * i ) + 1 ].x,
+					vertex_buffer[ ( polySize * i ) + 1 ].y,
+					vertex_buffer[ ( polySize * i ) + 1 ].z );
+		glVertex3f( (vertex_buffer[ ( polySize * i ) + 1 ]\
+						+ normal_buffer[ ( polySize * i ) + 1 ]).x,
+					(vertex_buffer[ ( polySize * i ) + 1 ]\
+						+ normal_buffer[ ( polySize * i ) + 1 ]).y,
+					(vertex_buffer[ ( polySize * i ) + 1 ]\
+						+ normal_buffer[ ( polySize * i ) + 1 ]).z );
+		glVertex3f( vertex_buffer[ polySize * ( i + 1) + 1 ].x,
+					vertex_buffer[ polySize * ( i + 1) + 1 ].y,
+					vertex_buffer[ polySize * ( i + 1) + 1 ].z );
+		glVertex3f( (vertex_buffer[ polySize * ( i + 1) + 1 ]\
+						+ normal_buffer[ polySize * ( i + 1) + 1 ]).x,
+					(vertex_buffer[ polySize * ( i + 1) + 1 ]\
+						+ normal_buffer[ polySize * ( i + 1) + 1 ]).y,
+					(vertex_buffer[ polySize * ( i + 1) + 1 ]\
+						+ normal_buffer[ polySize * ( i + 1) + 1 ]).z );
 		glEnd();
 	}
 	glEnable( GL_LIGHTING );
@@ -563,16 +692,28 @@ void SweepSurface::drawPath()
 {
 	// disable lighting, textures, material properties
 	glDisable( GL_LIGHTING );
-	if( useTexture ) tex->disable();
-	if( useMaterial ) mat->disable();
+	//if( useTexture ) tex->disable();
+	//if( useMaterial ) mat->disable();
 
-	glColor3f( 1.0, 0.0, 1.0 ); // path is purple
+	GLfloat* oldLW = new GLfloat [1];
+	glGetFloatv(GL_LINE_WIDTH, oldLW);
 
+    glLineWidth( scales.front().x * 2.0 );
+
+	float fraction;
 	glBegin( GL_LINE_STRIP );
-		std::vector<vec4>::iterator it2;
-		for( it2 = path.begin(); it2 != path.end(); it2++ )
-			glVertex3f( it2->x, it2->y, it2->z );
+		for( unsigned int i = 0; i < path.size(); i++ ) {
+			fraction = i / ( path.size() - 1 ) * 4.0f / 5.0f + 1.0f / 5.0f;
+			glColor4f( 0.9, 0.9, 0.9, use_gradient ? fraction : 1.0 );
+			glVertex3f( path[ i ].x * pathLenMultiplier, 
+						path[ i ].y * pathLenMultiplier,
+						path[ i ].z * pathLenMultiplier );
+		}
 	glEnd();
+
+	glLineWidth(oldLW[0]);
+
+	delete[] oldLW;
 
 	// reenable lighting
 	glEnable( GL_LIGHTING );
@@ -582,32 +723,37 @@ void SweepSurface::drawPath()
 //------------- redraw ---------------------------
 void SweepSurface::redraw()
 {
-    glPushMatrix();
-    	glColor3f( colors[ 0 ]->r, colors[ 0 ]->g, colors[ 0 ]->b );
-        glTranslatef( xLoc, yLoc, zLoc );
-        glRotatef( angle, dxRot, dyRot, dzRot );
-        glScalef( xSize, ySize, zSize );
+	
+	if( geomChange ) {
+		makeRibs();
+		computePhongNormals();
+		geomChange = false;
+	}
+	
+  //  glPushMatrix();
+  //  	glColor3f( colors[ 0 ]->r, colors[ 0 ]->g, colors[ 0 ]->b );
+  //      glTranslatef( xLoc, yLoc, zLoc );
+  //      glRotatef( angle, dxRot, dyRot, dzRot );
+  //      glScalef( xSize, ySize, zSize );
 
-        if( useMaterial ){
-        	mat->enable();
-        	mat->get();
-        }
+  //      if( useMaterial ){
+  //      	mat->enable();
+  //      	mat->get();
+  //      }
 
-        if( useTexture ) tex->enable();
+  //      if( useTexture ) tex->enable();
 
-		if( wireframe ) {
-			drawWireframe();
-		} else {
-			drawSkin();
-		}
+		//if (draw_wireframe) drawWireframe();
+		//
+		//if (draw_skin) drawSkin();
 
-		if( draw_normals ) drawNormals();
+		//if( draw_normals ) drawNormals();
 
-		if( draw_path ) drawPath();
+		//if( draw_path ) drawPath();
 
-        if( useTexture ) tex->disable();
+  //      if( useTexture ) tex->disable();
 
-        if( useMaterial ) mat->disable();
+  //      if( useMaterial ) mat->disable();
 
-    glPopMatrix();
+  //  glPopMatrix();
 }

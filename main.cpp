@@ -194,9 +194,9 @@ int main()
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
         glm::vec3 lightColor;
-        lightColor.x = sin(glfwGetTime() * 2.0f);
-        lightColor.y = sin(glfwGetTime() * 0.7f);
-        lightColor.z = sin(glfwGetTime() * 1.3f);
+        lightColor.x = 1.0f;//sin(glfwGetTime() * 2.0f);
+        lightColor.y = 1.0f;//sin(glfwGetTime() * 0.7f);
+        lightColor.z = 1.0f;//sin(glfwGetTime() * 1.3f);
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // Decrease the influence
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // Low influence
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.x, ambientColor.y, ambientColor.z);

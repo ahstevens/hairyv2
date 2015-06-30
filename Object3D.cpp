@@ -14,6 +14,9 @@
  */
 Object3D::Object3D()
 {
+	glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
     setLocation( 0, 0, 0 );
     setSize( 1, 1, 1 );
     setRotate( 0, 0, 0, 0);
@@ -32,13 +35,13 @@ Object3D::~Object3D()
  */
 void Object3D::setLocation( float x, float y, float z )
 {
-    location = glm::vec3( x, y, z );
+    location = vec3( x, y, z );
 }
 
 /**
  * set the location of the object to the x,y,z position defined by the arg
  */
-void Object3D::setLocation( glm::vec3 location )
+void Object3D::setLocation( vec3 location )
 {
     this->location = location;
 }
@@ -70,7 +73,7 @@ float Object3D::getZ()
 /**
  * return the location as a Point3 object
  */
-glm::vec3 Object3D::getLocation()
+vec3 Object3D::getLocation()
 {
     return location;
 }
@@ -83,10 +86,10 @@ glm::vec3 Object3D::getLocation()
  */
 void Object3D::setSize( float xs, float ys, float zs )
 {
-    size = glm::vec3( xs, ys, zs );
+    size = vec3( xs, ys, zs );
 }
 
-void Object3D::setSize( glm::vec3 size )
+void Object3D::setSize( vec3 size )
 {
     this->size = size;
 }
@@ -98,10 +101,10 @@ void Object3D::setSize( glm::vec3 size )
 void Object3D::setRotate( float angle, float dx, float dy, float dz )
 {
     this->angle = angle;
-    axis = glm::vec3( dx, dy, dz );
+    axis = vec3( dx, dy, dz );
 }
 
-void Object3D::setRotate( float angle, glm::vec3 axis )
+void Object3D::setRotate( float angle, vec3 axis )
 {
     this->angle = angle;
     this->axis = axis;
