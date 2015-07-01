@@ -9,6 +9,7 @@
 #ifndef SWEEPSURFACE_H_
 #define SWEEPSURFACE_H_
 
+#include <iostream>
 #include "Object3D.h"
 
 class SweepSurface: public Object3D

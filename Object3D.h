@@ -29,6 +29,8 @@ public:
 	void setSize( vec3 size );
     void setRotate( float angle, float dx, float dy, float dz ); // set rotate
 	void setRotate( float angle, vec3 axis );
+
+	mat4 getModelMatrix();
     
     float getX();                          // return x location
     float getY();                          // return y location
@@ -40,6 +42,8 @@ public:
 protected:
     vec3 location;					   // location (origin) of the object
 	vec3 size;						   // size of the object
+
+	mat4 model;
 
     float angle;						   // rotation angle and axis
 	vec3 axis;

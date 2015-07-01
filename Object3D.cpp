@@ -109,3 +109,5 @@ void Object3D::setRotate( float angle, vec3 axis )
     this->angle = angle;
     this->axis = axis;
 }
+
+mat4 Object3D::getModelMatrix() { return model; }

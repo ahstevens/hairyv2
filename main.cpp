@@ -16,6 +16,7 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
+#include "SweepSurface.h"
 
 
 // Function prototypes
@@ -168,6 +169,7 @@ int main()
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
     
+	SweepSurface* s = new SweepSurface();
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -213,6 +215,7 @@ int main()
         view = camera.GetViewMatrix();
         //glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+		glm::mat4 model;
         // Get the uniform locations
         GLint modelLoc = glGetUniformLocation(lightingShader.Program, "model");
         GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
@@ -220,13 +223,14 @@ int main()
         // Pass the matrices to the shader
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
 
         // Draw the container (using container's vertex attributes)
-        glBindVertexArray(containerVAO);
-        glm::mat4 model;
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
+        //glBindVertexArray(containerVAO);
+        //glDrawArrays(GL_TRIANGLES, 0, 36);
+        //glBindVertexArray(0);
+
+		s->redraw();
 
         // Also draw the lamp object, again binding the appropriate shader
         lampShader.Use();
@@ -280,6 +284,10 @@ void do_movement()
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
         camera.ProcessKeyboard(RIGHT, deltaTime);
+	if (keys[GLFW_KEY_N])
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	if (keys[GLFW_KEY_M])
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 bool firstMouse = true;

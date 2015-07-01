@@ -8,6 +8,12 @@
 
 #include "SweepSurface.h"
 
+struct Vertex
+{
+	float x, y, z;
+	float nx, ny, nz;
+};
+
 //------------- constructor -----------------------
 SweepSurface::SweepSurface()
 {
@@ -60,6 +66,7 @@ SweepSurface::SweepSurface()
 	// make the points representing the ribs of the swept surface
 	makeRibs();
 	computePhongNormals();
+	pack();
 
 	draw_skin = true;
 	draw_wireframe = false;
@@ -84,6 +91,7 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	// make the vertices representing the ribs of the swept surface
 	makeRibs();
 	computePhongNormals();
+	pack();
 
 	draw_skin = true;
 	draw_wireframe = false;
@@ -216,11 +224,12 @@ void SweepSurface::makeRibs()
 		v = scales[ i ].y * v;
 
 		// build coordinate frame transformation matrix at path point
-		coordFrameTrans = transpose( mat4( vec4( u, 0.0 ),
+		coordFrameTrans = mat4( vec4( u, 0.0 ),
 										   vec4( v, 0.0 ),
 										   vec4( w, 0.0 ),
-										   vec4( path[ i ], 1.0 ) * pathLenMultiplier ) );
+										   vec4(path[i], 1.0 ) ); // *pathLenMultiplier );
 
+		
 		// push back transformed polygon points as a new "rib" of the surface
 		std::vector<vec2>::iterator it;
 		for( it = polygon.begin(); it != polygon.end(); it++ )
@@ -409,21 +418,34 @@ void SweepSurface::computePhongNormals()
 
 void SweepSurface::pack()
 {
-	int polySize = polygon.size();
-	float *data = new float[ 3 * 2 * vertex_buffer.size() ];
+	int nVerts = vertex_buffer.size();
+	Vertex* verts = new Vertex[nVerts];
 
-		for( int i = 0; i < polySize + 1; ++i) {			
-			glVertex3f( vertex_buffer[ i ].x,
-						vertex_buffer[ i ].y, 
-						vertex_buffer[ i ].z );
-			glNormal3f( normalFront.x, normalFront.y, normalFront.z );
-		}
-		u = 1.0f;
-		glTexCoord2f( u, v );
-		glNormal3f( normalFront.x, normalFront.y, normalFront.z );
-		glVertex3f( vertex_buffer[ 1 ].x,
-					vertex_buffer[ 1 ].y, 
-					vertex_buffer[ 1 ].z );
+	for (int i = 0; i < nVerts; ++i)
+	{
+		verts[i].x = vertex_buffer[i].x;
+		verts[i].y = vertex_buffer[i].y;
+		verts[i].z = vertex_buffer[i].z;
+		verts[i].nx = normal_buffer[i].x;
+		verts[i].ny = normal_buffer[i].y;
+		verts[i].nz = normal_buffer[i].z;
+		std::cout << "Position:\t" << verts[i].x << ", " << verts[i].y << ", " << verts[i].z << std::endl;
+		std::cout << "Normal:\t" << verts[i].nx << ", " << verts[i].ny << ", " << verts[i].nz << std::endl << std::endl;
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, nVerts * sizeof(Vertex), verts, GL_STATIC_DRAW);
+	
+	glBindVertexArray(VAO);
+	// Position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+	glEnableVertexAttribArray(0);
+	// Normal attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+	glBindVertexArray(0);
+
+	delete[] verts;
 }
 
 /*
@@ -599,7 +621,7 @@ void SweepSurface::drawSkin()
 			glTexCoord2f( u, v );
 			glNormal3f( normal_buffer[ polySize * ( i + 1) + 1 ].x,
 						normal_buffer[ polySize * ( i + 1) + 1 ].y,
-						normal_buffer[ polySize * ( i + 1) ].z );
+						normal_buffer[ polySize * ( i + 1) + 1 ].z );
 			glVertex3f( vertex_buffer[ polySize * ( i + 1) + 1 ].x,
 						vertex_buffer[ polySize * ( i + 1) + 1 ].y,
 						vertex_buffer[ polySize * ( i + 1) + 1 ].z );
@@ -727,9 +749,14 @@ void SweepSurface::redraw()
 	if( geomChange ) {
 		makeRibs();
 		computePhongNormals();
+		pack();
 		geomChange = false;
 	}
 	
+	// Draw the container (using container's vertex attributes)
+	glBindVertexArray(VAO);
+	glDrawArrays(GL_LINE_STRIP, 0, vertex_buffer.size());
+	glBindVertexArray(0);
   //  glPushMatrix();
   //  	glColor3f( colors[ 0 ]->r, colors[ 0 ]->g, colors[ 0 ]->b );
   //      glTranslatef( xLoc, yLoc, zLoc );
