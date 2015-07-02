@@ -48,7 +48,7 @@ protected:
     float angle;						   // rotation angle and axis
 	vec3 axis;
 
-	GLuint VBO, VAO;
+	GLuint VBO, EBO, VAO;
 };
 
 #endif /*OBJECT3D_H_*/

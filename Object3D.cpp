@@ -16,6 +16,7 @@ Object3D::Object3D()
 {
 	glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     setLocation( 0, 0, 0 );
     setSize( 1, 1, 1 );

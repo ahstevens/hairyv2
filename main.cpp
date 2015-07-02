@@ -43,6 +43,8 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
+bool draw_normals = false;
+
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
@@ -96,6 +98,7 @@ int main()
     // Build and compile our shader program
     Shader lightingShader("materials.vs", "materials.frag");
     Shader lampShader("lamp.vs", "lamp.frag");
+    Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
     // Set up vertex data (and buffer(s)) and attribute pointers
     GLfloat vertices[] = {
@@ -184,7 +187,7 @@ int main()
         do_movement();
 
         // Clear the colorbuffer
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -196,17 +199,17 @@ int main()
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
         glm::vec3 lightColor;
-        lightColor.x = 1.0f;//sin(glfwGetTime() * 2.0f);
-        lightColor.y = 1.0f;//sin(glfwGetTime() * 0.7f);
-        lightColor.z = 1.0f;//sin(glfwGetTime() * 1.3f);
+        lightColor.x = sin(glfwGetTime() * 2.0f);
+        lightColor.y = sin(glfwGetTime() * 0.7f);
+        lightColor.z = sin(glfwGetTime() * 1.3f);
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // Decrease the influence
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // Low influence
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.x, ambientColor.y, ambientColor.z);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.x, diffuseColor.y, diffuseColor.z);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 1.0f, 1.0f, 1.0f);
         // Set material properties
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 0.5f, 0.31f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 0.5f, 0.31f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 1.0f, 0.0f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 1.0f, 0.0f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"),  0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
         glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 200.0f);
 
@@ -231,6 +234,17 @@ int main()
         //glBindVertexArray(0);
 
 		s->redraw();
+
+		if(draw_normals)
+		{
+			normalShader.Use();
+			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
+			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+			s->redraw();
+		}
 
         // Also draw the lamp object, again binding the appropriate shader
         lampShader.Use();
@@ -284,10 +298,12 @@ void do_movement()
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
         camera.ProcessKeyboard(RIGHT, deltaTime);
-	if (keys[GLFW_KEY_N])
+	if (keys[GLFW_KEY_K])
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	if (keys[GLFW_KEY_M])
+	if (keys[GLFW_KEY_L])
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (keys[GLFW_KEY_N])
+		draw_normals = abs(draw_normals - 1);
 }
 
 bool firstMouse = true;

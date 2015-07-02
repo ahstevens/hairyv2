@@ -88,6 +88,9 @@
     <None Include="lamp.vs" />
     <None Include="materials.frag" />
     <None Include="materials.vs" />
+    <None Include="normals.frag" />
+    <None Include="normals.gs" />
+    <None Include="normals.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -65,6 +65,8 @@ protected:
     std::vector<vec3> vertex_buffer;
     std::vector<vec3> normal_buffer;
 
+	std::vector<unsigned int> indices;
+
     bool draw_skin, draw_wireframe, draw_normals, draw_path, use_gradient,
         geomChange;
 
