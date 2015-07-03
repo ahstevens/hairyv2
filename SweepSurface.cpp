@@ -239,10 +239,25 @@ void SweepSurface::makeRibs()
 			for( it = polygon.begin(); it != polygon.end(); it++ )
 				vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );
 	}
-
+	std::vector<vec2>::iterator it;
+	for (it = polygon.begin(); it != polygon.end(); it++)
+		vertex_buffer.push_back(vec3(coordFrameTrans * vec4(*it, 0.0, 1.0)));
 	// place origin of polygon at last rib, so we can make endcap
 	//for( std::vector<vec4>::iterator it = polygon.begin(); it != polygon.end(); it++ )
 		vertex_buffer.push_back( vec3( coordFrameTrans * ( vec4( 0.0, 0.0, 0.0, 1.0 ) ) ) );
+}
+
+// utility function for calculating a weighted normal based on angle size
+vec3 getWeightedNormal(vec3 a, vec3 b)
+{
+	if (a != b && length(a) != 0 &&	length(b) != 0)
+	{
+		float cosTheta = dot(a, b) / (length(a) * length(b));
+		if (cosTheta >= -1 && cosTheta <= 1)
+			return acos(cosTheta) * cross(a, b);
+	}
+
+	return vec3(0.0);
 }
 
 /*
@@ -262,6 +277,7 @@ void SweepSurface::computePhongNormals()
 	// previous vertex, and the adjacent next vertex
 	vec3 vertCur, vecNext, vecPrev, vecAdj, vecAdjNext, vecAdjPrev;
 
+	// calculate the normal of the front endcap
 	if( path.size() > 1 )
 		normal = normalize( vec3( path[ 0 ].x - path[ 1 ].x,
 			 path[ 0 ].y - path[ 1 ].y,
@@ -269,10 +285,12 @@ void SweepSurface::computePhongNormals()
 	else
 		normal = vec3( 0.0, 0.0, 1.0 );
 
+	// push endcap normals
 	for( int i = 0; i < polySize + 1; ++i)
 		normal_buffer.push_back( normal );
 
-	for( int i = 1 + polySize; i < pntBuffSize - 1; i++ ) {
+	// calculate swept surface normals
+	for( int i = 1 + polySize; i < pntBuffSize - polySize - 1; i++ ) {
 		normal.x = normal.y = normal.z = 0.0;
 		vertCur = vertex_buffer[ i ];
 
@@ -296,50 +314,9 @@ void SweepSurface::computePhongNormals()
 				vecAdjNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
 			}
 
-			// weighted normal for triangle 1
-			if( vecAdj != vecPrev &&
-				length( vecAdj ) != 0 &&
-				length( vecPrev ) != 0 )
-			{
-				dotProd = dot( vecAdj, vecPrev );
-				cosTheta = dotProd / \
-						   ( length( vecAdj ) * length ( vecPrev ) );
-				if( cosTheta >= -1 && cosTheta <= 1 )
-				{
-					theta = acos( cosTheta );
-					normal += theta * cross( vecAdj, vecPrev );
-				}
-			}
-
-			// weighted normal for triangle 2
-			if( vecAdjNext != vecAdj &&
-				length( vecAdjNext ) != 0 &&
-				length( vecAdj ) != 0 )
-			{
-				dotProd = dot( vecAdjNext, vecAdj );
-				cosTheta = dotProd / \
-						   ( length( vecAdjNext ) * length ( vecAdj ) );
-				if( cosTheta >= -1 && cosTheta <= 1 )
-				{
-					theta = acos( cosTheta );
-					normal += theta * cross( vecAdjNext, vecAdj );
-				}
-			}
-
-			// weighted normal for triangle 3
-			if( vecNext != vecAdjNext &&
-				length( vecNext ) != 0 &&
-				length( vecAdjNext ) != 0 )
-			{
-				dotProd = dot( vecNext, vecAdjNext );
-				cosTheta = dotProd / \
-						   ( length( vecNext ) * length ( vecAdjNext ) );
-				if( cosTheta >= -1 && cosTheta <= 1 )
-				{
-					theta = acos( cosTheta );
-					normal += theta * cross( vecNext, vecAdjNext );
-				}
-			}
+			normal += getWeightedNormal(vecAdj, vecPrev);     // triangle 1
+			normal += getWeightedNormal(vecAdjNext, vecAdj);  // triangle 2
+			normal += getWeightedNormal(vecNext, vecAdjNext); // triangle 3
 		}
 
 		// calculate normals for faces on the next path side if not at end
@@ -362,55 +339,15 @@ void SweepSurface::computePhongNormals()
 				vecAdjPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
 			}
 
-			// weighted normal for triangle 4
-			if( vecAdj != vecNext &&
-				length( vecAdj ) != 0 &&
-				length( vecNext ) != 0 )
-			{
-				dotProd = dot( vecAdj, vecNext );
-				cosTheta = dotProd / \
-						   ( length( vecAdj ) * length ( vecNext ) );
-				if( cosTheta >= -1 && cosTheta <= 1 )
-				{
-					theta = acos( cosTheta );
-					normal += theta * cross( vecAdj, vecNext );
-				}
-			}
-
-			// weighted normal for triangle 5
-			if( vecAdjPrev != vecAdj &&
-				length( vecAdjPrev ) != 0 &&
-				length( vecAdj ) != 0 )
-			{
-				dotProd = dot( vecAdjPrev, vecAdj );
-				cosTheta = dotProd / \
-						   ( length( vecAdjPrev ) * length ( vecAdj ) );
-				if( cosTheta >= -1 && cosTheta <= 1 )
-				{
-					theta = acos( cosTheta );
-					normal += theta * cross( vecAdjPrev, vecAdj );
-				}
-			}
-
-			// weighted normal for triangle 6
-			if( vecPrev != vecAdjPrev &&
-				length( vecPrev ) != 0 &&
-				length( vecAdjPrev ) != 0 )
-			{
-				dotProd = dot( vecPrev, vecAdjPrev );
-				cosTheta = dotProd / \
-						   ( length( vecPrev ) * length ( vecAdjPrev ) );
-				if( cosTheta >= -1 && cosTheta <= 1 )
-				{
-					theta = acos( cosTheta );
-					normal += theta * cross( vecPrev, vecAdjPrev );
-				}
-			}
+			normal += getWeightedNormal(vecAdj, vecNext);     // triangle 4
+			normal += getWeightedNormal(vecAdjPrev, vecAdj);  // triangle 5
+			normal += getWeightedNormal(vecPrev, vecAdjPrev); // triangle 6
 		}
 		// add normalized normal to the vector
 		normal_buffer.push_back( normalize( normal ) );
 	}
 
+	// calculate back endcap normal
 	if( path.size() > 1 )
 		normal = normalize( vec3( path[ path.size() - 1 ].x - path[ path.size() - 2 ].x,
 			 path[ path.size() - 1 ].y - path[ path.size() - 2 ].y,
@@ -418,13 +355,18 @@ void SweepSurface::computePhongNormals()
 	else
 		normal = vec3( 0.0, 0.0, -1.0 );
 
-	normal_buffer.push_back( normal );
+	// push back endcap normals
+	for (int i = 0; i < polySize + 1; ++i)
+		normal_buffer.push_back(normal);
 }
 
 void SweepSurface::pack()
 {
 	int nVerts = vertex_buffer.size();
 	Vertex* verts = new Vertex[nVerts];
+
+	std::cout << "Vertex Buffer Size: " << vertex_buffer.size() << std::endl;
+	std::cout << "Normal Buffer Size: " << normal_buffer.size() << std::endl;
 
 	for (int i = 0; i < nVerts; ++i)
 	{
@@ -454,9 +396,9 @@ void SweepSurface::pack()
 	indices.push_back(polySize);
 	indices.push_back(1);
 
-	for( int i = 0; i < pathSize - 1; i++ ) {
+	for( int i = 0; i < pathSize; i++ ) {
 		int j;
-		for( j = ( polySize * i ) + 1; j < ( polySize ) * ( i + 1 ); j++ ) {
+		for( j = ( polySize * i ) + 1; j < ( polySize ) * ( i + 2 ); j++ ) {
 			//triangle 1
 			indices.push_back( j );
 			indices.push_back( j + polySize );
@@ -475,6 +417,37 @@ void SweepSurface::pack()
 		indices.push_back( ( polySize * i ) + 1 + polySize );
 		indices.push_back( ( polySize * i ) + 1 );
 	}
+
+	GLuint end = (pathSize + 2) * polySize + 1;
+	std::cout << "End: " << end << std::endl;
+	std::cout << "Size: " << vertex_buffer.size() << std::endl;
+	for (int i = end - 1; i > end - polySize; --i)
+	{
+		indices.push_back(end);
+		indices.push_back(i);
+		indices.push_back(i - 1);
+	}
+
+	indices.push_back(end);
+	indices.push_back(end - polySize);
+	indices.push_back(end - 1);
+
+	std::vector<GLuint>::iterator it;
+	for (it = indices.begin(); it != indices.end(); it++)
+	{
+		std::cout << *it << " ";
+	}
+	std::cout << std::endl;
+	//for (int i = 1 + ( pathSize + 1 ) * polySize; i < polySize; ++i)
+	//{
+	//	indices.push_back(0);
+	//	indices.push_back(i);
+	//	indices.push_back(i + 1);
+	//}
+
+	//indices.push_back(0);
+	//indices.push_back(polySize);
+	//indices.push_back(1);
 		
 	glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
