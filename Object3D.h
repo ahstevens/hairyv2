@@ -15,6 +15,9 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+#include "Shader.h"
+#include "Texture.h"
+
 using namespace glm;
 
 class Object3D
@@ -37,7 +40,7 @@ public:
     float getZ();                          // return z location
     vec3 getLocation();               // return location as a vec3
     
-    virtual void redraw() = 0;
+    virtual void redraw( Shader shader ) = 0;
         
 protected:
     vec3 location;					   // location (origin) of the object
@@ -49,6 +52,8 @@ protected:
 	vec3 axis;
 
 	GLuint VBO, EBO, VAO;
+
+	Texture tex;
 };
 
 #endif /*OBJECT3D_H_*/

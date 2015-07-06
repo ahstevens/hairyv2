@@ -16,6 +16,8 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
+
+#include "Texture.h"
 #include "SweepSurface.h"
 
 
@@ -195,21 +197,22 @@ int main()
         lightingShader.Use();
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
         GLint viewPosLoc     = glGetUniformLocation(lightingShader.Program, "viewPos");
-        glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
+        //glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
+		glUniform3f(lightPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
         glm::vec3 lightColor;
-        lightColor.x = sin(glfwGetTime() * 2.0f);
-        lightColor.y = sin(glfwGetTime() * 0.7f);
-        lightColor.z = sin(glfwGetTime() * 1.3f);
+		lightColor.x = 1.0f; // sin(glfwGetTime() * 2.0f);
+		lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
+		lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // Decrease the influence
         glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // Low influence
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.x, ambientColor.y, ambientColor.z);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.x, diffuseColor.y, diffuseColor.z);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 1.0f, 1.0f, 1.0f);
         // Set material properties
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 1.0f, 0.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 1.0f, 0.0f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 1.0f, 1.0f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 1.0f, 1.0f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"),  0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
         glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 200.0f);
 
@@ -233,7 +236,7 @@ int main()
         //glDrawArrays(GL_TRIANGLES, 0, 36);
         //glBindVertexArray(0);
 
-		s->redraw();
+		s->redraw(lightingShader);
 
 		if(draw_normals)
 		{
@@ -243,7 +246,7 @@ int main()
 			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-			s->redraw();
+			s->redraw(normalShader);
 		}
 
         // Also draw the lamp object, again binding the appropriate shader

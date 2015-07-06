@@ -12,6 +12,7 @@ struct Vertex
 {
 	float x, y, z;
 	float nx, ny, nz;
+	float s, t;
 };
 
 //------------- constructor -----------------------
@@ -43,29 +44,29 @@ SweepSurface::SweepSurface()
 	scales.push_back( vec2( 0.7, 0.7 ) );
 	scales.push_back( vec2( 0.6, 0.6 ) );
 	scales.push_back( vec2( 0.5, 0.5 ) );
-	scales.push_back( vec2( 0.4, 0.4 ) );
-	scales.push_back( vec2( 0.3, 0.3 ) );
-	scales.push_back( vec2( 0.2, 0.2 ) );
-	scales.push_back( vec2( 0.1, 0.1 ) );
-	scales.push_back( vec2( 0.0, 0.0 ) );
+	scales.push_back( vec2( 0.6, 0.6 ) );
+	scales.push_back( vec2( 0.7, 0.7 ) );
+	scales.push_back( vec2( 0.8, 0.8 ) );
+	scales.push_back( vec2( 0.9, 0.9 ) );
+	scales.push_back( vec2( 1.0, 1.0 ) );
 
 	// twist 180 degrees in the CCW direction
-	rotations.push_back( 0.0f );
-	rotations.push_back( -18.0f );
-	rotations.push_back( -36.0f );
-	rotations.push_back( -54.0f );
-	rotations.push_back( -72.0f );
-	rotations.push_back( -90.0f );
-	rotations.push_back( -108.0f );
-	rotations.push_back( -126.0f );
-	rotations.push_back( -144.0f );
-	rotations.push_back( -162.0f );
-	rotations.push_back( -180.0f );
-	rotations.push_back( -180.0f );
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
+	rotations.push_back(0.0f);
 
 	// make the points representing the ribs of the swept surface
-	makeRibs();
+	makeGeometry();
 	computePhongNormals();
+	computeTextureCoords();
 	pack();
 
 	draw_skin = true;
@@ -76,6 +77,11 @@ SweepSurface::SweepSurface()
 	geomChange = false;
 
 	pathLenMultiplier = 1.0;
+
+	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x44, 0x44, 0x44);
+	tex.checker(128, 128);
+	tex.setMinFilter(GL_NEAREST);
+	tex.setMagFilter(GL_NEAREST);
 }
 
 SweepSurface::SweepSurface( std::vector<vec2> polygon,
@@ -89,8 +95,9 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	this->rotations = rotations;
 
 	// make the vertices representing the ribs of the swept surface
-	makeRibs();
+	makeGeometry();
 	computePhongNormals();
+	computeTextureCoords();
 	pack();
 
 	draw_skin = true;
@@ -169,12 +176,12 @@ void SweepSurface::setPathLengthMultiplier( float m )
 }
 
 /*
- * makeRibs() builds a scaled and rotated uvw coordinate frame for each point
- * along the path, then uses that frame coordinate matrix to transform each
- * point of the defined 2D polygon to get a representation of the polygon at
- * that point on the path.
+ * makeGeometry() builds a scaled and rotated uvw coordinate frame for each 
+ * point along the path, then uses that frame coordinate matrix to transform 
+ * each point of the defined 2D polygon to get a representation of the polygon
+ * at that point on the path.
  */
-void SweepSurface::makeRibs()
+void SweepSurface::makeGeometry()
 {
 	// make sure points vector is empty before pushing new points
 	vertex_buffer.clear();
@@ -360,6 +367,37 @@ void SweepSurface::computePhongNormals()
 		normal_buffer.push_back(normal);
 }
 
+void SweepSurface::computeTextureCoords()
+{
+	texture_buffer.clear();
+
+	int pathSize = path.size();
+	int polySize = polygon.size();
+	int pntBuffSize = vertex_buffer.size();
+
+	float s, t;
+
+	texture_buffer.push_back(vec2(0.5f));
+
+	for (int i = 0; i < polySize; ++i) {
+		texture_buffer.push_back(vec2(0.5f) + polygon[i]);
+	}
+
+	for (int i = 0; i < pathSize; i++) {
+		for (int j = 0; j < polySize; j++) {
+			s = 1.0f - (float)( j / ( polySize - 1.0f ) );
+			t = (float)( i / ( pathSize - 1.0f ) );
+			texture_buffer.push_back(vec2(s, t));	
+		}
+	}
+
+	for (int i = 0; i < polySize; ++i) {
+		texture_buffer.push_back(vec2(0.5f) + polygon[i]);
+	}
+
+	texture_buffer.push_back(vec2(0.5f));
+}
+
 void SweepSurface::pack()
 {
 	int nVerts = vertex_buffer.size();
@@ -367,6 +405,7 @@ void SweepSurface::pack()
 
 	std::cout << "Vertex Buffer Size: " << vertex_buffer.size() << std::endl;
 	std::cout << "Normal Buffer Size: " << normal_buffer.size() << std::endl;
+	std::cout << "Texture Buffer Size: " << texture_buffer.size() << std::endl;
 
 	for (int i = 0; i < nVerts; ++i)
 	{
@@ -376,8 +415,11 @@ void SweepSurface::pack()
 		verts[i].nx = normal_buffer[i].x;
 		verts[i].ny = normal_buffer[i].y;
 		verts[i].nz = normal_buffer[i].z;
+		verts[i].s = texture_buffer[i].x;
+		verts[i].t = texture_buffer[i].y;
 		std::cout << "Position: " << verts[i].x << ", " << verts[i].y << ", " << verts[i].z << std::endl;
-		std::cout << "Normal:   " << verts[i].nx << ", " << verts[i].ny << ", " << verts[i].nz << std::endl << std::endl;
+		std::cout << "Normal:   " << verts[i].nx << ", " << verts[i].ny << ", " << verts[i].nz << std::endl;
+		std::cout << "Texture:   " << verts[i].s << ", " << verts[i].t <<  std::endl << std::endl;
 	}
 
 	int pathSize = path.size();
@@ -385,6 +427,7 @@ void SweepSurface::pack()
 
 	indices.clear();
 
+	// triangles for front endcap
 	for (int i = 1; i < polySize; ++i)
 	{
 		indices.push_back(0);
@@ -396,9 +439,10 @@ void SweepSurface::pack()
 	indices.push_back(polySize);
 	indices.push_back(1);
 
+	// create strips of triangles connecting ribs together along path
 	for( int i = 0; i < pathSize; i++ ) {
 		int j;
-		for( j = ( polySize * i ) + 1; j < ( polySize ) * ( i + 2 ); j++ ) {
+		for( j = ( polySize * i ) + 1; j < ( polySize ) * ( i + 1 ); j++ ) {
 			//triangle 1
 			indices.push_back( j );
 			indices.push_back( j + polySize );
@@ -408,7 +452,7 @@ void SweepSurface::pack()
 			indices.push_back( j + polySize + 1 );
 			indices.push_back( j + 1 );
 		}
-		
+		// stitch ends together
 		indices.push_back( j );
 		indices.push_back( j + polySize );
 		indices.push_back( ( polySize * i ) + 1 + polySize );
@@ -418,9 +462,8 @@ void SweepSurface::pack()
 		indices.push_back( ( polySize * i ) + 1 );
 	}
 
+	// triangles for back endcap
 	GLuint end = (pathSize + 2) * polySize + 1;
-	std::cout << "End: " << end << std::endl;
-	std::cout << "Size: " << vertex_buffer.size() << std::endl;
 	for (int i = end - 1; i > end - polySize; --i)
 	{
 		indices.push_back(end);
@@ -431,24 +474,8 @@ void SweepSurface::pack()
 	indices.push_back(end);
 	indices.push_back(end - polySize);
 	indices.push_back(end - 1);
-
-	std::vector<GLuint>::iterator it;
-	for (it = indices.begin(); it != indices.end(); it++)
-	{
-		std::cout << *it << " ";
-	}
-	std::cout << std::endl;
-	//for (int i = 1 + ( pathSize + 1 ) * polySize; i < polySize; ++i)
-	//{
-	//	indices.push_back(0);
-	//	indices.push_back(i);
-	//	indices.push_back(i + 1);
-	//}
-
-	//indices.push_back(0);
-	//indices.push_back(polySize);
-	//indices.push_back(1);
-		
+	
+	// set up VAO
 	glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
 		glBufferData(GL_ARRAY_BUFFER, nVerts * sizeof(Vertex), verts, GL_STATIC_DRAW);
@@ -462,22 +489,29 @@ void SweepSurface::pack()
 		// Normal attribute
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
 		glEnableVertexAttribArray(1);
+		// Texture attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
+		glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 
 	delete[] verts;
 }
 
 //------------- redraw ---------------------------
-void SweepSurface::redraw()
+void SweepSurface::redraw( Shader shader )
 {
 	
 	if( geomChange ) {
-		makeRibs();
+		makeGeometry();
 		computePhongNormals();
+		computeTextureCoords();
 		pack();
 		geomChange = false;
 	}
 	
+	glActiveTexture(GL_TEXTURE0);
+	tex.enable();
+
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);

@@ -33,27 +33,12 @@ public:
 
     void setPathLengthMultiplier( float m );
 
-	void enableSkin();
-	void disableSkin();
-    void enableWireframe();
-    void disableWireframe();
-    void enableNormals();
-    void disableNormals();
-    void enablePath();
-    void disablePath();
-    void enablePathGradient();
-    void disablePathGradient();
-
-    void drawWireframe();
-    void drawSkin();
-    void drawNormals();
-    void drawPath();
-
-    virtual void redraw();
+    virtual void redraw( Shader shader );
    
 protected:
-    void makeRibs();
+    void makeGeometry();
     void computePhongNormals();
+	void computeTextureCoords();
 	void pack();
 
     std::vector<vec2> polygon;
@@ -64,6 +49,7 @@ protected:
 
     std::vector<vec3> vertex_buffer;
     std::vector<vec3> normal_buffer;
+	std::vector<vec2> texture_buffer;
 
 	std::vector<GLuint> indices;
 
