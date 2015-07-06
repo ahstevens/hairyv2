@@ -113,9 +113,7 @@ void Texture::checker(int w, int h)
 			checks[base + 0] = (GLubyte)c;
 			checks[base + 1] = (GLubyte)c;
 			checks[base + 2] = (GLubyte)c;
-			std::cout << base << ": " << c << ", " << c << ", " << c << std::endl;
 		}
-		std::cout << std::endl;
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);

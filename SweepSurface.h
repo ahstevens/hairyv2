@@ -21,6 +21,7 @@ public:
 				  std::vector<vec2> scales,
 				  std::vector<float> rotations );
     virtual ~SweepSurface();
+	void tube(int segments);
    
 
 

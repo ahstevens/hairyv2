@@ -5,7 +5,8 @@
  * Author: dhs
  * Dec 6, 2014
  */
-
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include "SweepSurface.h"
 
 struct Vertex
@@ -44,11 +45,11 @@ SweepSurface::SweepSurface()
 	scales.push_back( vec2( 0.7, 0.7 ) );
 	scales.push_back( vec2( 0.6, 0.6 ) );
 	scales.push_back( vec2( 0.5, 0.5 ) );
-	scales.push_back( vec2( 0.6, 0.6 ) );
-	scales.push_back( vec2( 0.7, 0.7 ) );
-	scales.push_back( vec2( 0.8, 0.8 ) );
-	scales.push_back( vec2( 0.9, 0.9 ) );
-	scales.push_back( vec2( 1.0, 1.0 ) );
+	scales.push_back( vec2( 0.4, 0.4 ) );
+	scales.push_back( vec2( 0.3, 0.3 ) );
+	scales.push_back( vec2( 0.2, 0.2 ) );
+	scales.push_back( vec2( 0.1, 0.1 ) );
+	scales.push_back( vec2( 0.1, 0.1 ) );
 
 	// twist 180 degrees in the CCW direction
 	rotations.push_back(0.0f);
@@ -79,7 +80,7 @@ SweepSurface::SweepSurface()
 	pathLenMultiplier = 1.0;
 
 	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x44, 0x44, 0x44);
-	tex.checker(128, 128);
+	//tex.checker(8, 8);
 	tex.setMinFilter(GL_NEAREST);
 	tex.setMagFilter(GL_NEAREST);
 }
@@ -113,6 +114,21 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 //------------- destructor -----------------------
 SweepSurface::~SweepSurface()
 {
+}
+
+void SweepSurface::tube(int segments)
+{
+    float angleIncrement = 2.0f * M_PI / (float) segments;
+    
+    std::vector<vec2> circle;
+
+    for( int i = segments - 1; i >= 0; --i )
+        circle.push_back(vec2(float(sin(i * angleIncrement)) * 0.5f, 
+                              float(cos(i * angleIncrement)) * 0.5f));
+
+    this->polygon = circle;
+
+	geomChange = true;
 }
 
 // setter class for sweep surface 2D polygon
@@ -235,16 +251,18 @@ void SweepSurface::makeGeometry()
 								vec4( v, 0.0 ),
 								vec4( w, 0.0 ),
 								vec4(path[i], 1.0 ) ); // *pathLenMultiplier );
-
-		
-		// push back transformed polygon points as a new "rib" of the surface
+				
 		std::vector<vec2>::iterator it;
-		for( it = polygon.begin(); it != polygon.end(); it++ )
-			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );
 
+		// push back front endcap vertices
 		if(i == 0)			
 			for( it = polygon.begin(); it != polygon.end(); it++ )
 				vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );
+
+		// push back transformed polygon points as a new "rib" of the surface
+		for( it = polygon.begin(); it != polygon.end(); it++ )
+			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );		
+		vertex_buffer.push_back( vec3( coordFrameTrans * vec4( polygon.front(), 0.0, 1.0 ) ) );
 	}
 	std::vector<vec2>::iterator it;
 	for (it = polygon.begin(); it != polygon.end(); it++)
@@ -297,12 +315,12 @@ void SweepSurface::computePhongNormals()
 		normal_buffer.push_back( normal );
 
 	// calculate swept surface normals
-	for( int i = 1 + polySize; i < pntBuffSize - polySize - 1; i++ ) {
+	for( int i = polySize + 1; i < pntBuffSize - polySize - 1; i++ ) {
 		normal.x = normal.y = normal.z = 0.0;
 		vertCur = vertex_buffer[ i ];
 
 		// calculate normals for faces on previous path side if not at begin
-		if( i >= polySize + 1) {
+		if( i >= 2 * ( polySize + 1 ) ) {
 			vecAdj = vertex_buffer[ i - polySize ] - vertCur;
 			// check if i is first point in polygon to get proper prev point
 			if( i % polySize == 1 ) {
@@ -327,7 +345,7 @@ void SweepSurface::computePhongNormals()
 		}
 
 		// calculate normals for faces on the next path side if not at end
-		if( i < pntBuffSize - polySize - 1 ) {
+		if( i < pntBuffSize - 2 * ( polySize + 1 ) ) {
 			vecAdj = vertex_buffer[ i + polySize ] - vertCur;
 
 			// check if i is last point in polygon to get proper next point
@@ -384,9 +402,9 @@ void SweepSurface::computeTextureCoords()
 	}
 
 	for (int i = 0; i < pathSize; i++) {
-		for (int j = 0; j < polySize; j++) {
-			s = 1.0f - (float)( j / ( polySize - 1.0f ) );
-			t = (float)( i / ( pathSize - 1.0f ) );
+		for (int j = 0; j < polySize + 1; j++) {
+			s = 1.0f - ( (float) j / ( polySize ) );
+			t = i;
 			texture_buffer.push_back(vec2(s, t));	
 		}
 	}
@@ -417,13 +435,14 @@ void SweepSurface::pack()
 		verts[i].nz = normal_buffer[i].z;
 		verts[i].s = texture_buffer[i].x;
 		verts[i].t = texture_buffer[i].y;
-		std::cout << "Position: " << verts[i].x << ", " << verts[i].y << ", " << verts[i].z << std::endl;
-		std::cout << "Normal:   " << verts[i].nx << ", " << verts[i].ny << ", " << verts[i].nz << std::endl;
-		std::cout << "Texture:   " << verts[i].s << ", " << verts[i].t <<  std::endl << std::endl;
+		//std::cout << "Position: " << verts[i].x << ", " << verts[i].y << ", " << verts[i].z << std::endl;
+		//std::cout << "Normal:   " << verts[i].nx << ", " << verts[i].ny << ", " << verts[i].nz << std::endl;
+		//std::cout << "Texture:   " << verts[i].s << ", " << verts[i].t <<  std::endl << std::endl;
 	}
 
 	int pathSize = path.size();
 	int polySize = polygon.size();
+	int ribSize = polySize + 1;
 
 	indices.clear();
 
@@ -442,28 +461,28 @@ void SweepSurface::pack()
 	// create strips of triangles connecting ribs together along path
 	for( int i = 0; i < pathSize; i++ ) {
 		int j;
-		for( j = ( polySize * i ) + 1; j < ( polySize ) * ( i + 1 ); j++ ) {
+		for( j = ribSize * i; j < ribSize * ( i + 1 ); j++ ) {
 			//triangle 1
 			indices.push_back( j );
-			indices.push_back( j + polySize );
-			indices.push_back( j + polySize + 1 );
+			indices.push_back( j + ribSize );
+			indices.push_back( j + ( polySize + 1 ) + 1 );
 			//triangle 2
 			indices.push_back( j );
-			indices.push_back( j + polySize + 1 );
+			indices.push_back( j + ( polySize + 1 ) + 1 );
 			indices.push_back( j + 1 );
 		}
 		// stitch ends together
 		indices.push_back( j );
-		indices.push_back( j + polySize );
-		indices.push_back( ( polySize * i ) + 1 + polySize );
+		indices.push_back( j + ( polySize + 1 ) );
+		indices.push_back( ( ( polySize + 1 ) * i ) + 1 + ( polySize + 1 ) );
 				
 		indices.push_back( j );
-		indices.push_back( ( polySize * i ) + 1 + polySize );
-		indices.push_back( ( polySize * i ) + 1 );
+		indices.push_back( ( ( polySize + 1 ) * i ) + 1 + ( polySize + 1 ) );
+		indices.push_back( ( ( polySize + 1 ) * i ) + 1 );
 	}
 
 	// triangles for back endcap
-	GLuint end = (pathSize + 2) * polySize + 1;
+	GLuint end = (pathSize + 2) * ( polySize + 1 ) + 1;
 	for (int i = end - 1; i > end - polySize; --i)
 	{
 		indices.push_back(end);
@@ -472,7 +491,7 @@ void SweepSurface::pack()
 	}
 
 	indices.push_back(end);
-	indices.push_back(end - polySize);
+	indices.push_back(end - ( polySize + 1 ));
 	indices.push_back(end - 1);
 	
 	// set up VAO

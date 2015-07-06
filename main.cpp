@@ -175,6 +175,7 @@ int main()
     glBindVertexArray(0);
     
 	SweepSurface* s = new SweepSurface();
+	s->tube(8);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
