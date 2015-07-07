@@ -99,82 +99,51 @@ int main()
 
     // Build and compile our shader program
     Shader lightingShader("materials.vs", "materials.frag");
-    Shader lampShader("lamp.vs", "lamp.frag");
     Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
-    // Set up vertex data (and buffer(s)) and attribute pointers
-    GLfloat vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f,  0.0f, -1.0f,
+ 	// SWEEPSURFACE
+	std::vector<glm::vec2> poly, scales;
+	poly.push_back( glm::vec2( -0.5, -0.5 ) );
+	poly.push_back( glm::vec2( 0.5, -0.5 ) );
+	poly.push_back( glm::vec2( 0.5, 0.5 ) );
+	poly.push_back( glm::vec2( -0.5, 0.5 ) );
+	
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	scales.push_back( glm::vec2( 1.0, 1.0 ) );
+	
+	std::vector<glm::vec3> path;
+	path.push_back( glm::vec3( 0.0, 0.0, 0.0 ) );
+	path.push_back( glm::vec3( 0.0, 0.0, 1.0 ) );
+	path.push_back( glm::vec3( 0.0, 1.0, 2.0 ) );
+	path.push_back( glm::vec3( 1.0, 0.0, 3.0 ) );
+	path.push_back( glm::vec3( 1.0, 1.0, 4.0 ) );
+	path.push_back( glm::vec3( 0.0, 0.0, 5.0 ) );
+	path.push_back( glm::vec3( 0.0, 0.0, 6.0 ) );
+	path.push_back( glm::vec3( 0.0, 0.0, 7.0 ) );
+	path.push_back( glm::vec3( 0.0, 0.0, 8.0 ) );
+	path.push_back( glm::vec3( 0.0, 0.0, 9.0 ) );
 
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f, -1.0f,  0.0f,  0.0f,
-
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-         0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f,  0.5f,  0.0f, -1.0f,  0.0f,
-        -0.5f, -0.5f, -0.5f,  0.0f, -1.0f,  0.0f,
-
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-        -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
-    };
-    // First, set the container's VAO (and VBO)
-    GLuint VBO, containerVAO;
-    glGenVertexArrays(1, &containerVAO);
-    glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(containerVAO);
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);
-    glEnableVertexAttribArray(0);
-    // Normal attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(1);
-    glBindVertexArray(0);
-
-    // Then, we set the light's VAO (VBO stays the same. After all, the vertices are the same for the light object (also a 3D cube))
-    GLuint lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-    // We only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need.
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    // Set the vertex attributes (only position data for the lamp))
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0); // Note that we skip over the normal vectors
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-    
-	SweepSurface* s = new SweepSurface();
+	std::vector<float> rots;
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	rots.push_back(0.0);
+	
+	SweepSurface* s = new SweepSurface(poly, path, scales, rots);
 	s->tube(8);
 
     // Game loop
@@ -203,7 +172,7 @@ int main()
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
         glm::vec3 lightColor;
-		lightColor.x = 1.0f; // sin(glfwGetTime() * 2.0f);
+		lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
 		lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
 		lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
         glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // Decrease the influence
@@ -250,24 +219,6 @@ int main()
 			s->redraw(normalShader);
 		}
 
-        // Also draw the lamp object, again binding the appropriate shader
-        lampShader.Use();
-        // Get location objects for the matrices on the lamp shader (these could be different on a different shader)
-        modelLoc = glGetUniformLocation(lampShader.Program, "model");
-        viewLoc  = glGetUniformLocation(lampShader.Program, "view");
-        projLoc  = glGetUniformLocation(lampShader.Program, "projection");
-        // Set matrices
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-        model = glm::mat4();
-        model = glm::translate(model, lightPos);
-        model = glm::scale(model, glm::vec3(0.2f)); // Make it a smaller cube
-        glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        // Draw the light object (using light's vertex attributes)
-        glBindVertexArray(lightVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-        glBindVertexArray(0);
-
         // Swap the screen buffers
         glfwSwapBuffers(window);
     }
@@ -284,8 +235,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GL_TRUE);
     if (key >= 0 && key < 1024)
     {
-        if (action == GLFW_PRESS)
+        if (action == GLFW_PRESS) {
             keys[key] = true;
+			if (keys[GLFW_KEY_N])
+				draw_normals = abs(draw_normals - 1);
+		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;
     }
@@ -306,8 +260,6 @@ void do_movement()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	if (keys[GLFW_KEY_L])
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	if (keys[GLFW_KEY_N])
-		draw_normals = abs(draw_normals - 1);
 }
 
 bool firstMouse = true;

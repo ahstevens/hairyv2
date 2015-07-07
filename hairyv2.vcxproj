@@ -70,7 +70,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Object3D.cpp" />
+    <ClCompile Include="Object.cpp" />
     <ClCompile Include="Study.cpp" />
     <ClCompile Include="SweepSurface.cpp" />
     <ClCompile Include="Texture.cpp" />
@@ -78,7 +78,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Camera.h" />
-    <ClInclude Include="Object3D.h" />
+    <ClInclude Include="Object.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Study.h" />
     <ClInclude Include="SweepSurface.h" />
@@ -86,8 +86,6 @@
     <ClInclude Include="Trial.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="lamp.frag" />
-    <None Include="lamp.vs" />
     <None Include="materials.frag" />
     <None Include="materials.vs" />
     <None Include="normals.frag" />

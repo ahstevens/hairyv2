@@ -27,10 +27,10 @@
     <ClCompile Include="SweepSurface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Object3D.cpp">
+    <ClCompile Include="Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Texture.cpp">
+    <ClCompile Include="Object.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -50,20 +50,14 @@
     <ClInclude Include="SweepSurface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Object3D.h">
+    <ClInclude Include="Texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Texture.h">
+    <ClInclude Include="Object.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="lamp.frag">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="lamp.vs">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="materials.frag">
       <Filter>Source Files</Filter>
     </None>

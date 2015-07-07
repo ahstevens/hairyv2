@@ -1,90 +1,22 @@
 /**
  * SweepSurface.cpp - a class implementation representing a swept surface
  *                    object in OpenGL
- *
- * Author: dhs
- * Dec 6, 2014
  */
+#include "SweepSurface.h"
+
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "SweepSurface.h"
+
+using namespace glm;
 
 struct Vertex
 {
-	float x, y, z;
-	float nx, ny, nz;
-	float s, t;
+	vec3 position;
+	vec3 normal;
+	vec2 texture;
 };
 
 //------------- constructor -----------------------
-SweepSurface::SweepSurface()
-{
-	// default shape is an uninteresting square
-	polygon.push_back( vec2( -0.5, -0.5 ) );
-	polygon.push_back( vec2( 0.5, -0.5 ) );
-	polygon.push_back( vec2( 0.5, 0.5 ) );
-	polygon.push_back( vec2( -0.5, 0.5 ) );
-
-	// default path is straight along z axis
-	path.push_back( vec3( 0.0, 0.0, 0.0 ) );
-	path.push_back( vec3( 0.0, 0.0, 0.2 ) );
-	path.push_back( vec3( 0.0, 0.0, 0.4 ) );
-	path.push_back( vec3( 0.0, 0.0, 0.6 ) );
-	path.push_back( vec3( 0.0, 0.0, 0.8 ) );
-	path.push_back( vec3( 0.0, 0.0, 1.0 ) );
-	path.push_back( vec3( 0.0, 0.0, 1.2 ) );
-	path.push_back( vec3( 0.0, 0.0, 1.4 ) );
-	path.push_back( vec3( 0.0, 0.0, 1.6 ) );
-	path.push_back( vec3( 0.0, 0.0, 1.8 ) );
-	path.push_back( vec3( 0.0, 0.0, 2.0 ) );
-
-	// default scale is linear downscale to 0
-	scales.push_back( vec2( 1.0, 1.0 ) );
-	scales.push_back( vec2( 0.9, 0.9 ) );
-	scales.push_back( vec2( 0.8, 0.8 ) );
-	scales.push_back( vec2( 0.7, 0.7 ) );
-	scales.push_back( vec2( 0.6, 0.6 ) );
-	scales.push_back( vec2( 0.5, 0.5 ) );
-	scales.push_back( vec2( 0.4, 0.4 ) );
-	scales.push_back( vec2( 0.3, 0.3 ) );
-	scales.push_back( vec2( 0.2, 0.2 ) );
-	scales.push_back( vec2( 0.1, 0.1 ) );
-	scales.push_back( vec2( 0.1, 0.1 ) );
-
-	// twist 180 degrees in the CCW direction
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-	rotations.push_back(0.0f);
-
-	// make the points representing the ribs of the swept surface
-	makeGeometry();
-	computePhongNormals();
-	computeTextureCoords();
-	pack();
-
-	draw_skin = true;
-	draw_wireframe = false;
-	draw_path = false;
-	draw_normals = false;
-	use_gradient = true;
-	geomChange = false;
-
-	pathLenMultiplier = 1.0;
-
-	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x44, 0x44, 0x44);
-	//tex.checker(8, 8);
-	tex.setMinFilter(GL_NEAREST);
-	tex.setMagFilter(GL_NEAREST);
-}
-
 SweepSurface::SweepSurface( std::vector<vec2> polygon,
 						    std::vector<vec3> path,
 						    std::vector<vec2> scales,
@@ -101,14 +33,11 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	computeTextureCoords();
 	pack();
 
-	draw_skin = true;
-	draw_wireframe = false;
-	draw_path = false;
-	draw_normals = false;
-	use_gradient = true;
 	geomChange = false;
-
-	pathLenMultiplier = 1.0;
+	
+	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00);
+	tex.setMinFilter(GL_NEAREST);
+	tex.setMagFilter(GL_NEAREST);
 }
 
 //------------- destructor -----------------------
@@ -183,14 +112,6 @@ void SweepSurface::updateRotations( float rotations )
 	geomChange = true;
 }
 
-// setter class for sweep surface 2D polygon rotations (in degrees)
-void SweepSurface::setPathLengthMultiplier( float m )
-{
-	pathLenMultiplier = m;
-
-	geomChange = true;
-}
-
 /*
  * makeGeometry() builds a scaled and rotated uvw coordinate frame for each 
  * point along the path, then uses that frame coordinate matrix to transform 
@@ -199,18 +120,20 @@ void SweepSurface::setPathLengthMultiplier( float m )
  */
 void SweepSurface::makeGeometry()
 {
+	int pathSize = path.size();
+
 	// make sure points vector is empty before pushing new points
 	vertex_buffer.clear();
 
 	mat4 coordFrameTrans;
 
 	// for all points along the defined path
-	for( unsigned int i = 0; i < path.size(); i++ )
+	for( unsigned int i = 0; i < pathSize; i++ )
 	{
 		vec3 w;
 
 		if( i == 0 ) {
-			if( path.size() > 1 ) {
+			if( pathSize > 1 ) {
 				w = normalize( vec3( path[ i ].x - path[ i + 1 ].x,
 					 path[ i ].y - path[ i + 1 ].y,
 					 path[ i ].z - path[ i + 1 ].z ) );
@@ -223,10 +146,18 @@ void SweepSurface::makeGeometry()
 			//for( std::vector<vec4>::iterator it = polygon.begin(); it != polygon.end(); it++ )
 				vertex_buffer.push_back( vec3( 0.0, 0.0, 0.0 ) );
 		}
-		else {
+		else if( i == pathSize - 1 ){
 			// current path point minus prev path point gives vector pointing
 			// towards prev polygon's center.
 			w = normalize( vec3( path[ i - 1 ].x - path[ i ].x,
+								 path[ i - 1 ].y - path[ i ].y,
+								 path[ i - 1 ].z - path[ i ].z ) );
+		}
+		else {
+			w = normalize( vec3( path[ i ].x - path[ i + 1 ].x,
+								 path[ i ].y - path[ i + 1 ].y,
+								 path[ i ].z - path[ i + 1 ].z) +
+						   vec3( path[ i - 1 ].x - path[ i ].x,
 								 path[ i - 1 ].y - path[ i ].y,
 								 path[ i - 1 ].z - path[ i ].z ) );
 		}
@@ -264,12 +195,12 @@ void SweepSurface::makeGeometry()
 			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );		
 		vertex_buffer.push_back( vec3( coordFrameTrans * vec4( polygon.front(), 0.0, 1.0 ) ) );
 	}
+
 	std::vector<vec2>::iterator it;
 	for (it = polygon.begin(); it != polygon.end(); it++)
 		vertex_buffer.push_back(vec3(coordFrameTrans * vec4(*it, 0.0, 1.0)));
 	// place origin of polygon at last rib, so we can make endcap
-	//for( std::vector<vec4>::iterator it = polygon.begin(); it != polygon.end(); it++ )
-		vertex_buffer.push_back( vec3( coordFrameTrans * ( vec4( 0.0, 0.0, 0.0, 1.0 ) ) ) );
+	vertex_buffer.push_back( vec3( coordFrameTrans * ( vec4( 0.0, 0.0, 0.0, 1.0 ) ) ) );
 }
 
 // utility function for calculating a weighted normal based on angle size
@@ -294,7 +225,9 @@ void SweepSurface::computePhongNormals()
 	normal_buffer.clear();
 
 	int polySize = polygon.size();
-	int pntBuffSize = vertex_buffer.size();
+	int ribSize = polySize + 1;
+	int endCapSize = polySize + 1;
+	int nVerts = vertex_buffer.size();
 	float dotProd, cosTheta, theta;
 	vec3 normal;
 	// vectors from current vertex to next vertex, previous vertex,
@@ -310,63 +243,76 @@ void SweepSurface::computePhongNormals()
 	else
 		normal = vec3( 0.0, 0.0, 1.0 );
 
+	int i;
 	// push endcap normals
-	for( int i = 0; i < polySize + 1; ++i)
+	for( i = 0; i < endCapSize; ++i)
 		normal_buffer.push_back( normal );
 
 	// calculate swept surface normals
-	for( int i = polySize + 1; i < pntBuffSize - polySize - 1; i++ ) {
+	for( i; i < nVerts - endCapSize; i++ ) {
 		normal.x = normal.y = normal.z = 0.0;
 		vertCur = vertex_buffer[ i ];
 
+		if( i % ribSize == polySize ) {
+			normal_buffer.push_back( normal_buffer[i - polySize] );
+			continue;
+		}		
 		// calculate normals for faces on previous path side if not at begin
-		if( i >= 2 * ( polySize + 1 ) ) {
-			vecAdj = vertex_buffer[ i - polySize ] - vertCur;
+		if( i >= endCapSize + ribSize ) {
+			vecAdj = vertex_buffer[ i - ribSize ] - vertCur;
 			// check if i is first point in polygon to get proper prev point
-			if( i % polySize == 1 ) {
-				vecPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
+			if( i % ribSize == 0 ) {
+				vecPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;				
+				vecAdjPrev = vertex_buffer[ i - ribSize + polySize - 1 ] - vertCur;
 			}
 			else {
 				vecPrev = vertex_buffer[ i - 1 ] - vertCur;
+				vecAdjPrev = vertex_buffer[ i - ribSize - 1 ] - vertCur;
 			}
 			// check if i is last point in polygon to get proper next point
-			if( i % polySize == 0 ) {
+			if( i % ribSize == polySize - 1 ) {
 				vecNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
-				vecAdjNext = vertex_buffer[ i - 2 * polySize + 1 ] - vertCur;
+				vecAdjNext = vertex_buffer[ i - ribSize - polySize + 1 ] - vertCur;
 			}
 			else {
 				vecNext = vertex_buffer[ i + 1 ] - vertCur;
-				vecAdjNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
+				vecAdjNext = vertex_buffer[ i - ribSize + 1 ] - vertCur;
 			}
-
-			normal += getWeightedNormal(vecAdj, vecPrev);     // triangle 1
-			normal += getWeightedNormal(vecAdjNext, vecAdj);  // triangle 2
-			normal += getWeightedNormal(vecNext, vecAdjNext); // triangle 3
+			
+			normal += getWeightedNormal(vecNext, vecAdjNext);     // triangle 1
+			normal += getWeightedNormal(vecAdjNext, vecAdj);      // triangle 2
+			normal += getWeightedNormal(vecAdj, vecAdjPrev);      // triangle 3
+			normal += getWeightedNormal(vecAdjPrev, vecPrev);     // triangle 4
 		}
 
 		// calculate normals for faces on the next path side if not at end
-		if( i < pntBuffSize - 2 * ( polySize + 1 ) ) {
-			vecAdj = vertex_buffer[ i + polySize ] - vertCur;
-
-			// check if i is last point in polygon to get proper next point
-			if( i % polySize == 0 )
-				vecNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
-			else
-				vecNext = vertex_buffer[ i + 1 ] - vertCur;
-
+		if( i < nVerts - endCapSize - ribSize ) {
+			vecAdj = vertex_buffer[ i + ribSize ] - vertCur;
+			
 			// check if i is first point in polygon to get proper previous point
-			if( i % polySize == 1 ) {
+			if( i % ribSize == 0 ) {
 				vecPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
-				vecAdjPrev = vertex_buffer[ i + 2 * polySize - 1 ] - vertCur;
+				vecAdjPrev = vertex_buffer[ i + ribSize + polySize - 1 ] - vertCur;
 			}
 			else {
 				vecPrev = vertex_buffer[ i - 1 ] - vertCur;
-				vecAdjPrev = vertex_buffer[ i + polySize - 1 ] - vertCur;
+				vecAdjPrev = vertex_buffer[ i + ribSize - 1 ] - vertCur;
 			}
 
-			normal += getWeightedNormal(vecAdj, vecNext);     // triangle 4
-			normal += getWeightedNormal(vecAdjPrev, vecAdj);  // triangle 5
-			normal += getWeightedNormal(vecPrev, vecAdjPrev); // triangle 6
+			// check if i is last point in polygon to get proper next point
+			if( i % ribSize == polySize - 1 ) {
+				vecNext = vertex_buffer[ i - polySize + 1 ] - vertCur;
+				vecAdjNext = vertex_buffer[ i + ribSize - polySize + 1 ] - vertCur;
+			}
+			else {
+				vecNext = vertex_buffer[ i + 1 ] - vertCur;
+				vecAdjNext = vertex_buffer[ i + ribSize + 1 ] - vertCur;
+			}
+			
+			normal += getWeightedNormal(vecPrev, vecAdjPrev);     // triangle 5
+			normal += getWeightedNormal(vecAdjPrev, vecAdj);      // triangle 6
+			normal += getWeightedNormal(vecAdj, vecAdjNext);      // triangle 7
+			normal += getWeightedNormal(vecAdjNext, vecNext);     // triangle 8
 		}
 		// add normalized normal to the vector
 		normal_buffer.push_back( normalize( normal ) );
@@ -391,24 +337,27 @@ void SweepSurface::computeTextureCoords()
 
 	int pathSize = path.size();
 	int polySize = polygon.size();
+	int ribSize = polySize + 1;
 	int pntBuffSize = vertex_buffer.size();
 
 	float s, t;
 
+	// front endcap
 	texture_buffer.push_back(vec2(0.5f));
-
 	for (int i = 0; i < polySize; ++i) {
 		texture_buffer.push_back(vec2(0.5f) + polygon[i]);
 	}
 
+	// surface segments
 	for (int i = 0; i < pathSize; i++) {
-		for (int j = 0; j < polySize + 1; j++) {
+		for (int j = 0; j < ribSize; j++) {
 			s = 1.0f - ( (float) j / ( polySize ) );
 			t = i;
 			texture_buffer.push_back(vec2(s, t));	
 		}
 	}
 
+	// back endcap
 	for (int i = 0; i < polySize; ++i) {
 		texture_buffer.push_back(vec2(0.5f) + polygon[i]);
 	}
@@ -427,14 +376,9 @@ void SweepSurface::pack()
 
 	for (int i = 0; i < nVerts; ++i)
 	{
-		verts[i].x = vertex_buffer[i].x;
-		verts[i].y = vertex_buffer[i].y;
-		verts[i].z = vertex_buffer[i].z;
-		verts[i].nx = normal_buffer[i].x;
-		verts[i].ny = normal_buffer[i].y;
-		verts[i].nz = normal_buffer[i].z;
-		verts[i].s = texture_buffer[i].x;
-		verts[i].t = texture_buffer[i].y;
+		verts[i].position = vertex_buffer[i];
+		verts[i].normal = normal_buffer[i];
+		verts[i].texture = texture_buffer[i];
 		//std::cout << "Position: " << verts[i].x << ", " << verts[i].y << ", " << verts[i].z << std::endl;
 		//std::cout << "Normal:   " << verts[i].nx << ", " << verts[i].ny << ", " << verts[i].nz << std::endl;
 		//std::cout << "Texture:   " << verts[i].s << ", " << verts[i].t <<  std::endl << std::endl;
@@ -459,40 +403,32 @@ void SweepSurface::pack()
 	indices.push_back(1);
 
 	// create strips of triangles connecting ribs together along path
-	for( int i = 0; i < pathSize; i++ ) {
+	for( int i = 1; i < pathSize; i++ ) {
 		int j;
-		for( j = ribSize * i; j < ribSize * ( i + 1 ); j++ ) {
+		for( j = ribSize * i; j < ribSize * ( i + 1 ) - 1; j++ ) {
 			//triangle 1
 			indices.push_back( j );
+			indices.push_back( j + 1 );
 			indices.push_back( j + ribSize );
-			indices.push_back( j + ( polySize + 1 ) + 1 );
 			//triangle 2
-			indices.push_back( j );
-			indices.push_back( j + ( polySize + 1 ) + 1 );
+			indices.push_back( j + ribSize + 1 );
+			indices.push_back( j + ribSize );
 			indices.push_back( j + 1 );
 		}
-		// stitch ends together
-		indices.push_back( j );
-		indices.push_back( j + ( polySize + 1 ) );
-		indices.push_back( ( ( polySize + 1 ) * i ) + 1 + ( polySize + 1 ) );
-				
-		indices.push_back( j );
-		indices.push_back( ( ( polySize + 1 ) * i ) + 1 + ( polySize + 1 ) );
-		indices.push_back( ( ( polySize + 1 ) * i ) + 1 );
 	}
 
 	// triangles for back endcap
-	GLuint end = (pathSize + 2) * ( polySize + 1 ) + 1;
-	for (int i = end - 1; i > end - polySize; --i)
+	GLuint end = vertex_buffer.size() - 1;
+	for (int i = end - polySize; i < end - 1; ++i)
 	{
 		indices.push_back(end);
 		indices.push_back(i);
-		indices.push_back(i - 1);
+		indices.push_back(i+1);
 	}
 
 	indices.push_back(end);
-	indices.push_back(end - ( polySize + 1 ));
 	indices.push_back(end - 1);
+	indices.push_back(end - polySize);
 	
 	// set up VAO
 	glBindVertexArray(VAO);
@@ -503,13 +439,13 @@ void SweepSurface::pack()
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW );
 
 		// Position attribute
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
 		glEnableVertexAttribArray(0);
 		// Normal attribute
-		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(3 * sizeof(GLfloat)));
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, normal)));
 		glEnableVertexAttribArray(1);
-		// Texture attribute
-		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(6 * sizeof(GLfloat)));
+		// Texture coordinate attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, texture)));
 		glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
 

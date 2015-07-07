@@ -6,7 +6,9 @@
  *
  * 09/25/13 rdb: added some Color methods, other minor changes
  */
-#include "Object3D.h"
+#include "Object.h"
+
+using namespace glm;
 
 //------------------ Constructors ------------------------------------
 /**
