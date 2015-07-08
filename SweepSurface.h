@@ -12,7 +12,7 @@
 #include "Object.h"
 #include <vector>
 
-class SweepSurface: public Object3D
+class SweepSurface: public Object
 {
 public:
     SweepSurface( std::vector<glm::vec2> polygon,

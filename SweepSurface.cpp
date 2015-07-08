@@ -7,6 +7,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace glm;
 
 struct Vertex
@@ -140,11 +142,7 @@ void SweepSurface::makeGeometry()
 			}
 			else {
 				w = vec3( 0.0, 0.0, 1.0 ); // normal z axis
-			}
-
-			// place origin of polygon at first rib, so we can make endcap
-			//for( std::vector<vec4>::iterator it = polygon.begin(); it != polygon.end(); it++ )
-				vertex_buffer.push_back( vec3( 0.0, 0.0, 0.0 ) );
+			}			
 		}
 		else if( i == pathSize - 1 ){
 			// current path point minus prev path point gives vector pointing
@@ -178,29 +176,33 @@ void SweepSurface::makeGeometry()
 		v = scales[ i ].y * v;
 
 		// build coordinate frame transformation matrix at path point
-		coordFrameTrans = mat4( vec4( u, 0.0 ),
-								vec4( v, 0.0 ),
-								vec4( w, 0.0 ),
-								vec4(path[i], 1.0 ) ); // *pathLenMultiplier );
+		coordFrameTrans = mat4( vec4( u, 0.0f ),
+								vec4( v, 0.0f ),
+								vec4( w, 0.0f ),
+								vec4(path[i], 1.0f ) ); // *pathLenMultiplier );
 				
 		std::vector<vec2>::iterator it;
 
 		// push back front endcap vertices
-		if(i == 0)			
+		if(i == 0) {
+			// place origin of polygon
+			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( 0.0f, 0.0f, 0.0f, 1.0f ) ) );
+			// place polygon endcap points
 			for( it = polygon.begin(); it != polygon.end(); it++ )
-				vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );
+				vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0f, 1.0f ) ) );
+		}
 
 		// push back transformed polygon points as a new "rib" of the surface
 		for( it = polygon.begin(); it != polygon.end(); it++ )
-			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0, 1.0 ) ) );		
-		vertex_buffer.push_back( vec3( coordFrameTrans * vec4( polygon.front(), 0.0, 1.0 ) ) );
+			vertex_buffer.push_back( vec3( coordFrameTrans * vec4( *it, 0.0f, 1.0f ) ) );		
+		vertex_buffer.push_back( vec3( coordFrameTrans * vec4( polygon.front(), 0.0f, 1.0f ) ) );
 	}
 
 	std::vector<vec2>::iterator it;
 	for (it = polygon.begin(); it != polygon.end(); it++)
-		vertex_buffer.push_back(vec3(coordFrameTrans * vec4(*it, 0.0, 1.0)));
+		vertex_buffer.push_back(vec3(coordFrameTrans * vec4(*it, 0.0f, 1.0f)));
 	// place origin of polygon at last rib, so we can make endcap
-	vertex_buffer.push_back( vec3( coordFrameTrans * ( vec4( 0.0, 0.0, 0.0, 1.0 ) ) ) );
+	vertex_buffer.push_back( vec3( coordFrameTrans * vec4( 0.0f, 0.0f, 0.0f, 1.0f ) ) );
 }
 
 // utility function for calculating a weighted normal based on angle size
@@ -352,7 +354,8 @@ void SweepSurface::computeTextureCoords()
 	for (int i = 0; i < pathSize; i++) {
 		for (int j = 0; j < ribSize; j++) {
 			s = 1.0f - ( (float) j / ( polySize ) );
-			t = i;
+			//t = i;                                  // texture per segment
+			t = (float) i / pathSize;               // texture per object
 			texture_buffer.push_back(vec2(s, t));	
 		}
 	}
@@ -466,6 +469,12 @@ void SweepSurface::redraw( Shader shader )
 	
 	glActiveTexture(GL_TEXTURE0);
 	tex.enable();
+		
+	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 
+					   1,
+					   GL_FALSE,
+					   glm::value_ptr(getModelMatrix())
+					   );
 
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);

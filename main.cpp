@@ -33,7 +33,7 @@ void do_movement();
 const GLuint WIDTH = 2048, HEIGHT = 1536, WIDTHMM = 196, HEIGHTMM = 157;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera  camera(glm::vec3(0.0f, 0.0f, 10.0f));
 GLfloat lastX  =  WIDTH  / 2.0;
 GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
@@ -102,49 +102,29 @@ int main()
     Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
  	// SWEEPSURFACE
-	std::vector<glm::vec2> poly, scales;
+	std::vector<glm::vec2> poly;
 	poly.push_back( glm::vec2( -0.5, -0.5 ) );
 	poly.push_back( glm::vec2( 0.5, -0.5 ) );
 	poly.push_back( glm::vec2( 0.5, 0.5 ) );
 	poly.push_back( glm::vec2( -0.5, 0.5 ) );
 	
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	scales.push_back( glm::vec2( 1.0, 1.0 ) );
-	
-	std::vector<glm::vec3> path;
-	path.push_back( glm::vec3( 0.0, 0.0, 0.0 ) );
-	path.push_back( glm::vec3( 0.0, 0.0, 1.0 ) );
-	path.push_back( glm::vec3( 0.0, 1.0, 2.0 ) );
-	path.push_back( glm::vec3( 1.0, 0.0, 3.0 ) );
-	path.push_back( glm::vec3( 1.0, 1.0, 4.0 ) );
-	path.push_back( glm::vec3( 0.0, 0.0, 5.0 ) );
-	path.push_back( glm::vec3( 0.0, 0.0, 6.0 ) );
-	path.push_back( glm::vec3( 0.0, 0.0, 7.0 ) );
-	path.push_back( glm::vec3( 0.0, 0.0, 8.0 ) );
-	path.push_back( glm::vec3( 0.0, 0.0, 9.0 ) );
+	float length = 5.0f,
+		  step = 0.25f;
 
+
+	std::vector<glm::vec3> path;
+	std::vector<glm::vec2> scales;
 	std::vector<float> rots;
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
-	rots.push_back(0.0);
+	for(float i = 0.0f; i < length; i += step) {
+		path.push_back( glm::vec3( cos(i), sin(i), i ) );
+		scales.push_back( glm::vec2( 1.0f, 1.0f ) );
+		rots.push_back(0.0);
+	}
 	
 	SweepSurface* s = new SweepSurface(poly, path, scales, rots);
-	s->tube(8);
+	s->tube(128);
+
+	s->setSize(0.1,0.1,0.1);
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -191,30 +171,20 @@ int main()
         view = camera.GetViewMatrix();
         //glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
-		glm::mat4 model;
         // Get the uniform locations
-        GLint modelLoc = glGetUniformLocation(lightingShader.Program, "model");
         GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
         GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
         // Pass the matrices to the shader
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-		glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-
-        // Draw the container (using container's vertex attributes)
-        //glBindVertexArray(containerVAO);
-        //glDrawArrays(GL_TRIANGLES, 0, 36);
-        //glBindVertexArray(0);
-
+		
 		s->redraw(lightingShader);
 
 		if(draw_normals)
 		{
 			normalShader.Use();
-			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "model"), 1, GL_FALSE, glm::value_ptr(model));
 			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
 			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
 			s->redraw(normalShader);
 		}

@@ -2,8 +2,8 @@
  * Object.h - an abstract class representing an OpenGL graphical object 
 
  */
-#ifndef OBJECT3D_H_
-#define OBJECT3D_H_
+#ifndef OBJECT_H_
+#define OBJECT_H_
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -11,11 +11,11 @@
 #include "Shader.h"
 #include "Texture.h"
 
-class Object3D
+class Object
 {
 public:
-    Object3D();
-    virtual ~Object3D();
+    Object();
+    virtual ~Object();
     
     void setLocation( float x, float y, float z ); // set location
 	void setLocation( glm::vec3 location );
@@ -30,6 +30,11 @@ public:
     float getY();                          // return y location
     float getZ();                          // return z location
     glm::vec3 getLocation();               // return location as a vec3
+
+	float getRotationAngle();
+	glm::vec3 getRotationAxis();
+
+	glm::vec3 getSize();
     
     virtual void redraw( Shader shader ) = 0;
         
@@ -47,5 +52,5 @@ protected:
 	Texture tex;
 };
 
-#endif /*OBJECT3D_H_*/
+#endif /*OBJECT_H_*/
 

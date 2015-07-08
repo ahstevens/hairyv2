@@ -8,25 +8,27 @@
  */
 #include "Object.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 using namespace glm;
 
 //------------------ Constructors ------------------------------------
 /**
  * Create a new object3D at position 0,0,0 of size 1,1,1
  */
-Object3D::Object3D()
+Object::Object()
 {
 	glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    setLocation( 0, 0, 0 );
-    setSize( 1, 1, 1 );
-    setRotate( 0, 0, 0, 0);
+    setLocation( 0.0f, 0.0f, 0.0f );
+    setSize( 1.0f, 1.0f, 1.0f );
+    setRotate( 0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 //------------------ Destructor ------------------------------------
-Object3D::~Object3D()
+Object::~Object()
 {
 }
 
@@ -36,7 +38,7 @@ Object3D::~Object3D()
 /**
  * set the location of the object to the x,y,z position defined by the args
  */
-void Object3D::setLocation( float x, float y, float z )
+void Object::setLocation( float x, float y, float z )
 {
     location = vec3( x, y, z );
 }
@@ -44,7 +46,7 @@ void Object3D::setLocation( float x, float y, float z )
 /**
  * set the location of the object to the x,y,z position defined by the arg
  */
-void Object3D::setLocation( vec3 location )
+void Object::setLocation( vec3 location )
 {
     this->location = location;
 }
@@ -53,21 +55,21 @@ void Object3D::setLocation( vec3 location )
 /**
  * return the value of the x origin of the shape
  */
-float Object3D::getX()
+float Object::getX()
 {
     return location.x;
 }
 /**
  * return the value of the y origin of the shape
  */
-float Object3D::getY()
+float Object::getY()
 {
     return location.y;
 }
 /**
  * return the value of the z origin of the shape
  */
-float Object3D::getZ()
+float Object::getZ()
 {
     return location.z;
 }
@@ -76,7 +78,7 @@ float Object3D::getZ()
 /**
  * return the location as a Point3 object
  */
-vec3 Object3D::getLocation()
+vec3 Object::getLocation()
 {
     return location;
 }
@@ -87,30 +89,43 @@ vec3 Object3D::getLocation()
  *    That is, the shape has an internal fixed size, the shape parameters
  *    scale that internal size.
  */
-void Object3D::setSize( float xs, float ys, float zs )
+void Object::setSize( float xs, float ys, float zs )
 {
     size = vec3( xs, ys, zs );
 }
 
-void Object3D::setSize( vec3 size )
+void Object::setSize( vec3 size )
 {
     this->size = size;
 }
+
+vec3 Object::getSize() { return size; }
 
 //------------------ setRotate ---------------------------------------
 /**
  * set the rotation parameters: angle, and axis specification
  */
-void Object3D::setRotate( float angle, float dx, float dy, float dz )
+void Object::setRotate( float angle, float dx, float dy, float dz )
 {
     this->angle = angle;
     axis = vec3( dx, dy, dz );
 }
 
-void Object3D::setRotate( float angle, vec3 axis )
+void Object::setRotate( float angle, vec3 axis )
 {
     this->angle = angle;
     this->axis = axis;
 }
 
-mat4 Object3D::getModelMatrix() { return model; }
+float Object::getRotationAngle() { return angle; }
+
+vec3 Object::getRotationAxis() { return axis; }
+
+mat4 Object::getModelMatrix() 
+{
+	model = glm::mat4();
+	model = glm::translate(model, location); // Translate it down a bit so it's at the center of the scene
+	if(angle < -0.0000001 || angle > 0.0000001) model = glm::rotate(model, angle, axis);
+    model = glm::scale(model, size);	// It's a bit too big for our scene, so scale it down
+	return model; 
+}
