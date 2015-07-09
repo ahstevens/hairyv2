@@ -39,7 +39,7 @@ GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
 
 // Light attributes
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec4 lightPos(1.0f, 1.0f, 1.0f, 0.0f);
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -123,9 +123,7 @@ int main()
 	
 	SweepSurface* s = new SweepSurface(poly, path, scales, rots);
 	s->tube(128);
-
-	s->setSize(0.1,0.1,0.1);
-
+	
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -148,7 +146,7 @@ int main()
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
         GLint viewPosLoc     = glGetUniformLocation(lightingShader.Program, "viewPos");
         //glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
-		glUniform3f(lightPosLoc, camera.Position.x, camera.Position.y, camera.Position.z);
+		glUniform4f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z, lightPos.w);
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
         glm::vec3 lightColor;
@@ -164,7 +162,7 @@ int main()
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 1.0f, 1.0f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 1.0f, 1.0f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"),  0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
-        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 200.0f);
+        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 100.0f);
 
         // Create camera transformations
         glm::mat4 view;

@@ -7,7 +7,7 @@ struct Material {
 }; 
 
 struct Light {
-    vec3 position;
+    vec4 position;
 
     vec3 ambient;
     vec3 diffuse;
@@ -29,21 +29,25 @@ uniform sampler2D theTexture;
 void main()
 {
     // Ambient
-    vec3 ambient = light.ambient * material.diffuse * vec3(texture(theTexture, TexCoords));
+    vec3 ambient = light.ambient * material.ambient * vec3(texture(theTexture, TexCoords));
   	
     // Diffuse 
     vec3 norm = normalize(Normal);
-    vec3 lightDir = normalize(light.position - FragPos);
-	//vec3 lightDir = vec3(1.0);
-    float diff = max(dot(norm, lightDir), 0.0);
+
+    vec3 lightDir;
+	if(light.position.w == 0.0)
+		lightDir = normalize(light.position).xyz;
+	else
+		lightDir = normalize(light.position.xyz - FragPos);
+
+	float diff = max(dot(norm, lightDir), 0.0);
     vec3 diffuse = light.diffuse * diff * material.diffuse * vec3(texture(theTexture, TexCoords));
     
     // Specular
     vec3 viewDir = normalize(viewPos - FragPos);
-	lightDir = normalize(light.position - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm);  
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
-    vec3 specular = light.specular * spec * material.specular * vec3(texture(theTexture, TexCoords));
+    vec3 specular = light.specular * spec * material.specular;
         
     color = vec4(ambient + diffuse + specular, 1.0f);
 
