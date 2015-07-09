@@ -108,8 +108,8 @@ int main()
 	poly.push_back( glm::vec2( 0.5, 0.5 ) );
 	poly.push_back( glm::vec2( -0.5, 0.5 ) );
 	
-	float length = 5.0f,
-		  step = 0.25f;
+	float length = 10.0f,
+		  step = 0.2f;
 
 
 	std::vector<glm::vec3> path;

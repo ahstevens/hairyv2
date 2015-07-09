@@ -354,8 +354,8 @@ void SweepSurface::computeTextureCoords()
 	for (int i = 0; i < pathSize; i++) {
 		for (int j = 0; j < ribSize; j++) {
 			s = 1.0f - ( (float) j / ( polySize ) );
-			//t = i;                                  // texture per segment
-			t = (float) i / pathSize;               // texture per object
+			t = i;                                  // texture per segment
+			//t = (float) i / pathSize;               // texture per object
 			texture_buffer.push_back(vec2(s, t));	
 		}
 	}
