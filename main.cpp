@@ -94,7 +94,8 @@ int main()
     glViewport(0, 0, WIDTH, HEIGHT);
 
     // OpenGL options
-    glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
 
 
     // Build and compile our shader program
@@ -109,7 +110,7 @@ int main()
 	poly.push_back( glm::vec2( -0.5, 0.5 ) );
 	
 	float length = 10.0f,
-		  step = 0.2f;
+		  step = 0.5f;
 
 
 	std::vector<glm::vec3> path;
@@ -122,7 +123,7 @@ int main()
 	}
 	
 	SweepSurface* s = new SweepSurface(poly, path, scales, rots);
-	s->tube(128);
+	s->tube(32);
 	
     // Game loop
     while (!glfwWindowShouldClose(window))

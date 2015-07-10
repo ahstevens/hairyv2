@@ -353,7 +353,7 @@ void SweepSurface::computeTextureCoords()
 	// surface segments
 	for (int i = 0; i < pathSize; i++) {
 		for (int j = 0; j < ribSize; j++) {
-			s = 1.0f - ( (float) j / ( polySize ) );
+			s = (float) j / polySize;
 			t = i;                                  // texture per segment
 			//t = (float) i / pathSize;               // texture per object
 			texture_buffer.push_back(vec2(s, t));	
@@ -398,7 +398,7 @@ void SweepSurface::pack()
 	{
 		indices.push_back(0);
 		indices.push_back(i);
-		indices.push_back(i+1);
+		indices.push_back(i + 1);
 	}
 
 	indices.push_back(0);
@@ -411,12 +411,12 @@ void SweepSurface::pack()
 		for( j = ribSize * i; j < ribSize * ( i + 1 ) - 1; j++ ) {
 			//triangle 1
 			indices.push_back( j );
-			indices.push_back( j + 1 );
 			indices.push_back( j + ribSize );
+			indices.push_back( j + 1 );
 			//triangle 2
 			indices.push_back( j + ribSize + 1 );
-			indices.push_back( j + ribSize );
 			indices.push_back( j + 1 );
+			indices.push_back( j + ribSize );
 		}
 	}
 
@@ -425,13 +425,13 @@ void SweepSurface::pack()
 	for (int i = end - polySize; i < end - 1; ++i)
 	{
 		indices.push_back(end);
+		indices.push_back(i + 1);
 		indices.push_back(i);
-		indices.push_back(i+1);
 	}
 
 	indices.push_back(end);
-	indices.push_back(end - 1);
 	indices.push_back(end - polySize);
+	indices.push_back(end - 1);
 	
 	// set up VAO
 	glBindVertexArray(VAO);

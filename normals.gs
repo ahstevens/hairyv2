@@ -40,7 +40,7 @@ void GenerateFaceNormal()
   vec3 V1 = P2 - P1;
   
   vec3 N = cross(V1, V0);
-  N = -normalize(N);
+  N = normalize(N);
   
   // Center of the triangle
   vec3 P = (P0+P1+P2) / 3.0;

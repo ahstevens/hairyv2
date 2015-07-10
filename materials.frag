@@ -28,8 +28,12 @@ uniform sampler2D theTexture;
 
 void main()
 {
+	vec3 tex = vec3(texture(theTexture, TexCoords));
+
+	
+
     // Ambient
-    vec3 ambient = light.ambient * material.ambient * vec3(texture(theTexture, TexCoords));
+    vec3 ambient = light.ambient * material.ambient * tex;
   	
     // Diffuse 
     vec3 norm = normalize(Normal);
@@ -41,7 +45,7 @@ void main()
 		lightDir = normalize(light.position.xyz - FragPos);
 
 	float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = light.diffuse * diff * material.diffuse * vec3(texture(theTexture, TexCoords));
+    vec3 diffuse = light.diffuse * diff * material.diffuse * tex;
     
     // Specular
     vec3 viewDir = normalize(viewPos - FragPos);
