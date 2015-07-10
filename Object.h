@@ -39,6 +39,8 @@ public:
     virtual void redraw( Shader shader ) = 0;
         
 protected:
+	void computeModelMatrix();
+
     glm::vec3 location;					   // location (origin) of the object
 	glm::vec3 size;						   // size of the object
 
@@ -50,6 +52,8 @@ protected:
 	GLuint VAO, VBO, EBO;
 
 	Texture tex;
+
+	bool update_model_matrix;
 };
 
 #endif /*OBJECT_H_*/

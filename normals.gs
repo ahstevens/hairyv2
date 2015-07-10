@@ -1,6 +1,6 @@
 #version 330 core
 layout (triangles) in;
-layout (line_strip, max_vertices = 8) out;
+layout (line_strip, max_vertices = 12) out;
 
 in VS_OUT {
     vec3 normal;
@@ -55,10 +55,34 @@ void GenerateFaceNormal()
   EndPrimitive();
 }
 
+void GenerateEdges()
+{
+  vec3 P0 = gl_in[0].gl_Position.xyz;
+  vec3 P1 = gl_in[1].gl_Position.xyz;
+  vec3 P2 = gl_in[2].gl_Position.xyz;
+    
+  vcolor = vec3(0.0, 1.0, 0.0); // green
+
+  gl_Position = projection * view * model * vec4(P0, 1.0);
+  EmitVertex();
+  
+  gl_Position = projection * view * model * vec4(P1, 1.0);
+  EmitVertex();
+    
+  gl_Position = projection * view * model * vec4(P2, 1.0);
+  EmitVertex();
+
+  gl_Position = projection * view * model * vec4(P0, 1.0);
+  EmitVertex();
+
+  EndPrimitive();
+}
+
 void main()
 {
     GenerateVertexNormal(0); // First vertex normal
     GenerateVertexNormal(1); // Second vertex normal
     GenerateVertexNormal(2); // Third vertex normal
 	GenerateFaceNormal();
+	GenerateEdges();
 }

@@ -114,7 +114,7 @@ public:
             this->Zoom = 1.0f;
         if (this->Zoom >= 60.0f)
             this->Zoom = 60.0f;
-		std::cout<<"Offset: "<<yoffset<<" Zoom: "<<this->Zoom<<std::endl;
+		//std::cout<<"Offset: "<<yoffset<<" Zoom: "<<this->Zoom<<std::endl;
     }
 
 private:

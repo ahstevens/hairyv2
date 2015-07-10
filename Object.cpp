@@ -41,6 +41,7 @@ Object::~Object()
 void Object::setLocation( float x, float y, float z )
 {
     location = vec3( x, y, z );
+	update_model_matrix = true;
 }
 
 /**
@@ -49,6 +50,7 @@ void Object::setLocation( float x, float y, float z )
 void Object::setLocation( vec3 location )
 {
     this->location = location;
+	update_model_matrix = true;
 }
 
 //------------------ getX, getY, getZ -----------------------------
@@ -92,11 +94,13 @@ vec3 Object::getLocation()
 void Object::setSize( float xs, float ys, float zs )
 {
     size = vec3( xs, ys, zs );
+	update_model_matrix = true;
 }
 
 void Object::setSize( vec3 size )
 {
     this->size = size;
+	update_model_matrix = true;
 }
 
 vec3 Object::getSize() { return size; }
@@ -109,23 +113,30 @@ void Object::setRotate( float angle, float dx, float dy, float dz )
 {
     this->angle = angle;
     axis = vec3( dx, dy, dz );
+	update_model_matrix = true;
 }
 
 void Object::setRotate( float angle, vec3 axis )
 {
     this->angle = angle;
     this->axis = axis;
+	update_model_matrix = true;
 }
 
 float Object::getRotationAngle() { return angle; }
 
 vec3 Object::getRotationAxis() { return axis; }
 
-mat4 Object::getModelMatrix() 
+void Object::computeModelMatrix()
 {
 	model = glm::mat4();
 	model = glm::translate(model, location); // Translate it down a bit so it's at the center of the scene
 	if(angle < -0.0000001 || angle > 0.0000001) model = glm::rotate(model, angle, axis);
     model = glm::scale(model, size);	// It's a bit too big for our scene, so scale it down
+}
+
+mat4 Object::getModelMatrix()
+{	
+	if( update_model_matrix ) computeModelMatrix();
 	return model; 
 }

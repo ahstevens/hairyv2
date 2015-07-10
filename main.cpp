@@ -16,6 +16,7 @@
 // Other includes
 #include "Shader.h"
 #include "Camera.h"
+#include "Light.h"
 
 #include "Texture.h"
 #include "SweepSurface.h"
@@ -39,7 +40,7 @@ GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
 
 // Light attributes
-glm::vec4 lightPos(1.0f, 1.0f, 1.0f, 0.0f);
+Light light;
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
@@ -146,21 +147,24 @@ int main()
         lightingShader.Use();
         GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
         GLint viewPosLoc     = glGetUniformLocation(lightingShader.Program, "viewPos");
-        //glUniform3f(lightPosLoc,    lightPos.x, lightPos.y, lightPos.z);
+		glm::vec4 lightPos = light.getLocation();
 		glUniform4f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z, lightPos.w);
         glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
         // Set lights properties
-        glm::vec3 lightColor;
-		lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
-		lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
-		lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
-        glm::vec3 diffuseColor = lightColor * glm::vec3(0.5f); // Decrease the influence
-        glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // Low influence
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.x, ambientColor.y, ambientColor.z);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.x, diffuseColor.y, diffuseColor.z);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), 1.0f, 1.0f, 1.0f);
+		//glm::vec3 lightColor;
+		//lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
+		//lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
+		//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
+
+		light.setColor( 1.0f, 1.0f, 1.0f );
+        glm::vec3 diffuseColor = light.getAmbientColor(); 
+        glm::vec3 ambientColor = light.getDiffuseColor(); 
+        glm::vec3 specularColor = light.getSpecularColor(); 
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
         // Set material properties
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   1.0f, 1.0f, 1.0f);
+        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   0.2f, 0.2f, 0.2f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 1.0f, 1.0f);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"),  0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
         glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 100.0f);

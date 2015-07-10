@@ -466,8 +466,8 @@ void SweepSurface::redraw( Shader shader )
 		pack();
 		geomChange = false;
 	}
-	
-	glActiveTexture(GL_TEXTURE0);
+		
+	//glActiveTexture(GL_TEXTURE0);
 	tex.enable();
 		
 	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 
