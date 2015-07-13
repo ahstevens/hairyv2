@@ -29,7 +29,11 @@ public:
     void setRotate( float angle, float dx, float dy, float dz ); // set rotate
 	void setRotate( float angle, glm::vec3 axis );
 	float getRotationAngle();
-	glm::vec3 getRotationAxis();
+	glm::vec3 getRotationAxis();	
+
+	void setColor( glm::vec3 color );
+	void setColor( float r, float g, float b);
+	Material getMaterial();
 
 	glm::mat4 getModelMatrix();
     

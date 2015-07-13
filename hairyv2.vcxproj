@@ -69,6 +69,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BiMap.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -79,6 +80,7 @@
     <ClCompile Include="Trial.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BiMap.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />

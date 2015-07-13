@@ -1,4 +1,11 @@
 #pragma once
+
+#include <vector>
+#include "Camera.h"
+#include "Light.h"
+#include "BiMap.h"
+#include "Object.h"
+
 class Trial
 {
 public:
@@ -6,9 +13,11 @@ public:
 	~Trial(void);
 
 private:
-	//Camera camera;
-	//Light light;
+	Camera camera;
+	Light light;
 
-	//BiMap biMap;
+	BiMap bimap;
+
+	std::vector<Object> objects;
 };
 

@@ -112,6 +112,21 @@ void Object::computeModelMatrix()
     model = glm::scale(model, size);	
 }
 
+void Object::setColor( glm::vec3 color )
+{
+	mat.setColor( color );
+}
+
+void Object::setColor( float r, float g, float b )
+{
+	mat.setColor( r, g, b );
+}
+
+Material Object::getMaterial()
+{
+	return mat;
+}
+
 mat4 Object::getModelMatrix()
 {	
 	if( update_model_matrix ) computeModelMatrix();

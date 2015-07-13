@@ -34,7 +34,7 @@ void do_movement();
 const GLuint WIDTHMM = 196, HEIGHTMM = 157;
 
 // Camera
-Camera  camera(glm::vec3(0.0f, 0.0f, 10.0f));
+Camera  camera(glm::vec3(50.0f, 50.0f, 50.0f));
 GLfloat lastX  =  WIDTH  / 2.0;
 GLfloat lastY  =  HEIGHT / 2.0;
 bool    keys[1024];
@@ -126,6 +126,20 @@ int main()
 	SweepSurface* s = new SweepSurface(poly, path, scales, rots);
 	s->tube(32);
 	
+	std::vector<SweepSurface*> objs;
+
+	for( int i = 0; i < 100; ++i)
+		for( int j = 0; j < 100; ++j)
+		{
+			SweepSurface* temp = new SweepSurface(poly, path, scales, rots);
+			temp->tube(8);
+			temp->setPosition( (float)i, (float)j, 0.0f);
+			temp->setColor( ((float)i) / 100.0f, ((float)j ) / 100.0f, 0.5f);
+			temp->setSize(0.1, 0.1, 0.1);
+			objs.push_back(temp);
+		}
+
+
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
@@ -156,6 +170,8 @@ int main()
 		//lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
 		//lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
 		//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
+				
+		//s->setColor(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f));
 
 		light.setColor( 1.0f, 1.0f, 1.0f );
 		glm::vec3 ambientColor = light.getAmbientColor();
@@ -176,17 +192,31 @@ int main()
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		
-		s->redraw(lightingShader);
+		//s->redraw(lightingShader);
 
-		if(draw_normals)
+		//if(draw_normals)
+		//{
+		//	normalShader.Use();
+		//	glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+		//	glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+		//	// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+		//	s->redraw(normalShader);
+		//}
+
+		std::vector<SweepSurface*>::iterator it;
+		for(it = objs.begin(); it != objs.end(); it++)
 		{
-			normalShader.Use();
-			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
-			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-			s->redraw(normalShader);
-		}
+			(*it)->redraw(lightingShader);
 
+			if(draw_normals)
+			{
+				normalShader.Use();
+				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+				(*it)->redraw(normalShader);
+			}
+		}
         // Swap the screen buffers
         glfwSwapBuffers(window);
     }

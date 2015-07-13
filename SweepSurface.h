@@ -22,8 +22,6 @@ public:
     virtual ~SweepSurface();
 	void tube(int segments);
    
-
-
     void updatePolygon( std::vector<glm::vec2> polygon );
     void updatePath( std::vector<glm::vec3> path );
     void updateScales( std::vector<glm::vec2> scales );

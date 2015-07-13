@@ -2,11 +2,11 @@
 
 using namespace glm;
 
-Material::Material() : ambientRatio(0.2f), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(1.0, 1.0, 1.0)), shininess(50.0f)
+Material::Material() : ambientRatio(0.2f), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), shininess(10.0f)
 {
 }
 
-Material::Material(vec3 color) : ambientRatio(0.2f), shininess(50.0f)
+Material::Material(vec3 color) : ambientRatio(0.2f), shininess(10.0f)
 {
 	setColor(color);
 }
@@ -20,14 +20,14 @@ void Material::setColor(float r, float g, float b)
 	vec3 color = vec3(r, g, b);
 	ambient = ambientRatio * color;
 	diffuse = color;
-	specular = vec3(1.0, 1.0, 1.0);
+	specular = vec3(0.5, 0.5, 0.5);
 }
 
 void Material::setColor(glm::vec3 color)
 {
 	ambient = ambientRatio * color;
 	diffuse = color;
-	specular = vec3(1.0, 1.0, 1.0);
+	specular = vec3(0.5, 0.5, 0.5);
 }
 
 glm::vec3 Material::getColor()

@@ -1,8 +1,9 @@
 #include "Trial.h"
 
 
-Trial::Trial(void)
+Trial::Trial() : camera(), light(), bimap(100, 100)
 {
+
 }
 
 
