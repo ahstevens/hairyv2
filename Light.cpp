@@ -2,32 +2,27 @@
 
 using namespace glm;
 
-Light::Light(void)
+Light::Light() : position(vec3(1.0, 1.0, 1.0)), ambientRatio(0.2f), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), type(DIRECTIONAL)
 {
-	this-> location = vec3(1.0, 1.0, 1.0);
-	this->ambientRatio = 0.2f;
-	this->type = DIRECTIONAL;
-		
-	setColor( vec3(1.0, 1.0, 1.0) );	
 }
 
 Light::~Light()
 {
 }
 
-void Light::setLocation( float x, float y, float z )
+void Light::setPosition( float x, float y, float z )
 {
-	location = vec3( x, y, z );
+	position = vec3(x, y, z);
 }
 
-void Light::setLocation( glm::vec3 loc )
+void Light::setPosition( glm::vec3 loc )
 {
-	location = loc;
+	position = loc;
 }
 
-glm::vec4 Light::getLocation()
+glm::vec4 Light::getPosition()
 {
-	return vec4( location, type == POINT ? 1.0f : 0.0f );
+	return vec4(position, type == POINT ? 1.0f : 0.0f);
 }
 
 

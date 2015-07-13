@@ -10,6 +10,7 @@
 
 #include "Shader.h"
 #include "Texture.h"
+#include "Material.h"
 
 class Object
 {
@@ -17,31 +18,27 @@ public:
     Object();
     virtual ~Object();
     
-    void setLocation( float x, float y, float z ); // set location
-	void setLocation( glm::vec3 location );
+    void setPosition( float x, float y, float z ); // set location
+	void setPosition(glm::vec3 location);
+	glm::vec3 getPosition();               // return location as a vec3
+
     void setSize( float xs, float ys, float zs );   // set object size
 	void setSize( glm::vec3 size );
+	glm::vec3 getSize();
+
     void setRotate( float angle, float dx, float dy, float dz ); // set rotate
 	void setRotate( float angle, glm::vec3 axis );
-
-	glm::mat4 getModelMatrix();
-    
-    float getX();                          // return x location
-    float getY();                          // return y location
-    float getZ();                          // return z location
-    glm::vec3 getLocation();               // return location as a vec3
-
 	float getRotationAngle();
 	glm::vec3 getRotationAxis();
 
-	glm::vec3 getSize();
+	glm::mat4 getModelMatrix();
     
-    virtual void redraw( Shader shader ) = 0;
+	virtual void redraw( Shader shader ) = 0;
         
 protected:
 	void computeModelMatrix();
 
-    glm::vec3 location;					   // location (origin) of the object
+    glm::vec3 position;					   // location (origin) of the object
 	glm::vec3 size;						   // size of the object
 
 	glm::mat4 model;
@@ -50,6 +47,8 @@ protected:
 	glm::vec3 axis;
 
 	GLuint VAO, VBO, EBO;
+
+	Material mat;
 
 	Texture tex;
 

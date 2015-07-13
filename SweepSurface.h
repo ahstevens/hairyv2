@@ -34,10 +34,12 @@ public:
     virtual void redraw( Shader shader );
    
 protected:
-    void makeGeometry();
+    void computeGeometry();
     void computePhongNormals();
 	void computeTextureCoords();
+	void computeIndices();
 	void pack();
+	void update();
 
     std::vector<glm::vec2> polygon;
     std::vector<glm::vec3> path;
@@ -48,7 +50,7 @@ protected:
     std::vector<glm::vec3> normal_buffer;
 	std::vector<glm::vec2> texture_buffer;
 
-	std::vector<GLuint> indices;
+	std::vector<GLuint> index_buffer;
 
     bool geomChange;
 };

@@ -22,7 +22,7 @@ Object::Object()
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &EBO);
 
-    setLocation( 0.0f, 0.0f, 0.0f );
+    setPosition( 0.0f, 0.0f, 0.0f );
     setSize( 1.0f, 1.0f, 1.0f );
     setRotate( 0.0f, 0.0f, 0.0f, 1.0f);
 }
@@ -38,51 +38,28 @@ Object::~Object()
 /**
  * set the location of the object to the x,y,z position defined by the args
  */
-void Object::setLocation( float x, float y, float z )
+void Object::setPosition(float x, float y, float z)
 {
-    location = vec3( x, y, z );
+    position = vec3( x, y, z );
 	update_model_matrix = true;
 }
 
 /**
  * set the location of the object to the x,y,z position defined by the arg
  */
-void Object::setLocation( vec3 location )
+void Object::setPosition(vec3 location)
 {
-    this->location = location;
+	this->position = location;
 	update_model_matrix = true;
-}
-
-//------------------ getX, getY, getZ -----------------------------
-/**
- * return the value of the x origin of the shape
- */
-float Object::getX()
-{
-    return location.x;
-}
-/**
- * return the value of the y origin of the shape
- */
-float Object::getY()
-{
-    return location.y;
-}
-/**
- * return the value of the z origin of the shape
- */
-float Object::getZ()
-{
-    return location.z;
 }
 
 //------------------ getLocation ----------------------------------------
 /**
  * return the location as a Point3 object
  */
-vec3 Object::getLocation()
+vec3 Object::getPosition()
 {
-    return location;
+	return position;
 }
 
 //------------------ setSize ----------------------------------------
@@ -130,9 +107,9 @@ vec3 Object::getRotationAxis() { return axis; }
 void Object::computeModelMatrix()
 {
 	model = glm::mat4();
-	model = glm::translate(model, location); // Translate it down a bit so it's at the center of the scene
+	model = glm::translate(model, position); 
 	if(angle < -0.0000001 || angle > 0.0000001) model = glm::rotate(model, angle, axis);
-    model = glm::scale(model, size);	// It's a bit too big for our scene, so scale it down
+    model = glm::scale(model, size);	
 }
 
 mat4 Object::getModelMatrix()

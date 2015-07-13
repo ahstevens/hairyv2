@@ -11,9 +11,9 @@ public:
 	Light();
 	~Light();
 
-	void setLocation( float x, float y, float z );
-	void setLocation( glm::vec3 loc );
-	glm::vec4 getLocation();
+	void setPosition( float x, float y, float z );
+	void setPosition( glm::vec3 loc );
+	glm::vec4 getPosition();
 
 	void setColor( float r, float g, float b );
 	void setColor( glm::vec3 color );
@@ -38,7 +38,7 @@ public:
 	LIGHT_TYPE getType();
 
 private:
-	glm::vec3 location,
+	glm::vec3 position,
 		ambient,
 		diffuse,
 		specular;

@@ -31,7 +31,7 @@ void do_movement();
 // NOTE: the 9.7" 2048x1536 retina display area measures 196x157mm
 
 // Window dimensions
-const GLuint WIDTH = 2048, HEIGHT = 1536, WIDTHMM = 196, HEIGHTMM = 157;
+const GLuint WIDTHMM = 196, HEIGHTMM = 157;
 
 // Camera
 Camera  camera(glm::vec3(0.0f, 0.0f, 10.0f));
@@ -145,11 +145,12 @@ int main()
 
         // Use cooresponding shader when setting uniforms/drawing objects
         lightingShader.Use();
-        GLint lightPosLoc    = glGetUniformLocation(lightingShader.Program, "light.position");
-        GLint viewPosLoc     = glGetUniformLocation(lightingShader.Program, "viewPos");
-		glm::vec4 lightPos = light.getLocation();
-		glUniform4f(lightPosLoc, lightPos.x, lightPos.y, lightPos.z, lightPos.w);
-        glUniform3f(viewPosLoc,     camera.Position.x, camera.Position.y, camera.Position.z);
+
+		glm::vec4 lightPos = light.getPosition();
+		glUniform4f(glGetUniformLocation(lightingShader.Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
+		glm::vec3 cameraPos = camera.getPosition();
+		glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+
         // Set lights properties
 		//glm::vec3 lightColor;
 		//lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
@@ -157,23 +158,17 @@ int main()
 		//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
 
 		light.setColor( 1.0f, 1.0f, 1.0f );
-        glm::vec3 diffuseColor = light.getAmbientColor(); 
-        glm::vec3 ambientColor = light.getDiffuseColor(); 
+		glm::vec3 ambientColor = light.getAmbientColor();
+		glm::vec3 diffuseColor = light.getDiffuseColor();
         glm::vec3 specularColor = light.getSpecularColor(); 
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
         glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
-        // Set material properties
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.ambient"),   0.2f, 0.2f, 0.2f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.diffuse"),   1.0f, 1.0f, 1.0f);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "material.specular"),  0.5f, 0.5f, 0.5f); // Specular doesn't have full effect on this object's material
-        glUniform1f(glGetUniformLocation(lightingShader.Program, "material.shininess"), 100.0f);
 
         // Create camera transformations
-        glm::mat4 view;
-        view = camera.GetViewMatrix();
-        //glm::mat4 projection = glm::perspective(camera.Zoom, (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
-		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+        glm::mat4 view = camera.getViewMatrix();
+        
+		glm::mat4 projection = camera.getProjectionMatrix();
         // Get the uniform locations
         GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
         GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
@@ -186,7 +181,7 @@ int main()
 		if(draw_normals)
 		{
 			normalShader.Use();
-			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.GetViewMatrix()));
+			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
 			s->redraw(normalShader);
@@ -222,13 +217,13 @@ void do_movement()
 {
     // Camera controls
     if (keys[GLFW_KEY_W])
-        camera.ProcessKeyboard(FORWARD, deltaTime);
+        camera.processKeyboard(FORWARD, deltaTime);
     if (keys[GLFW_KEY_S])
-        camera.ProcessKeyboard(BACKWARD, deltaTime);
+        camera.processKeyboard(BACKWARD, deltaTime);
     if (keys[GLFW_KEY_A])
-        camera.ProcessKeyboard(LEFT, deltaTime);
+        camera.processKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
-        camera.ProcessKeyboard(RIGHT, deltaTime);
+        camera.processKeyboard(RIGHT, deltaTime);
 	if (keys[GLFW_KEY_K])
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	if (keys[GLFW_KEY_L])
@@ -251,10 +246,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    camera.processMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.ProcessMouseScroll(yoffset);
+    camera.processMouseScroll(yoffset);
 }
