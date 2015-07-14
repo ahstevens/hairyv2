@@ -15,7 +15,7 @@ public:
 
 private:
 	std::string participant;
-	Trial trial;
+	//Trial trial;
 	int trialNum;
 	float timeStart;
 

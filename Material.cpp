@@ -1,12 +1,15 @@
 #include "Material.h"
 
+#define MAT_AR  0.5f
+#define MAT_SHN 10.0f
+
 using namespace glm;
 
-Material::Material() : ambientRatio(0.2f), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), shininess(10.0f)
+Material::Material() : ambientRatio(MAT_AR), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), shininess(MAT_SHN)
 {
 }
 
-Material::Material(vec3 color) : ambientRatio(0.2f), shininess(10.0f)
+Material::Material(vec3 color) : ambientRatio(MAT_AR), shininess(MAT_SHN)
 {
 	setColor(color);
 }

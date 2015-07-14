@@ -11,7 +11,6 @@ class Texture
 {
     public:
         Texture();
-        Texture( const Texture &rhs);
         ~Texture();
 
         GLuint  getId();

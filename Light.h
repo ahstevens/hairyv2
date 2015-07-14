@@ -8,7 +8,7 @@ enum LIGHT_TYPE {
 class Light
 {
 public:
-	Light();
+	Light(glm::vec3 postion);
 	~Light();
 
 	void setPosition( float x, float y, float z );

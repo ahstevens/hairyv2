@@ -457,7 +457,6 @@ void SweepSurface::update()
 //------------- redraw ---------------------------
 void SweepSurface::redraw( Shader shader )
 {
-	
 	if( geomChange ) {
 		update();
 		geomChange = false;

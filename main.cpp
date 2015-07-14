@@ -20,6 +20,7 @@
 
 #include "Texture.h"
 #include "SweepSurface.h"
+#include "Trial.h"
 
 
 // Function prototypes
@@ -34,19 +35,21 @@ void do_movement();
 const GLuint WIDTHMM = 196, HEIGHTMM = 157;
 
 // Camera
-Camera  camera(glm::vec3(50.0f, 50.0f, 50.0f));
-GLfloat lastX  =  WIDTH  / 2.0;
-GLfloat lastY  =  HEIGHT / 2.0;
+Camera  camera(glm::vec3(24.5,24.5,75.0));
+GLfloat lastX  =  WIDTH  / 2.0f;
+GLfloat lastY  =  HEIGHT / 2.0f;
 bool    keys[1024];
 
 // Light attributes
-Light light;
+Light light(glm::vec3(1.0, 1.0, 1.0));
 
 // Deltatime
 GLfloat deltaTime = 0.0f;	// Time between current frame and last frame
 GLfloat lastFrame = 0.0f;  	// Time of last frame
 
-bool draw_normals = false;
+int draw_normals = 0;
+
+std::vector<SweepSurface> objs;
 
 // The MAIN function, from here we start the application and run the game loop
 int main()
@@ -75,7 +78,7 @@ int main()
 	}
 
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Hairy Slices", retinaDisplay, nullptr);
+    GLFWwindow* window = glfwCreateWindow((GLint) WIDTH, (GLint) HEIGHT, "Hairy Slices", retinaDisplay, nullptr);
     glfwMakeContextCurrent(window);
 
     // Set the required callback functions
@@ -92,7 +95,7 @@ int main()
     glewInit();
 
     // Define the viewport dimensions
-    glViewport(0, 0, WIDTH, HEIGHT);
+    glViewport(0, 0, (GLsizei) WIDTH, (GLsizei) HEIGHT);
 
     // OpenGL options
 	glEnable(GL_DEPTH_TEST);
@@ -104,47 +107,50 @@ int main()
     Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
  	// SWEEPSURFACE
-	std::vector<glm::vec2> poly;
-	poly.push_back( glm::vec2( -0.5, -0.5 ) );
-	poly.push_back( glm::vec2( 0.5, -0.5 ) );
-	poly.push_back( glm::vec2( 0.5, 0.5 ) );
-	poly.push_back( glm::vec2( -0.5, 0.5 ) );
-	
-	float length = 10.0f,
-		  step = 0.5f;
+	//std::vector<glm::vec2> poly;
+	//poly.push_back( glm::vec2( -0.5, -0.5 ) );
+	//poly.push_back( glm::vec2( 0.5, -0.5 ) );
+	//poly.push_back( glm::vec2( 0.5, 0.5 ) );
+	//poly.push_back( glm::vec2( -0.5, 0.5 ) );
+	//
+	//float length = 10.0f,
+	//	  step = 0.5f;
 
 
-	std::vector<glm::vec3> path;
-	std::vector<glm::vec2> scales;
-	std::vector<float> rots;
-	for(float i = 0.0f; i < length; i += step) {
-		path.push_back( glm::vec3( cos(i), sin(i), i ) );
-		scales.push_back( glm::vec2( 1.0f, 1.0f ) );
-		rots.push_back(0.0);
-	}
-	
-	SweepSurface* s = new SweepSurface(poly, path, scales, rots);
-	s->tube(32);
-	
-	std::vector<SweepSurface*> objs;
+	//std::vector<glm::vec3> path;
+	//std::vector<glm::vec2> scales;
+	//std::vector<float> rots;
+	//for(float i = 0.0f; i < length; i += step) {
+	//	path.push_back( glm::vec3( cos(i), sin(i), i ) );
+	//	scales.push_back( glm::vec2( 1.0f, 1.0f ) );
+	//	rots.push_back(0.0);
+	//}
+	//
+	//SweepSurface* s = new SweepSurface(poly, path, scales, rots);
+	//s->tube(32);
+	//
+	//std::vector<SweepSurface*> objs;
 
-	for( int i = 0; i < 100; ++i)
-		for( int j = 0; j < 100; ++j)
-		{
-			SweepSurface* temp = new SweepSurface(poly, path, scales, rots);
-			temp->tube(8);
-			temp->setPosition( (float)i, (float)j, 0.0f);
-			temp->setColor( ((float)i) / 100.0f, ((float)j ) / 100.0f, 0.5f);
-			temp->setSize(0.1, 0.1, 0.1);
-			objs.push_back(temp);
-		}
+	//for( int i = 0; i < 10; ++i)
+	//	for( int j = 0; j < 10; ++j)
+	//	{
+	//		SweepSurface* temp = new SweepSurface(poly, path, scales, rots);
+	//		temp->tube(8);
+	//		temp->setPosition( (float)i, (float)j, 0.0f);
+	//		temp->setColor( ((float)i) / 10.0f, ((float)j ) / 10.0f, 0.5f);
+	//		temp->setSize(0.5, 0.5, 0.5);
+	//		objs.push_back(temp);
+	//	}
 
+	Trial trial(50, 50, 0.25f);
+
+	objs = trial.getObjects();
 
     // Game loop
     while (!glfwWindowShouldClose(window))
     {
         // Calculate deltatime of current frame
-        GLfloat currentFrame = glfwGetTime();
+        GLfloat currentFrame = (GLfloat) glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
@@ -153,7 +159,7 @@ int main()
         do_movement();
 
         // Clear the colorbuffer
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -172,6 +178,7 @@ int main()
 		//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
 				
 		//s->setColor(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f));
+		light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0);
 
 		light.setColor( 1.0f, 1.0f, 1.0f );
 		glm::vec3 ambientColor = light.getAmbientColor();
@@ -203,10 +210,10 @@ int main()
 		//	s->redraw(normalShader);
 		//}
 
-		std::vector<SweepSurface*>::iterator it;
+		std::vector<SweepSurface>::iterator it;
 		for(it = objs.begin(); it != objs.end(); it++)
 		{
-			(*it)->redraw(lightingShader);
+			(*it).redraw(lightingShader);
 
 			if(draw_normals)
 			{
@@ -214,9 +221,11 @@ int main()
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-				(*it)->redraw(normalShader);
+				(*it).redraw(normalShader);
 			}
 		}
+
+
         // Swap the screen buffers
         glfwSwapBuffers(window);
     }
@@ -237,6 +246,8 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             keys[key] = true;
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
+			if (keys[GLFW_KEY_R])
+				objs = Trial(10, 10, 0.25).getObjects();
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;
@@ -265,21 +276,21 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
     if (firstMouse)
     {
-        lastX = xpos;
-        lastY = ypos;
+        lastX = (GLfloat) xpos;
+        lastY = (GLfloat) ypos;
         firstMouse = false;
     }
 
-    GLfloat xoffset = xpos - lastX;
-    GLfloat yoffset = lastY - ypos;  // Reversed since y-coordinates go from bottom to left
+    GLfloat xoffset = (GLfloat) xpos - lastX;
+    GLfloat yoffset = lastY - (GLfloat) ypos;  // Reversed since y-coordinates go from bottom to left
 
-    lastX = xpos;
-    lastY = ypos;
+    lastX = (GLfloat) xpos;
+    lastY = (GLfloat) ypos;
 
     camera.processMouseMovement(xoffset, yoffset);
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-    camera.processMouseScroll(yoffset);
+    camera.processMouseScroll((GLfloat) yoffset);
 }

@@ -2,8 +2,9 @@
 
 using namespace glm;
 
-Light::Light() : position(vec3(1.0, 1.0, 1.0)), ambientRatio(0.2f), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), type(DIRECTIONAL)
+Light::Light(glm::vec3 position = glm::vec3(1.0f, 1.0f, 1.0f)) : ambientRatio(0.2f), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), type(DIRECTIONAL)
 {
+	this->position = position;
 }
 
 Light::~Light()
