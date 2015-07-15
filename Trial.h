@@ -30,7 +30,7 @@ private:
 	Camera camera;
 	Light light;
 
-	BiMap bimap;
+	BiMap* bimap;
 
 	std::vector< std::vector< gridpoint_t > > grid;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+
 // Std. Includes
 #include <vector>
 
@@ -26,8 +27,8 @@ const GLfloat SENSITIVTY =  0.25f;
 const GLfloat ZOOM       =  29.0f;
 const GLfloat WIDTH      =  2048.0f;
 const GLfloat HEIGHT     =  1536.0f;
-const GLfloat NEAR       =  0.1f;
-const GLfloat FAR        =  100.0f;
+const GLfloat ZNEAR       =  0.1f;
+const GLfloat ZFAR        =  100.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -36,7 +37,7 @@ class Camera
 public:
 
     // Constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH, GLfloat width = WIDTH, GLfloat height = HEIGHT, GLfloat near = NEAR, GLfloat far = FAR) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movement_speed(SPEED), mouse_sensitivity(SENSITIVTY), zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH, GLfloat width = WIDTH, GLfloat height = HEIGHT, GLfloat near = ZNEAR, GLfloat far = ZFAR) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movement_speed(SPEED), mouse_sensitivity(SENSITIVTY), zoom(ZOOM)
     {
 		this->position = position;
         this->world_up = up;

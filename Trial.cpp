@@ -8,7 +8,7 @@
 
 using namespace glm;
 
-Trial::Trial(int xSize, int ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), camera(glm::vec3((float)(xSize-1)/2, (float)(ySize-1)/2, 25.0f)), light(glm::vec3(1.0f, 1.0f, 1.0f)), bimap((float)xSize, (float)ySize)
+Trial::Trial(int xSize, int ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), camera(glm::vec3((float)(xSize-1)/2, (float)(ySize-1)/2, 25.0f)), light(glm::vec3(1.0f, 1.0f, 1.0f))
 {
 	init();
 }
@@ -24,6 +24,9 @@ void Trial::init()
 	srand((unsigned int) time(NULL));
 
 	std::vector<glm::vec2> poly = circle(8);
+
+	bimap = new BiMap(xSize, ySize);
+	bimap->normalize();
 
 	float x, y, x_jitter, y_jitter, dx, dy, dz;
     for(int i = 0; i < xSize; ++i)
@@ -51,7 +54,7 @@ void Trial::init()
             x = (float) i + x_jitter;
             y = (float) j + y_jitter;
 
-            bimap.getVecValues( x, y, dx, dy, dz);
+            bimap->getVecValues( x, y, dx, dy, dz);
 
 			temp.x = x;
 			temp.y = y;
@@ -86,6 +89,8 @@ void Trial::init()
         }
 		grid.push_back( column );
 	}	
+
+	delete bimap;
 }
 
 std::vector<SweepSurface> Trial::getObjects() { return objects; }

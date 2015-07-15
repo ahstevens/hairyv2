@@ -2,7 +2,7 @@
 #include "glm/glm.hpp"
 
 enum LIGHT_TYPE {
-	POINT, DIRECTIONAL
+	POINT_LT, DIRECTIONAL_LT
 };
 
 class Light

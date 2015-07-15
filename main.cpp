@@ -1,3 +1,5 @@
+//#include <vld.h> // Visual Leak Detector
+
 #include <iostream>
 #include <cmath>
 
@@ -7,7 +9,6 @@
 
 // GLFW
 #include <GLFW/glfw3.h>
-
 // GLM Mathematics
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -35,7 +36,7 @@ void do_movement();
 const GLuint WIDTHMM = 196, HEIGHTMM = 157;
 
 // Camera
-Camera  camera(glm::vec3(24.5,24.5,75.0));
+Camera  camera(glm::vec3(33.0,24.5,97.0));
 GLfloat lastX  =  WIDTH  / 2.0f;
 GLfloat lastY  =  HEIGHT / 2.0f;
 bool    keys[1024];
@@ -141,8 +142,9 @@ int main()
 	//		temp->setSize(0.5, 0.5, 0.5);
 	//		objs.push_back(temp);
 	//	}
-
-	Trial trial(50, 50, 1.0f, 0.25f);
+	std::cout << "Generating trial..." << std::endl;
+	Trial trial(67, 50, 1.0f, 0.25f);
+	std::cout << "Trial generated" << std::endl;
 
 	objs = trial.getObjects();
 
@@ -247,7 +249,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R])
-				objs = Trial(10, 10, 1.0f, 0.25f).getObjects();
+				objs = Trial(67, 50, 1.0f, 0.25f).getObjects();
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;
