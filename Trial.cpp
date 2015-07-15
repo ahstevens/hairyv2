@@ -8,9 +8,9 @@
 
 using namespace glm;
 
-Trial::Trial(int xsz, int ysz, float jitter) : xSize(xsz), ySize(ysz), camera(glm::vec3((float)(xsz-1)/2, (float)(xsz-1)/2, 25.0f)), light(glm::vec3(1.0f, 1.0f, 1.0f)), bimap((float)xsz, (float)ysz)
+Trial::Trial(int xSize, int ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), camera(glm::vec3((float)(xSize-1)/2, (float)(ySize-1)/2, 25.0f)), light(glm::vec3(1.0f, 1.0f, 1.0f)), bimap((float)xSize, (float)ySize)
 {
-	init(jitter);
+	init();
 }
 
 
@@ -19,7 +19,7 @@ Trial::~Trial()
 }
 
 
-void Trial::init(float jitter)
+void Trial::init()
 {
 	srand((unsigned int) time(NULL));
 
@@ -79,8 +79,8 @@ void Trial::init(float jitter)
 			sweepTemp.setSize( 0.5, 0.5, 0.5 );
 			sweepTemp.setColor( ((float)i) / xSize, ((float)j ) / ySize, 0.5f);
 			sweepTemp.setPosition( x, y, 0.0f );
-			//if( dz < 0 )
-   //             sweepTemp.setRotate( 180, 0, 1, 0 );
+			if( dz < 0 )
+                sweepTemp.setRotate( 180, 0, 1, 0 );
 
             objects.push_back( sweepTemp );
         }

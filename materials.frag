@@ -24,13 +24,12 @@ uniform vec3 viewPos;
 uniform Material material;
 uniform Light light;
 
+uniform bool use_texture;
 uniform sampler2D theTexture;
 
 void main()
 {
-	vec3 tex = vec3(texture(theTexture, TexCoords));
-
-	
+	vec3 tex = use_texture ? vec3(texture(theTexture, TexCoords)) : vec3(1.0);
 
     // Ambient
     vec3 ambient = light.ambient * material.ambient * tex;

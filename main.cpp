@@ -142,7 +142,7 @@ int main()
 	//		objs.push_back(temp);
 	//	}
 
-	Trial trial(50, 50, 0.25f);
+	Trial trial(50, 50, 1.0f, 0.25f);
 
 	objs = trial.getObjects();
 
@@ -247,7 +247,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R])
-				objs = Trial(10, 10, 0.25).getObjects();
+				objs = Trial(10, 10, 1.0f, 0.25f).getObjects();
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;

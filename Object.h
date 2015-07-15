@@ -55,6 +55,7 @@ protected:
 	Material mat;
 
 	Texture tex;
+	bool use_texture;
 
 	bool update_model_matrix;
 };

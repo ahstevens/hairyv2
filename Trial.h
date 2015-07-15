@@ -13,10 +13,10 @@ struct gridpoint_t {
 class Trial
 {
 public:
-	Trial(int xsz, int ysz, float jitter);
+	Trial(int xSize, int ySize, float density, float jitter);
 	~Trial();
 
-	void init(float jitter);
+	void init();
 
 	std::vector<SweepSurface> getObjects();
 
@@ -24,6 +24,8 @@ private:
 	std::vector<glm::vec2> circle(int segments);
 
 	int xSize, ySize;
+
+	float jitter, density;
 
 	Camera camera;
 	Light light;

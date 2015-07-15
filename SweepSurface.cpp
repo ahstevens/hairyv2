@@ -31,9 +31,10 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 
 	geomChange = true;
 	
-	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00);
-	tex.setMinFilter(GL_NEAREST);
-	tex.setMagFilter(GL_NEAREST);
+	//use_texture = true;
+	//tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00);
+	//tex.setMinFilter(GL_NEAREST);
+	//tex.setMagFilter(GL_NEAREST);
 }
 
 //------------- destructor -----------------------
@@ -470,9 +471,11 @@ void SweepSurface::redraw( Shader shader )
 		mat.getSpecularColor().r, mat.getSpecularColor().g, mat.getSpecularColor().b);
 	glUniform1f(glGetUniformLocation(shader.Program, "material.shininess"), 
 		mat.getShininess());
+	glUniform1i(glGetUniformLocation(shader.Program, "use_texture"),
+		use_texture);
 		
 	//glActiveTexture(GL_TEXTURE0);
-	tex.enable();
+	if (use_texture) tex.enable();
 		
 	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 
 					   1,
@@ -484,4 +487,6 @@ void SweepSurface::redraw( Shader shader )
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, index_buffer.size(), GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
+
+	if (use_texture) tex.disable();
 }

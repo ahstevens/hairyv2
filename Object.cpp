@@ -25,6 +25,8 @@ Object::Object()
     setPosition( 0.0f, 0.0f, 0.0f );
     setSize( 1.0f, 1.0f, 1.0f );
     setRotate( 0.0f, 0.0f, 0.0f, 1.0f);
+
+	use_texture = false;
 }
 
 //------------------ Destructor ------------------------------------
