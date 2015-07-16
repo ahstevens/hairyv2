@@ -8,7 +8,7 @@
 
 using namespace glm;
 
-Trial::Trial(int xSize, int ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), camera(glm::vec3((float)(xSize-1)/2, (float)(ySize-1)/2, 25.0f)), light(glm::vec3(1.0f, 1.0f, 1.0f))
+Trial::Trial(int xSize, int ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter)
 {
 	init();
 }
@@ -25,9 +25,12 @@ void Trial::init()
 
 	std::vector<glm::vec2> poly = circle(8);
 
+	std::cout << "Generating bimap..." << std::endl;
 	bimap = new BiMap(xSize, ySize);
+	std::cout << "Normalizing bimap..." << std::endl;
 	bimap->normalize();
 
+	std::cout << "Generating grid..." << std::endl;
 	float x, y, x_jitter, y_jitter, dx, dy, dz;
     for(int i = 0; i < xSize; ++i)
 	{
@@ -68,10 +71,10 @@ void Trial::init()
 			
 			std::vector<glm::vec3> path;
 			path.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
-            path.push_back( glm::vec3( dx, dy, dz) );
+            path.push_back( glm::vec3( dx*10, dy*10, dz*10 ) );
 
 			std::vector<glm::vec2> scales;
-			scales.push_back( glm::vec2( 1.0f, 1.0f ) );
+			scales.push_back( glm::vec2( 0.0f, 0.0f ) );
 			scales.push_back( glm::vec2( 1.0f, 1.0f ) );
 
 			std::vector<float> rots;
@@ -82,8 +85,8 @@ void Trial::init()
 			sweepTemp.setSize( 0.5, 0.5, 0.5 );
 			sweepTemp.setColor( ((float)i) / xSize, ((float)j ) / ySize, 0.5f);
 			sweepTemp.setPosition( x, y, 0.0f );
-			if( dz < 0 )
-                sweepTemp.setRotate( 180, 0, 1, 0 );
+			//if( dz < 0 )
+   //             sweepTemp.setRotate( 180, 0, 1, 0 );
 
             objects.push_back( sweepTemp );
         }
@@ -91,6 +94,7 @@ void Trial::init()
 	}	
 
 	delete bimap;
+	std::cout << "Grid completed." << std::endl;
 }
 
 std::vector<SweepSurface> Trial::getObjects() { return objects; }

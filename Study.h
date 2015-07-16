@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include "Camera.h"
+#include "Light.h"
 #include "Trial.h"
 
 class Study
@@ -14,6 +16,9 @@ public:
 	void end();
 
 private:
+	Camera camera;
+	Light light;
+
 	std::string participant;
 	//Trial trial;
 	int trialNum;

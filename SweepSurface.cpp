@@ -31,10 +31,10 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 
 	geomChange = true;
 	
-	//use_texture = true;
-	//tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00);
-	//tex.setMinFilter(GL_NEAREST);
-	//tex.setMagFilter(GL_NEAREST);
+	use_texture = true;
+	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00);
+	tex.setMinFilter(GL_NEAREST);
+	tex.setMagFilter(GL_NEAREST);
 }
 
 //------------- destructor -----------------------

@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vector>
-#include "Camera.h"
-#include "Light.h"
 #include "BiMap.h"
 #include "SweepSurface.h"
 
@@ -26,9 +24,6 @@ private:
 	int xSize, ySize;
 
 	float jitter, density;
-
-	Camera camera;
-	Light light;
 
 	BiMap* bimap;
 

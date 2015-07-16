@@ -107,41 +107,6 @@ int main()
     Shader lightingShader("materials.vs", "materials.frag");
     Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
- 	// SWEEPSURFACE
-	//std::vector<glm::vec2> poly;
-	//poly.push_back( glm::vec2( -0.5, -0.5 ) );
-	//poly.push_back( glm::vec2( 0.5, -0.5 ) );
-	//poly.push_back( glm::vec2( 0.5, 0.5 ) );
-	//poly.push_back( glm::vec2( -0.5, 0.5 ) );
-	//
-	//float length = 10.0f,
-	//	  step = 0.5f;
-
-
-	//std::vector<glm::vec3> path;
-	//std::vector<glm::vec2> scales;
-	//std::vector<float> rots;
-	//for(float i = 0.0f; i < length; i += step) {
-	//	path.push_back( glm::vec3( cos(i), sin(i), i ) );
-	//	scales.push_back( glm::vec2( 1.0f, 1.0f ) );
-	//	rots.push_back(0.0);
-	//}
-	//
-	//SweepSurface* s = new SweepSurface(poly, path, scales, rots);
-	//s->tube(32);
-	//
-	//std::vector<SweepSurface*> objs;
-
-	//for( int i = 0; i < 10; ++i)
-	//	for( int j = 0; j < 10; ++j)
-	//	{
-	//		SweepSurface* temp = new SweepSurface(poly, path, scales, rots);
-	//		temp->tube(8);
-	//		temp->setPosition( (float)i, (float)j, 0.0f);
-	//		temp->setColor( ((float)i) / 10.0f, ((float)j ) / 10.0f, 0.5f);
-	//		temp->setSize(0.5, 0.5, 0.5);
-	//		objs.push_back(temp);
-	//	}
 	std::cout << "Generating trial..." << std::endl;
 	Trial trial(67, 50, 1.0f, 0.25f);
 	std::cout << "Trial generated" << std::endl;
@@ -161,7 +126,7 @@ int main()
         do_movement();
 
         // Clear the colorbuffer
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
