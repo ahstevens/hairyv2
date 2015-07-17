@@ -1,5 +1,10 @@
 #pragma once
 
+// GLEW
+#define GLEW_STATIC
+#include <GL/glew.h>
+
+#include <GLFW/glfw3.h>
 #include <string>
 #include "Camera.h"
 #include "Light.h"
@@ -8,14 +13,41 @@
 class Study
 {
 public:
-	Study(void);
-	~Study(void);
+	static Study* getInstance();
 
+	void init();
 	void begin();
 	void next();
 	void end();
 
+
 private:
+	Study();
+	static Study* instance;
+
+	~Study();
+
+	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+	void key_process(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+	static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+	void mouse_process(GLFWwindow* window, double xpos, double ypos);
+
+	static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+	void scroll_process(GLFWwindow* window, double xoffset, double yoffset);
+
+	void do_movement();
+
+	bool keys[1024], firstMouse;
+
+	GLfloat lastX, lastY;
+	GLfloat deltaTime;		// Time between current frame and last frame
+	GLfloat lastFrame;		// Time of last frame
+
+	int draw_normals;
+
+	std::vector<SweepSurface> objs;
+
 	Camera camera;
 	Light light;
 

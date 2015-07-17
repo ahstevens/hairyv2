@@ -2,7 +2,6 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
-
 #include <stdlib.h> // rand()
 
 #define KEYSTEPS 10
@@ -65,55 +64,6 @@ void BiMap::newMap()
 	mkDataMap(fieldZ);
 }
 
-
-void BiMap::getVecValues(float x, float y, float &m1, float &m2, float &m3)
-{
-	// only the middle part of the data field is exposed
-	int r,c;
-	float len;
-
-	r = FSIZE*(0.5*x/xspace + 0.25);
-	c = FSIZE*(0.5*y/xspace + 0.25);
-
-	m1 = fieldX[r][c];
-	m2 = fieldY[r][c];	
-	m3 = fieldZ[r][c];		
-}
-
-void BiMap::normalize()
-{
-	int i, j;
-
-	float temp, max = 0;
-
-	// get max mag
-	for(i = 0; i < FSIZE; ++i)
-		for(j = 0; j < FSIZE; ++j)
-		{
-			temp = sqrt( fieldX[i][j] * fieldX[i][j] + fieldY[i][j] * fieldY[i][j] + fieldZ[i][j] * fieldZ[i][j] );
-			if( temp > max ) max = temp;
-		}
-
-	for(i = 0; i < FSIZE; ++i)
-		for(j = 0; j < FSIZE; ++j)
-		{
-			fieldX[i][j] /= max;
-			fieldY[i][j] /= max;
-			fieldZ[i][j] /= max;
-		}
-}
-
-float BiMap::getXSize()
-{
-	return xspace;
-}
-
-float BiMap::getYSize()
-{
-	return yspace;
-}
-
-
 void BiMap::mkDataMap(float **t)
 {	
 	int k,kx,ky;
@@ -170,7 +120,6 @@ void BiMap::mkDataMap(float **t)
 		}	
 }
 
-
 void BiMap::gabor(float **t, int cx, int cy, float r, float size,float contrast,float rat)
 {
     //const int TPATCH = 50;
@@ -216,24 +165,49 @@ float BiMap::MRand()
     return float (rand()%1000)/1000.0f - 0.5f;
 }
 
-
-void BiMap::hsvToRgb(float h,float s,float v, float &r,float &g, float &b)
+void BiMap::getVecValues(float x, float y, float &m1, float &m2, float &m3)
 {
- 
-    int i = int(h * 6.0);
-    float f = h * 6 - i;
-    float p = v * (1 - s);
-    float q = v * (1 - f * s);
-    float t = v * (1 - (1 - f) * s);
- 
-    switch(i)
-    {
-        case 0: r = v, g = t, b = p; break;
-        case 1: r = q, g = v, b = p; break;
-        case 2: r = p, g = v, b = t; break;
-        case 3: r = p, g = q, b = v; break;
-        case 4: r = t, g = p, b = v; break;
-        case 5: r = v, g = p, b = q; break;
-    }
-  
+	// only the middle part of the data field is exposed
+	int r,c;
+	float len;
+
+	r = FSIZE*(0.5*x/xspace + 0.25);
+	c = FSIZE*(0.5*y/xspace + 0.25);
+
+	m1 = fieldX[r][c];
+	m2 = fieldY[r][c];	
+	m3 = fieldZ[r][c];		
+}
+
+void BiMap::normalize()
+{
+	int i, j;
+
+	float temp, max = 0;
+
+	// get max mag
+	for(i = 0; i < FSIZE; ++i)
+		for(j = 0; j < FSIZE; ++j)
+		{
+			temp = sqrt( fieldX[i][j] * fieldX[i][j] + fieldY[i][j] * fieldY[i][j] + fieldZ[i][j] * fieldZ[i][j] );
+			if( temp > max ) max = temp;
+		}
+
+	for(i = 0; i < FSIZE; ++i)
+		for(j = 0; j < FSIZE; ++j)
+		{
+			fieldX[i][j] /= max;
+			fieldY[i][j] /= max;
+			fieldZ[i][j] /= max;
+		}
+}
+
+float BiMap::getXSize()
+{
+	return xspace;
+}
+
+float BiMap::getYSize()
+{
+	return yspace;
 }

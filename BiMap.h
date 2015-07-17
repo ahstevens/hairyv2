@@ -9,21 +9,21 @@ public:
 	BiMap(float xsz, float ysz); // defines the space to be sampled
 	~BiMap();
 	
-	void mkMaps();
+	void newMap();
 	void mkDataMap(float **t);
+	void gabor(float **t, int cx, int cy, float r, float size, float contrast, float rat);
 	void getVecValues(float x, float y, float &m1, float &m2, float &m3);
 	void normalize();
 	float getXSize();
 	float getYSize();
 
-	void newMap();
-	void gabor(float **t, int cx, int cy, float r, float size, float contrast, float rat);
+
+private:
+	float MRand();
+	
 	float **fieldX;
 	float **fieldY;
 	float **fieldZ;
-private:
-
-	float MRand();
 
 	int ksize;
 	int rows, cols;	
@@ -33,8 +33,6 @@ private:
 	bool texture;
 
 	float tx, ty;
-
-	void hsvToRgb(float h,float s,float v, float &r,float &g, float &b);
 
 	int xs, ys;
 };
