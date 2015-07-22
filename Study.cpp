@@ -23,7 +23,11 @@ Study::Study()
 	draw_normals = 0;
 
 	camera = Camera(glm::vec3(33.0,24.5,97.0));
-	light = Light(glm::vec3(1.0, 1.0, 1.0));	
+	light = Light(glm::vec3(1.0, 1.0, 1.0));
+
+	// initialize key array
+	for (int i = 0; i < 1024; ++i)
+		keys[i] = 0;
 }
 
 Study::~Study()
@@ -122,9 +126,9 @@ void Study::init()
 		//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
 				
 		//s->setColor(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f));
-		light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
+		//light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
 
-		light.setColor( 1.0f, 1.0f, 1.0f );
+		//light.setColor( 1.0f, 1.0f, 1.0f );
 		glm::vec3 ambientColor = light.getAmbientColor();
 		glm::vec3 diffuseColor = light.getDiffuseColor();
         glm::vec3 specularColor = light.getSpecularColor(); 

@@ -28,7 +28,7 @@ const GLfloat ZOOM       =  29.0f;
 const GLfloat WIDTH      =  2048.0f;
 const GLfloat HEIGHT     =  1536.0f;
 const GLfloat ZNEAR       =  0.1f;
-const GLfloat ZFAR        =  100.0f;
+const GLfloat ZFAR        =  1000.0f;
 
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
@@ -68,7 +68,7 @@ public:
 
 	glm::mat4 getProjectionMatrix()
 	{
-		return glm::perspective(glm::radians(zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+		return glm::perspective(glm::radians(zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, ZNEAR, ZFAR);
 	}
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)

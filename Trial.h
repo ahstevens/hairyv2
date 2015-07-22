@@ -5,7 +5,7 @@
 #include "SweepSurface.h"
 
 struct gridpoint_t {
-	float x, y, x_jitter, y_jitter, dx, dy, dz;
+	float x_jitter, y_jitter, dx, dy, dz;
 };
 
 class Trial

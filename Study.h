@@ -20,7 +20,6 @@ public:
 	void next();
 	void end();
 
-
 private:
 	Study();
 	static Study* instance;

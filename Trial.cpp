@@ -23,12 +23,12 @@ void Trial::init()
 {
 	srand((unsigned int) time(NULL));
 
-	std::vector<glm::vec2> poly = circle(8);
+	std::vector<glm::vec2> poly = circle(32);
 
 	std::cout << "Generating bimap..." << std::endl;
 	bimap = new BiMap(xSize, ySize);
-	std::cout << "Normalizing bimap..." << std::endl;
-	bimap->normalize();
+	//std::cout << "Normalizing bimap..." << std::endl;
+	//bimap->normalize();
 
 	std::cout << "Generating grid..." << std::endl;
 	float x, y, x_jitter, y_jitter, dx, dy, dz;
@@ -59,8 +59,6 @@ void Trial::init()
 
             bimap->getVecValues( x, y, dx, dy, dz);
 
-			temp.x = x;
-			temp.y = y;
             temp.x_jitter = x_jitter;
             temp.y_jitter = y_jitter;
             temp.dx = dx;
@@ -71,19 +69,18 @@ void Trial::init()
 			
 			std::vector<glm::vec3> path;
 			path.push_back( glm::vec3( 0.0f, 0.0f, 0.0f ) );
-            path.push_back( glm::vec3( dx*10, dy*10, dz*10 ) );
+            path.push_back( glm::vec3( dx*0.3f, dy*0.3f, dz*0.3f ) );
 
 			std::vector<glm::vec2> scales;
-			scales.push_back( glm::vec2( 0.0f, 0.0f ) );
-			scales.push_back( glm::vec2( 1.0f, 1.0f ) );
+			scales.push_back( glm::vec2( 0.5f, 0.5f ) );
+			scales.push_back( glm::vec2( 0.5f, 0.5f ) );
 
 			std::vector<float> rots;
 			rots.push_back( 0.0f );			
 			rots.push_back( 0.0f );            
 			
             SweepSurface sweepTemp(poly, path, scales, rots);
-			sweepTemp.setSize( 0.5, 0.5, 0.5 );
-			sweepTemp.setColor( ((float)i) / xSize, ((float)j ) / ySize, 0.5f);
+			//sweepTemp.setColor( ((float)i) / xSize, ((float)j ) / ySize, 0.5f);
 			sweepTemp.setPosition( x, y, 0.0f );
 			//if( dz < 0 )
    //             sweepTemp.setRotate( 180, 0, 1, 0 );

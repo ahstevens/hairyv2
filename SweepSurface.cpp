@@ -32,7 +32,7 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	geomChange = true;
 	
 	use_texture = true;
-	tex.stripes(8, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00);
+	tex.stripes(16, 0xAA, 0x33, 0x33, 0xBB, 0xBB, 0xBB);
 	tex.setMinFilter(GL_NEAREST);
 	tex.setMagFilter(GL_NEAREST);
 }
@@ -40,21 +40,6 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 //------------- destructor -----------------------
 SweepSurface::~SweepSurface()
 {
-}
-
-void SweepSurface::tube(int segments)
-{
-    float angleIncrement = 2.0f * M_PI / (float) segments;
-    
-    std::vector<vec2> circle;
-
-    for( int i = segments - 1; i >= 0; --i )
-        circle.push_back(vec2(float(sin(i * angleIncrement)) * 0.5f, 
-                              float(cos(i * angleIncrement)) * 0.5f));
-
-    this->polygon = circle;
-
-	geomChange = true;
 }
 
 // setter class for sweep surface 2D polygon
@@ -205,9 +190,10 @@ vec3 getWeightedNormal(vec3 a, vec3 b)
 {
 	if (a != b && length(a) != 0 &&	length(b) != 0)
 	{
-		float cosTheta = dot(a, b) / (length(a) * length(b));
-		if (cosTheta >= -1 && cosTheta <= 1)
-			return acos(cosTheta) * cross(a, b);
+		//float cosTheta = dot(a, b) / (length(a) * length(b));
+		//if (cosTheta >= -1 && cosTheta <= 1)
+		//	return acos(cosTheta) * cross(a, b);
+		return cross(a, b);
 	}
 
 	return vec3(0.0);
