@@ -22,7 +22,7 @@ Study::Study()
 
 	draw_normals = 0;
 
-	camera = Camera(glm::vec3(33.0,24.5,97.0));
+	camera = Camera(glm::vec3(0,0,565));
 	light = Light(glm::vec3(1.0, 1.0, 1.0));
 
 	// initialize key array
@@ -47,20 +47,22 @@ void Study::init()
 	// Choose the iPad retina display for full screen, if present
 	int count, widthMM, heightMM;
 	GLFWmonitor** monitors = glfwGetMonitors(&count);
-	GLFWmonitor* retinaDisplay = glfwGetPrimaryMonitor();
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	GLboolean retinaDisplayPresent;
 	for(int i = 0; i < count; ++i)
 	{
 		glfwGetMonitorPhysicalSize(monitors[i], &widthMM, &heightMM);
-		std::cout << "Monitor " << i << ": " << widthMM << " x " << heightMM << std::endl;
+		std::cout << "Monitor " << i << ": " << widthMM << "mm x " << heightMM << "mm" << std::endl;
 		if(widthMM == 722 && heightMM == 542)
 		{
-			retinaDisplay = monitors[i];
+			retinaDisplayPresent = true;
+			monitor = monitors[i];
 			break;
 		}
 	}
 
     // Create a GLFWwindow object that we can use for GLFW's functions
-    GLFWwindow* window = glfwCreateWindow((GLint) WIDTH, (GLint) HEIGHT, "Hairy Slices", retinaDisplay, nullptr);
+    GLFWwindow* window = glfwCreateWindow((GLint) WIDTH, (GLint) HEIGHT, "Hairy Slices", monitor, nullptr);
     glfwMakeContextCurrent(window);
 
     // Set the required callback functions
@@ -166,7 +168,7 @@ void Study::init()
 			if(draw_normals)
 			{
 				normalShader.Use();
-				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
 				(*it).redraw(normalShader);

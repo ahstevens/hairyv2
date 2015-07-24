@@ -3,6 +3,7 @@
 
 // Std. Includes
 #include <vector>
+#include <iostream>
 
 // GL Includes
 #include <GL/glew.h>
@@ -27,9 +28,14 @@ const GLfloat SENSITIVTY =  0.25f;
 const GLfloat ZOOM       =  29.0f;
 const GLfloat WIDTH      =  2048.0f;
 const GLfloat HEIGHT     =  1536.0f;
-const GLfloat ZNEAR       =  0.1f;
-const GLfloat ZFAR        =  1000.0f;
 
+// NOTE: the 9.7" 2048x1536 retina display area measures 197.1 x 147.82 mm
+
+// Window dimensions
+const GLfloat WIDTHMM  = 197.1f;
+const GLfloat HEIGHTMM = 147.82f;
+const GLfloat ZNEAR     = 560.0f;
+const GLfloat ZFAR      = 1000.0f;
 
 // An abstract camera class that processes input and calculates the corresponding Euler Angles, Vectors and Matrices for use in OpenGL
 class Camera
@@ -37,7 +43,7 @@ class Camera
 public:
 
     // Constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH, GLfloat width = WIDTH, GLfloat height = HEIGHT, GLfloat near = ZNEAR, GLfloat far = ZFAR) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movement_speed(SPEED), mouse_sensitivity(SENSITIVTY), zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), GLfloat yaw = YAW, GLfloat pitch = PITCH, GLfloat width = WIDTHMM, GLfloat height = HEIGHTMM, GLfloat near = ZNEAR, GLfloat far = ZFAR) : front(glm::vec3(0.0f, 0.0f, -1.0f)), movement_speed(SPEED), mouse_sensitivity(SENSITIVTY), zoom(ZOOM)
     {
 		this->position = position;
         this->world_up = up;
@@ -68,7 +74,8 @@ public:
 
 	glm::mat4 getProjectionMatrix()
 	{
-		return glm::perspective(glm::radians(zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, ZNEAR, ZFAR);
+		//return glm::perspective(glm::radians(zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, ZNEAR, ZFAR);
+		return glm::frustum(-WIDTHMM * 0.5f, WIDTHMM * 0.5f, -HEIGHTMM * 0.5f, HEIGHTMM * 0.5f, ZNEAR, ZFAR);
 	}
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
