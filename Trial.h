@@ -3,6 +3,7 @@
 #include <vector>
 #include "BiMap.h"
 #include "SweepSurface.h"
+#include "IL/ILRender.h"
 
 struct gridpoint_t {
 	float x_jitter, y_jitter, dx, dy, dz;
