@@ -83,7 +83,7 @@ void Trial::init()
 			//sweepTemp.setColor( ((float)i) / xSize, ((float)j ) / ySize, 0.5f);
 			sweepTemp.setPosition( x, y, 0.0f );
 			//if( dz < 0 )
-   //             sweepTemp.setRotate( 180, 0, 1, 0 );
+			//	sweepTemp.setRotate( 180, 0, 1, 0 );
 
             objects.push_back( sweepTemp );
         }

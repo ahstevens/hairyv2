@@ -13,15 +13,15 @@
 class Study
 {
 public:
-	static Study* getInstance();
+	static Study* getInstance( GLFWwindow* window );
 
-	void init();
+	void init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm);
 	void begin();
 	void next();
 	void end();
-
+	
 private:
-	Study();
+	Study( GLFWwindow* window );
 	static Study* instance;
 
 	~Study();
@@ -37,8 +37,10 @@ private:
 
 	void do_movement();
 
-	bool keys[1024], firstMouse;
+	GLFWwindow* window;
 
+	bool keys[1024], firstMouse;
+	
 	GLfloat lastX, lastY;
 	GLfloat deltaTime;		// Time between current frame and last frame
 	GLfloat lastFrame;		// Time of last frame
