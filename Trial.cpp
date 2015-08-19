@@ -5,7 +5,6 @@
 #include <time.h> // time() for srand()
 
 #include "SweepSurface.h"
-#include "IL/ILRender.h"
 
 using namespace glm;
 
