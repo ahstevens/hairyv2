@@ -189,13 +189,8 @@ void SweepSurface::computeGeometry()
 vec3 getWeightedNormal(vec3 a, vec3 b)
 {
 	if (a != b && length(a) != 0 &&	length(b) != 0)
-	{
-		//float cosTheta = dot(a, b) / (length(a) * length(b));
-		//if (cosTheta >= -1 && cosTheta <= 1)
-		//	return acos(cosTheta) * cross(a, b);
 		return cross(a, b);
-	}
-
+	
 	return vec3(0.0);
 }
 
