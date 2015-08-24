@@ -2,14 +2,16 @@
 #include "Object.h"
 #include <vector>
 
-struct Seed {
-	GLfloat x, y;
-	GLfloat dx, dy, dz;
-};
+
 
 class Slice : public Object
 {
 public:
+	struct Seed {
+		GLfloat x, y;
+		GLfloat dx, dy, dz;
+	};
+
 	Slice( void );
 	Slice( float width, float height );
 	Slice( float width, float height, std::vector<Seed> seeds );
@@ -26,10 +28,17 @@ public:
 	void removeSeeds( int n );                // Removes last n seeds added to the Slice
 	void clearSeeds( void );                  // Clear all seeds from the Slice
 
+	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
+
 	virtual void redraw( Shader shader );
 
-private:
+private:	
+	std::vector<glm::vec2> circle( int segments );
+
 	std::vector<Seed> seeds;
+	std::vector<Vertex> vertices;
+	std::vector<GLuint*> indices;
+	std::vector<GLsizei> counts;
 	float width, height;
 };
 

@@ -19,8 +19,9 @@ public:
     		      std::vector<glm::vec3> path,
 				  std::vector<glm::vec2> scales,
 				  std::vector<float> rotations );
+	SweepSurface( std::vector<glm::vec2> polygon,
+    		      std::vector<glm::vec3> path );
     virtual ~SweepSurface();
-	void tube(int segments);
    
     void updatePolygon( std::vector<glm::vec2> polygon );
     void updatePath( std::vector<glm::vec3> path );
@@ -28,6 +29,9 @@ public:
     void updateScales( float scales );
     void updateRotations( std::vector<float> rotations );
     void updateRotations( float rotations );
+
+	std::vector<Vertex> getVertices();
+	std::vector<GLuint> getIndices();
 	
     virtual void redraw( Shader shader );
    
@@ -37,7 +41,7 @@ protected:
 	void computeTextureCoords();
 	void computeIndices();
 	void pack();
-	void update();
+	void update( bool pack );
 
     std::vector<glm::vec2> polygon;
     std::vector<glm::vec3> path;

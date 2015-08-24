@@ -46,14 +46,12 @@ private:
 	GLfloat lastFrame;		// Time of last frame
 
 	int draw_normals;
-
-	std::vector<SweepSurface> objs;
-
+	
 	Camera camera;
 	Light light;
 
 	std::string participant;
-	//Trial trial;
+	Trial trial;
 	int trialNum;
 	float timeStart;
 

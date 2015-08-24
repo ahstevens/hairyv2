@@ -2,33 +2,25 @@
 
 #include <vector>
 #include "BiMap.h"
-#include "SweepSurface.h"
-
-struct gridpoint_t {
-	float x_jitter, y_jitter, dx, dy, dz;
-};
+#include "Slice.h"
 
 class Trial
 {
 public:
-	Trial(int xSize, int ySize, float density, float jitter);
+	Trial(int xSize = 10, int ySize = 10, float density = 1.0f, float jitter = 0.25f);
 	~Trial();
 
 	void init();
 
-	std::vector<SweepSurface> getObjects();
+	void display( Shader shader );
 
-private:	
-	std::vector<glm::vec2> circle(int segments);
-
+private:
 	int xSize, ySize;
 
 	float jitter, density;
 
 	BiMap* bimap;
 
-	std::vector< std::vector< gridpoint_t > > grid;
-
-	std::vector<SweepSurface> objects;
+	Slice* cp;
 };
 

@@ -11,13 +11,6 @@
 
 using namespace glm;
 
-struct Vertex
-{
-	vec3 position;
-	vec3 normal;
-	vec2 texture;
-};
-
 //------------- constructor -----------------------
 SweepSurface::SweepSurface( std::vector<vec2> polygon,
 						    std::vector<vec3> path,
@@ -35,6 +28,15 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	tex.stripes(16, 0xAA, 0x33, 0x33, 0xBB, 0xBB, 0xBB);
 	tex.setMinFilter(GL_NEAREST);
 	tex.setMagFilter(GL_NEAREST);
+}
+
+SweepSurface::SweepSurface( std::vector<vec2> polygon,
+						    std::vector<vec3> path ) : scales( path.size(), vec2( 1.0f, 1.0f ) ), rotations( path.size(), 0.0f )
+{
+	this->polygon = polygon;
+	this->path = path;
+
+	geomChange = true;
 }
 
 //------------- destructor -----------------------
@@ -427,22 +429,46 @@ void SweepSurface::pack()
 	delete[] verts;
 }
 
-void SweepSurface::update()
+std::vector<Object::Vertex> SweepSurface::getVertices()
 {
-	computeGeometry();
-	computePhongNormals();
-	computeTextureCoords();
-	computeIndices();
-	pack();
+	update( false );
+
+	int nVerts = vertex_buffer.size();
+	std::vector<Vertex> verts(nVerts);
+
+	for (int i = 0; i < nVerts; ++i)
+	{
+		verts[i].position = vertex_buffer[i];
+		verts[i].normal = normal_buffer[i];
+		verts[i].texture = texture_buffer[i];
+	}
+
+	return verts;
+}
+
+std::vector<GLuint> SweepSurface::getIndices()
+{
+	update( false );
+
+	return index_buffer;
+}
+
+void SweepSurface::update( bool pack = true )
+{
+	if( geomChange ) {
+		computeGeometry();
+		computePhongNormals();
+		computeTextureCoords();
+		computeIndices();
+		if( pack ) this->pack();
+		geomChange = false;
+	}
 }
 
 //------------- redraw ---------------------------
 void SweepSurface::redraw( Shader shader )
 {
-	if( geomChange ) {
-		update();
-		geomChange = false;
-	}
+	update();
 
 	glUniform3f(glGetUniformLocation(shader.Program, "material.ambient"), 
 		mat.getAmbientColor().r, mat.getAmbientColor().g, mat.getAmbientColor().b);

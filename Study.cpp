@@ -59,10 +59,9 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	std::cout << "Generating trial..." << std::endl;
-	Trial trial(67, 50, 1.0f, 0.25f);
+	trial = Trial(67, 50, 1.0f, 0.25f);
+	trial.init();
 	std::cout << "Trial generated" << std::endl;
-
-	objs = trial.getObjects();
 
     // Game loop
     while (!glfwWindowShouldClose(window))
@@ -128,19 +127,15 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		//	s->redraw(normalShader);
 		//}
 
-		std::vector<SweepSurface>::iterator it;
-		for(it = objs.begin(); it != objs.end(); it++)
-		{
-			(*it).redraw(lightingShader);
+		trial.display(lightingShader);
 
-			if(draw_normals)
-			{
-				normalShader.Use();
-				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-				(*it).redraw(normalShader);
-			}
+		if(draw_normals)
+		{
+			normalShader.Use();
+			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+			trial.display(normalShader);
 		}
 
 
@@ -184,8 +179,10 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
             keys[key] = true;
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
-			if (keys[GLFW_KEY_R])
-				objs = Trial(67, 50, 1.0f, 0.25f).getObjects();
+			if (keys[GLFW_KEY_R]) {
+				trial = Trial(67, 50, 1.0f, 0.25f);
+				trial.init();
+			}
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;

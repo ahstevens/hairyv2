@@ -1,5 +1,12 @@
 #include "Slice.h"
+#include "SweepSurface.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h> // M_PI
+
+#include <glm/gtc/type_ptr.hpp>
+
+using namespace glm;
 
 Slice::Slice(void)
 	: width( 1.0f ), height( 1.0f )
@@ -69,8 +76,99 @@ void Slice::clearSeeds( void )
 	seeds.clear();
 }
 
+std::vector<vec2> Slice::circle(int segments)
+{
+    float angleIncrement = 2.0f * (float) M_PI / (float) segments;
+    
+    std::vector<vec2> circle;
+
+    for( int i = segments - 1; i >= 0; --i )
+        circle.push_back(vec2(float(sin(i * angleIncrement)) * 0.5f, 
+                              float(cos(i * angleIncrement)) * 0.5f));
+
+    return circle;
+}
+
+void Slice::generateTubes( int segments, float thickness, float lengthMultiplier )
+{
+	vertices.clear();
+	indices.clear();
+
+	std::vector<vec2> circle = this->circle( segments );
+	std::vector< std::vector< GLuint > > tempIndices;
+
+	std::vector<Seed>::iterator it;
+	for( it = seeds.begin(); it != seeds.end(); ++it )
+	{
+		std::vector<vec3> path;
+		path.push_back( vec3( it->x, it->y, 0.0f ) );
+		path.push_back( vec3( it->x + ( it->dx * lengthMultiplier ),
+							  it->y + ( it->dy * lengthMultiplier ),
+							  it->dz * lengthMultiplier ) );
+
+		SweepSurface s( circle, path );
+		s.updateScales( thickness );
+
+		std::vector<Vertex> tubeVerts = s.getVertices();
+		vertices.insert( vertices.end(), tubeVerts.begin(), tubeVerts.end() );
+
+		std::vector<GLuint> tubeIndices = s.getIndices();
+		tempIndices.push_back( tubeIndices );
+		counts.push_back( tubeIndices.size() );
+	}
+
+	indices = std::vector< GLuint* >( tempIndices.size() );
+	for( size_t i = 0; i < tempIndices.size(); ++i )
+    {
+        indices[i] = &tempIndices[i][0];
+    }
+
+	// set up VAO
+	glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+		// Position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
+		glEnableVertexAttribArray(0);
+		// Normal attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, normal)));
+		glEnableVertexAttribArray(1);
+		// Texture coordinate attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, texture)));
+		glEnableVertexAttribArray(2);
+	glBindVertexArray(0);
+}
 
 void Slice::redraw( Shader shader )
 {
+	glUniform3f(glGetUniformLocation(shader.Program, "material.ambient"), 
+		mat.getAmbientColor().r, mat.getAmbientColor().g, mat.getAmbientColor().b);
+	glUniform3f(glGetUniformLocation(shader.Program, "material.diffuse"), 
+		mat.getDiffuseColor().r, mat.getDiffuseColor().g, mat.getDiffuseColor().b);
+	glUniform3f(glGetUniformLocation(shader.Program, "material.specular"), 
+		mat.getSpecularColor().r, mat.getSpecularColor().g, mat.getSpecularColor().b);
+	glUniform1f(glGetUniformLocation(shader.Program, "material.shininess"), 
+		mat.getShininess());
+	glUniform1i(glGetUniformLocation(shader.Program, "use_texture"),
+		use_texture);
+		
+	//glActiveTexture(GL_TEXTURE0);
+	if (use_texture) tex.enable();
+		
+	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 
+					   1,
+					   GL_FALSE,
+					   glm::value_ptr(getModelMatrix())
+					   );
 
+	// Draw the container (using container's vertex attributes)
+	glBindVertexArray(VAO);
+	glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **) &indices[0], counts.size() );
+	glBindVertexArray(0);
+
+	if (use_texture) tex.disable();
 }
