@@ -54,12 +54,12 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
     Shader lightingShader("materials.vs", "materials.frag");
     Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, dist_mm), width_mm, height_mm, dist_mm, dist_mm - 100, 1000.0f);
+	camera = Camera(glm::vec3(0.0f, 0.0f, dist_mm), width_mm, height_mm, dist_mm, dist_mm, 1000.0f);
 
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	std::cout << "Generating trial..." << std::endl;
-	trial = Trial(67, 50, 1.0f, 0.25f);
+	trial = Trial(10, 10, 1.0f, 0.25f);
 	trial.init();
 	std::cout << "Trial generated" << std::endl;
 

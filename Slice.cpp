@@ -93,9 +93,11 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 {
 	vertices.clear();
 	indices.clear();
+	indices_offsets.clear();
+	counts.clear();
 
 	std::vector<vec2> circle = this->circle( segments );
-	std::vector< std::vector< GLuint > > tempIndices;
+	GLuint offset = 0;
 
 	std::vector<Seed>::iterator it;
 	for( it = seeds.begin(); it != seeds.end(); ++it )
@@ -113,15 +115,13 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		vertices.insert( vertices.end(), tubeVerts.begin(), tubeVerts.end() );
 
 		std::vector<GLuint> tubeIndices = s.getIndices();
-		tempIndices.push_back( tubeIndices );
+		for(GLuint& i : tubeIndices)
+			i += offset;
+		indices.insert( indices.end(), tubeIndices.begin(), tubeIndices.end() );
 		counts.push_back( tubeIndices.size() );
+		indices_offsets.push_back( offset );
+		offset += tubeVerts.size();
 	}
-
-	indices = std::vector< GLuint* >( tempIndices.size() );
-	for( size_t i = 0; i < tempIndices.size(); ++i )
-    {
-        indices[i] = &tempIndices[i][0];
-    }
 
 	// set up VAO
 	glBindVertexArray(VAO);
@@ -129,7 +129,7 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
 
 		// Position attribute
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
@@ -167,7 +167,7 @@ void Slice::redraw( Shader shader )
 
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);
-	glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **) &indices[0], counts.size() );
+	glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **) &indices_offsets[0], seeds.size() );
 	glBindVertexArray(0);
 
 	if (use_texture) tex.disable();

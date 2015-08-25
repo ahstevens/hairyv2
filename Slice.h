@@ -37,7 +37,8 @@ private:
 
 	std::vector<Seed> seeds;
 	std::vector<Vertex> vertices;
-	std::vector<GLuint*> indices;
+	std::vector<GLuint> indices;
+	std::vector<GLuint> indices_offsets;
 	std::vector<GLsizei> counts;
 	float width, height;
 };

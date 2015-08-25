@@ -7,7 +7,7 @@
 class Trial
 {
 public:
-	Trial(int xSize = 10, int ySize = 10, float density = 1.0f, float jitter = 0.25f);
+	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f);
 	~Trial();
 
 	void init();
@@ -21,6 +21,6 @@ private:
 
 	BiMap* bimap;
 
-	Slice* cp;
+	Slice cp;
 };
 

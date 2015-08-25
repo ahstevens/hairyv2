@@ -5,7 +5,7 @@
 
 using namespace glm;
 
-Trial::Trial(int xSize, int ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter)
+Trial::Trial(float xSize, float ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), cp(Slice(xSize, ySize))
 {
 }
 
@@ -23,9 +23,7 @@ void Trial::init()
 	bimap = new BiMap(xSize, ySize);
 	//std::cout << "Normalizing bimap..." << std::endl;
 	//bimap->normalize();
-
-	cp = new Slice(xSize, ySize);
-
+	
 	std::cout << "Seeding the cutting plane..." << std::endl;
 
 	float x_jitter, y_jitter;
@@ -53,17 +51,18 @@ void Trial::init()
 
             bimap->getVecValues( seed.x, seed.y, seed.dx, seed.dy, seed.dz);
 
-			cp->addSeed( seed );
+			cp.addSeed( seed );
         }
 	}	
 
 	delete bimap;
 	std::cout << "Cutting plane seeded." << std::endl;
 
-	cp->generateTubes( 8, 0.5f );
+	cp.generateTubes( 8, 0.5f, 0.1f );
+	cp.setPosition( -(xSize / 2), -(ySize / 2), -10.0f );
 }
 
 void Trial::display( Shader shader )
 {
-	cp->redraw( shader );
+	cp.redraw( shader );
 }

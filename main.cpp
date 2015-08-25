@@ -5,15 +5,15 @@
 
 #include "Study.h"
 
-const GLint   WIDTH_RETINA_PX   = 2048;    // iPad 3 Retina screen pixel width
-const GLint   HEIGHT_RETINA_PX  = 1536;    // iPad 3 Retina screen pixel height
-const GLfloat WIDTH_RETINA_MM   = 197.1f;  // iPad 3 Retina screen physical width (mm)
-const GLfloat HEIGHT_RETINA_MM  = 147.82f; // iPad 3 Retina screen physical height (mm)
-const GLint   WIDTH_DELL_PX     = 1920;    // Dell U2412M screen pixel width
-const GLint   HEIGHT_DELL_PX    = 1200;    // Dell U2412M screen pixel height
-const GLfloat WIDTH_DELL_MM     = 518.4f;  // Dell U2412M screen physical width (mm)
-const GLfloat HEIGHT_DELL_MM    = 324.0f;  // Dell U2412M screen physical height (mm)
-const GLfloat DIST_EYE_MM       = 560.0f;  // Eye distance from display (mm)
+const GLuint   WIDTH_RETINA_PX   = 2048;    // iPad 3 Retina screen pixel width
+const GLuint   HEIGHT_RETINA_PX  = 1536;    // iPad 3 Retina screen pixel height
+const GLfloat  WIDTH_RETINA_MM   = 197.1f;  // iPad 3 Retina screen physical width (mm)
+const GLfloat  HEIGHT_RETINA_MM  = 147.82f; // iPad 3 Retina screen physical height (mm)
+const GLuint   WIDTH_DELL_PX     = 1920;    // Dell U2412M screen pixel width
+const GLuint   HEIGHT_DELL_PX    = 1200;    // Dell U2412M screen pixel height
+const GLfloat  WIDTH_DELL_MM     = 518.4f;  // Dell U2412M screen physical width (mm)
+const GLfloat  HEIGHT_DELL_MM    = 324.0f;  // Dell U2412M screen physical height (mm)
+const GLfloat  DIST_EYE_MM       = 560.0f;  // Eye distance from display (mm)
 
 
 
@@ -50,7 +50,7 @@ int main()
 	if (retinaDisplayPresent)
 		window = glfwCreateWindow(WIDTH_RETINA_PX, HEIGHT_RETINA_PX, "Hairy Slices", monitor, nullptr);
 	else
-		window = glfwCreateWindow(WIDTH_DELL_PX, HEIGHT_DELL_PX, "Hairy Slices", monitor, nullptr);
+		window = glfwCreateWindow(WIDTH_DELL_PX, HEIGHT_DELL_PX, "Hairy Slices", nullptr, nullptr);
 
 	glfwMakeContextCurrent(window);
 
