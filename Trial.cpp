@@ -58,7 +58,7 @@ void Trial::init()
 	delete bimap;
 	std::cout << "Cutting plane seeded." << std::endl;
 
-	cp.generateTubes( 8, 0.5f, 0.1f );
+	cp.generateTubes( 8, 0.5f, 0.3f );
 	cp.setPosition( -(xSize / 2), -(ySize / 2), -10.0f );
 }
 

@@ -117,9 +117,9 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		std::vector<GLuint> tubeIndices = s.getIndices();
 		for(GLuint& i : tubeIndices)
 			i += offset;
+		indices_offsets.push_back((GLvoid*)(indices.size() * sizeof(GLuint)));
 		indices.insert( indices.end(), tubeIndices.begin(), tubeIndices.end() );
 		counts.push_back( tubeIndices.size() );
-		indices_offsets.push_back( offset );
 		offset += tubeVerts.size();
 	}
 

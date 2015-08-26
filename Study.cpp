@@ -59,7 +59,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
 	std::cout << "Generating trial..." << std::endl;
-	trial = Trial(10, 10, 1.0f, 0.25f);
+	trial = Trial(50, 50, 1.0f, 0.0f);
 	trial.init();
 	std::cout << "Trial generated" << std::endl;
 
