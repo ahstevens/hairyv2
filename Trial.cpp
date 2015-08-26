@@ -2,6 +2,8 @@
 
 #include <time.h> // time() for srand()
 
+#define BIMAP_BASE_SIZE 100.f
+#define EPSILON           0.001f
 
 using namespace glm;
 
@@ -17,49 +19,68 @@ Trial::~Trial()
 
 void Trial::init()
 {
+	// seed the rand function for use in BiMap
 	srand((unsigned int) time(NULL));
 	
-	std::cout << "Generating bimap..." << std::endl;
-	bimap = new BiMap(xSize, ySize);
-	//std::cout << "Normalizing bimap..." << std::endl;
-	//bimap->normalize();
-	
-	std::cout << "Seeding the cutting plane..." << std::endl;
+	// aspect ratio
+	float ar = xSize / ySize;
+	float bmMaxX, bmMaxY;
 
-	float x_jitter, y_jitter;
-    for(int i = 0; i < xSize; ++i)
+	if( ar > 1.0f ) {
+		bmMaxX = BIMAP_BASE_SIZE;
+		bmMaxY = BIMAP_BASE_SIZE / ar;
+	}
+	else {
+		bmMaxX = BIMAP_BASE_SIZE * ar;
+		bmMaxY = BIMAP_BASE_SIZE;
+	}
+
+	std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")..." << std::endl;
+	
+	bimap = new BiMap( bmMaxX, bmMaxY );
+
+	float xStep = 1 / density;
+	float yStep = 1 / density;
+
+	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane using xStep = " << xStep << ", yStep = "<< yStep << "..." << std::endl;
+	
+    for( float i = 0.f; i < ( xSize + EPSILON ); i += xStep )
 	{
-        for(int j = 0; j < ySize; ++j)
+        for( float j = 0.f; j < ( ySize + EPSILON ); j += yStep )
         {
-            if( i == 0 )
+			float x_jitter;
+            if( i < EPSILON )
                 x_jitter = ( rand() % 2 ) * jitter;
-            else if( i == xSize - 1 )
+            else if( abs( i - ( xSize - xStep ) ) < EPSILON )
                 x_jitter = ( rand() % 2 - 1 ) * jitter;
             else
                 x_jitter = ( rand() % 3 - 1 ) * jitter;
 
-            if( j == 0 )
+			float y_jitter;
+            if( j < EPSILON )
                 y_jitter = ( rand() % 2 ) * jitter;
-            else if( j == ySize - 1 )
+            else if( abs( j - ( ySize - yStep ) ) < EPSILON )
                 y_jitter = ( rand() % 2 - 1 ) * jitter;
             else
                 y_jitter = ( rand() % 3 - 1 ) * jitter;
 
 			Slice::Seed seed;
-            seed.x = (float) i + x_jitter;
-            seed.y = (float) j + y_jitter;
+            seed.x = (float) i + ( x_jitter * xStep );
+            seed.y = (float) j + ( y_jitter * yStep );
 
-            bimap->getVecValues( seed.x, seed.y, seed.dx, seed.dy, seed.dz);
+            bimap->getVecValues( ( seed.x / xSize ) * bmMaxX, 
+								 ( seed.y / ySize ) * bmMaxY,
+								 seed.dx, seed.dy, seed.dz);
 
 			cp.addSeed( seed );
         }
 	}	
 
 	delete bimap;
-	std::cout << "Cutting plane seeded." << std::endl;
 
-	cp.generateTubes( 8, 0.5f, 0.3f );
-	cp.setPosition( -(xSize / 2), -(ySize / 2), -10.0f );
+	std::cout << "Generating geometry for " << (int)( xSize * ySize ) << " tubes..." << std::endl;
+	cp.generateTubes( 8 );
+	cp.setPosition( 0.0f, 0.0f, -10.0f );
 }
 
 void Trial::display( Shader shader )

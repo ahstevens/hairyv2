@@ -492,7 +492,7 @@ void SweepSurface::redraw( Shader shader )
 
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);
-	glDrawElements(GL_TRIANGLES, index_buffer.size(), GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, index_buffer.size(), GL_UNSIGNED_INT, (GLvoid*) 0);
 	glBindVertexArray(0);
 
 	if (use_texture) tex.disable();

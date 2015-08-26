@@ -58,12 +58,12 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 	int width, height;
 	glfwGetWindowSize(window, &width, &height);
-	std::cout << "Generating trial..." << std::endl;
-	trial = Trial(50, 50, 1.0f, 0.0f);
+	std::cout << "Generating trial for " << width_mm << "x" << height_mm << "mm screen..." << std::endl;
+	trial = Trial(width_mm, height_mm, 0.5f, 0.0f);
 	trial.init();
 	std::cout << "Trial generated" << std::endl;
 
-    // Game loop
+    // main loop
     while (!glfwWindowShouldClose(window))
     {
         // Calculate deltatime of current frame

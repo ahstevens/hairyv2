@@ -4,7 +4,10 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
 
+// glm::value_ptr
 #include <glm/gtc/type_ptr.hpp>
+// glm::translate
+#include <glm/gtc/matrix_transform.hpp>
 
 using namespace glm;
 
@@ -99,14 +102,16 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 	std::vector<vec2> circle = this->circle( segments );
 	GLuint offset = 0;
 
+	mat4 trans = translate( mat4(1.f), vec3(-width/2, -height/2, 0.0));
+
 	std::vector<Seed>::iterator it;
 	for( it = seeds.begin(); it != seeds.end(); ++it )
 	{
 		std::vector<vec3> path;
-		path.push_back( vec3( it->x, it->y, 0.0f ) );
-		path.push_back( vec3( it->x + ( it->dx * lengthMultiplier ),
-							  it->y + ( it->dy * lengthMultiplier ),
-							  it->dz * lengthMultiplier ) );
+		path.push_back( vec3( trans * vec4( it->x, it->y, 0.0f, 1.0f ) ) );
+		path.push_back( vec3( trans * vec4( it->x + ( it->dx * lengthMultiplier ),
+											it->y + ( it->dy * lengthMultiplier ),
+											it->dz * lengthMultiplier, 1.0f ) ) );
 
 		SweepSurface s( circle, path );
 		s.updateScales( thickness );

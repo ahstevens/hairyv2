@@ -15,7 +15,7 @@ public:
 	void display( Shader shader );
 
 private:
-	int xSize, ySize;
+	float xSize, ySize;
 
 	float jitter, density;
 
