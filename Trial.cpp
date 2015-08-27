@@ -44,9 +44,9 @@ void Trial::init()
 
 	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane using xStep = " << xStep << ", yStep = "<< yStep << "..." << std::endl;
 	
-    for( float i = 0.f; i < ( xSize + EPSILON ); i += xStep )
+    for( float i = fmod( ( xSize / 2 ), xStep ); i < ( xSize + EPSILON ); i += xStep )
 	{
-        for( float j = 0.f; j < ( ySize + EPSILON ); j += yStep )
+        for( float j = fmod( ( ySize / 2 ), yStep ); j < ( ySize + EPSILON ); j += yStep )
         {
 			float x_jitter;
             if( i < EPSILON )
@@ -78,9 +78,13 @@ void Trial::init()
 
 	delete bimap;
 
-	std::cout << "Generating geometry for " << (int)( xSize * ySize ) << " tubes..." << std::endl;
+	std::cout << "Generating geometry for " << cp.seedCount() << " tubes..." << std::endl;
 	cp.generateTubes( 8 );
-	cp.setPosition( 0.0f, 0.0f, -10.0f );
+
+	// position in middle of clipping volume and scale to fill screen
+	cp.setPosition( 0.0f, 0.0f, -500.0f );
+	float temp = ( 560.f + 500.f ) / 560.f;
+	cp.setSize( temp, temp, temp );
 }
 
 void Trial::display( Shader shader )

@@ -79,6 +79,11 @@ void Slice::clearSeeds( void )
 	seeds.clear();
 }
 
+int Slice::seedCount()
+{
+	return seeds.size();
+}
+
 std::vector<vec2> Slice::circle(int segments)
 {
     float angleIncrement = 2.0f * (float) M_PI / (float) segments;
@@ -127,6 +132,8 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		counts.push_back( tubeIndices.size() );
 		offset += tubeVerts.size();
 	}
+
+	std::cout << "Generated " << vertices.size() << " vertices..." << std::endl;
 
 	// set up VAO
 	glBindVertexArray(VAO);

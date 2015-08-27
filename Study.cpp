@@ -14,12 +14,12 @@ Study* Study::getInstance( GLFWwindow* window )
 
 Study::Study( GLFWwindow* window )
 {
-	int width, height;
-	glfwGetWindowSize(window, &width, &height);
+	int width_px, height_px;
+	glfwGetWindowSize(window, &width_px, &height_px);
 	this->window = window;
 	firstMouse = true;
-	lastX  =  width  / 2.0f;
-    lastY  =  height / 2.0f;
+	lastX  =  width_px  / 2.0f;
+    lastY  =  height_px / 2.0f;
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
@@ -39,6 +39,10 @@ Study::~Study()
 
 void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 {
+	windowWidth = width_mm;
+	windowHeight = height_mm;
+	eyeDistance = dist_mm;
+
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -54,14 +58,11 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
     Shader lightingShader("materials.vs", "materials.frag");
     Shader normalShader("normals.vs", "normals.frag", "normals.gs");
 
-	camera = Camera(glm::vec3(0.0f, 0.0f, dist_mm), width_mm, height_mm, dist_mm, dist_mm, 1000.0f);
+	// set camera at eye position; far clipping plane is 1 meter behind screen
+	glm::vec3 eyePos( 0.f, 0.f, dist_mm );
+	camera = Camera( eyePos, width_mm, height_mm, dist_mm, dist_mm + 1000.0f);
 
-	int width, height;
-	glfwGetWindowSize(window, &width, &height);
-	std::cout << "Generating trial for " << width_mm << "x" << height_mm << "mm screen..." << std::endl;
-	trial = Trial(width_mm, height_mm, 0.5f, 0.0f);
-	trial.init();
-	std::cout << "Trial generated" << std::endl;
+	generateTrial();
 
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -180,8 +181,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R]) {
-				trial = Trial(67, 50, 1.0f, 0.25f);
-				trial.init();
+				generateTrial();
 			}
 		}
         else if (action == GLFW_RELEASE)
@@ -238,4 +238,12 @@ void Study::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.processMouseScroll((GLfloat) yoffset);
+}
+
+void Study::generateTrial()
+{
+	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
+	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
+	trial.init();
+	std::cout << "Trial generated" << std::endl;
 }

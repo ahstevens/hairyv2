@@ -28,7 +28,7 @@ const GLfloat SENSITIVTY =  0.25f;
 const GLfloat ZOOM       =  29.0f;
 const GLfloat WIDTH      =  100.0f;
 const GLfloat HEIGHT     =  100.0f;
-const GLfloat SCREEN     =  560.0f;
+const GLfloat DISTANCE   =  560.0f;
 const GLfloat ZNEAR      =  560.0f;
 const GLfloat ZFAR       =  1000.0f;
 
@@ -38,13 +38,12 @@ class Camera
 public:
 
     // Constructor with vectors
-    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), GLfloat screen_width = WIDTH, GLfloat screen_height = HEIGHT, GLfloat screen_distance = SCREEN, GLfloat near = ZNEAR, GLfloat far = ZFAR) : yaw(YAW), pitch(PITCH), front(glm::vec3(0.0f, 0.0f, -1.0f)), movement_speed(SPEED), mouse_sensitivity(SENSITIVTY), zoom(ZOOM)
+    Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), GLfloat screen_width = WIDTH, GLfloat screen_height = HEIGHT, GLfloat screen_distance = DISTANCE, GLfloat far = ZFAR) : yaw(YAW), pitch(PITCH), front(glm::vec3(0.0f, 0.0f, -1.0f)), movement_speed(SPEED), mouse_sensitivity(SENSITIVTY), zoom(ZOOM)
     {
 		this->position = position;
 		this->screen_width = screen_width;
 		this->screen_height = screen_height;
 		this->screen_distance = screen_distance;
-		this->near = near;
 		this->far = far;
 		this->world_up = glm::vec3(0.0f, 1.0f, 0.0f);
         this->updateCameraVectors();
@@ -72,15 +71,11 @@ public:
 
 	glm::mat4 getProjectionMatrix()
 	{
-		GLfloat scale_factor = near / screen_distance;
 		//return glm::perspective(glm::radians(zoom), (GLfloat)WIDTH / (GLfloat)HEIGHT, ZNEAR, ZFAR);
 		//return glm::frustum(-WIDTHMM * 0.5f, WIDTHMM * 0.5f, -HEIGHTMM * 0.5f, HEIGHTMM * 0.5f, ZNEAR, ZFAR);
-		return glm::frustum(-screen_width * 0.5f * scale_factor,
-							 screen_width * 0.5f * scale_factor,
-							-screen_height * 0.5f * scale_factor,
-							 screen_height * 0.5f * scale_factor,
-							 near * scale_factor,
-							 far);
+		return glm::frustum(-screen_width * 0.5f, screen_width * 0.5f,
+							-screen_height * 0.5f, screen_height * 0.5f,
+							 screen_distance, far);
 	}
 
     // Processes input received from any keyboard-like input system. Accepts input parameter in the form of camera defined ENUM (to abstract it from windowing systems)
@@ -145,7 +140,7 @@ private:
 	GLfloat movement_speed;
 	GLfloat mouse_sensitivity;
 	GLfloat zoom;
-	GLfloat screen_width, screen_height, screen_distance, near, far;
+	GLfloat screen_width, screen_height, screen_distance, far;
 
     // Calculates the front vector from the Camera's (updated) Euler Angles
     void updateCameraVectors()

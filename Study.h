@@ -37,7 +37,10 @@ private:
 
 	void do_movement();
 
+	void generateTrial();
+
 	GLFWwindow* window;
+	GLfloat windowWidth, windowHeight, eyeDistance;
 
 	bool keys[1024], firstMouse;
 	

@@ -27,6 +27,7 @@ public:
 	void removeSeed( void );                  // Removes last seed added to the Slice
 	void removeSeeds( int n );                // Removes last n seeds added to the Slice
 	void clearSeeds( void );                  // Clear all seeds from the Slice
+	int seedCount();                          // Returns the number of seeds in the Slice
 
 	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
 
