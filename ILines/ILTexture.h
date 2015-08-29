@@ -11,7 +11,7 @@ namespace ILines { class ILTexture; }
 
 #include "ILLightingModel.h"
 
-#include "glm/glm.hpp"
+#include "Vector.h"
 
 
 namespace ILines

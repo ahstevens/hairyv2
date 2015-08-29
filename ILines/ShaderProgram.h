@@ -10,6 +10,7 @@ namespace ILines { class ShaderProgram; }
 #include <string>
 #include <fstream>
 
+//#include "glExtensions.h"
 #include "GL/glew.h"
 
 
@@ -38,6 +39,12 @@ namespace ILines
 		GLenum	target;
 		GLuint	programID;
 
+		/*
+		static PFNGLBINDPROGRAMPROC		pglBindProgram;
+		static PFNGLGENPROGRAMSPROC		pglGenPrograms;
+		static PFNGLDELETEPROGRAMSPROC	pglDeletePrograms;
+		static PFNGLPROGRAMSTRINGPROC	pglProgramString;
+		*/
 		void getExtensions() const;
 	};
 }

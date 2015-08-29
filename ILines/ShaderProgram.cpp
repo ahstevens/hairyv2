@@ -24,7 +24,7 @@ namespace ILines
 			const_cast<ShaderProgram *>(this)->allocate();
 
 		glEnable(target);
-		pglBindProgram(target, programID);
+		glBindProgramARB(target, programID);
 	}
 
 	void ShaderProgram::release() const
@@ -38,7 +38,7 @@ namespace ILines
 		getExtensions();
 
 		destroy();
-		pglGenPrograms(1, &programID);
+		glGenProgramsARB(1, &programID);
 	}
 
 	void ShaderProgram::destroy()
@@ -47,7 +47,7 @@ namespace ILines
 
 		if (programID != 0)
 		{
-			pglDeletePrograms(1, &programID);
+			glDeleteProgramsARB(1, &programID);
 			programID = 0;
 		}
 	}
@@ -95,7 +95,7 @@ namespace ILines
 
 		bind();
 
-		pglProgramString(target, GL_PROGRAM_FORMAT_ASCII,
+		glProgramStringARB(target, GL_PROGRAM_FORMAT_ASCII_ARB,
 		                 GLsizei(program.length()), program.c_str());
 
 		if (succ = (glGetError() != GL_INVALID_OPERATION))
@@ -152,6 +152,7 @@ namespace ILines
 
 	void ShaderProgram::getExtensions() const
 	{
+		/*
 		pglBindProgram    = (PFNGLBINDPROGRAMPROC)
 		                     wglXGetProcAddress("glBindProgramARB");
 		pglGenPrograms    = (PFNGLGENPROGRAMSPROC)
@@ -160,12 +161,14 @@ namespace ILines
 		                    wglXGetProcAddress("glDeleteProgramsARB");
 		pglProgramString  = (PFNGLPROGRAMSTRINGPROC)
 		                    wglXGetProcAddress("glProgramStringARB");
+		*/
 	}
 
-
+	/*
 	PFNGLBINDPROGRAMPROC	ShaderProgram::pglBindProgram    = NULL;
 	PFNGLGENPROGRAMSPROC	ShaderProgram::pglGenPrograms    = NULL;
 	PFNGLDELETEPROGRAMSPROC	ShaderProgram::pglDeletePrograms = NULL;
 	PFNGLPROGRAMSTRINGPROC	ShaderProgram::pglProgramString  = NULL;
+	*/
 }
 

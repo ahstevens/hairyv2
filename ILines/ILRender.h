@@ -13,14 +13,15 @@ namespace ILines { class ILRender; }
 #include <cstring>
 #include <algorithm>
 
-#include <GL/gl.h>
+//#include <GL/gl.h>
 
+//#include "glExtensions.h"
 #include "GL/glew.h"
 #include "ILTexture.h"
 #include "ILLightingModel.h"
 #include "ILUtilities.h"
 #include "ShaderProgram.h"
-#include "glm/glm.hpp"
+#include "Vector.h"
 
 
 namespace ILines
@@ -54,7 +55,7 @@ namespace ILines
 		/** @brief Precomputes and prepares the textures for illuminating lines. */
 		void setupTextures(float ka, float kd, float ks, float n, int texDim,
 		                   ILLightingModel::Model lightingModel,
-		                   bool stretch = false, const glm::vec3 L = glm::vec3());
+		                   bool stretch = false, const float *L = NULL);
 
 		/** @brief Draws a set of line strips. */
 		void multiDrawArrays(GLint *first,
@@ -211,6 +212,7 @@ namespace ILines
 		static PFNGLDELETEPROGRAMSPROC			pglDeletePrograms;
 		static PFNGLGENPROGRAMSPROC				pglGenPrograms;
 		*/
+		
 
 		/** @brief Vertex program for the Phong/Blinn lighting model.
 		 *         See IL_cylinder_blinn_vp.cpp. */
@@ -234,7 +236,7 @@ namespace ILines
 		ILErrorCallback	errorCallback;
 
 		/** @brief Builds the needed texture matrix. */
-		void buildTextureMatrix(glm::vec3 L, glm::vec3 V);
+		void buildTextureMatrix(Vector3f L, Vector3f V);
 
 		/** @brief Sets up the needed texture coordinate arrays. */
 		void setupTexCoordArrays(GLint size, GLenum type, GLsizei stride,

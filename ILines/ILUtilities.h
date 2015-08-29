@@ -16,9 +16,11 @@ namespace ILines { class ILUtilities; }
 #include <windows.h>
 #endif
 
-#include <GL/glew.h>
+#include "GL/glew.h"
+//#include <GL/gl.h>
+//#include <GL/glu.h>
 
-#include "glm/glm.hpp"
+#include "Vector.h"
 
 
 namespace ILines

@@ -48,10 +48,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <AdditionalOptions>-D_SCL_SECURE_NO_WARNINGS %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>opengl32.lib;glfw3.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;glu32.lib;glew32s.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -70,6 +71,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BiMap.cpp" />
+    <ClCompile Include="ILines\ILRender.cpp" />
+    <ClCompile Include="ILines\ILTexture.cpp" />
+    <ClCompile Include="ILines\ILUtilities.cpp" />
+    <ClCompile Include="ILines\ShaderProgram.cpp" />
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_fp.cpp" />
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp" />
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_vp.cpp" />
+    <ClCompile Include="ILines\Vector.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -83,6 +92,12 @@
   <ItemGroup>
     <ClInclude Include="BiMap.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="ILines\ILLightingModel.h" />
+    <ClInclude Include="ILines\ILRender.h" />
+    <ClInclude Include="ILines\ILTexture.h" />
+    <ClInclude Include="ILines\ILUtilities.h" />
+    <ClInclude Include="ILines\ShaderProgram.h" />
+    <ClInclude Include="ILines\Vector.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />

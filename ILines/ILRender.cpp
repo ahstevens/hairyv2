@@ -79,7 +79,7 @@ namespace ILines
 	{
 		float		*texDiff, *texSpec;
 		/* The viewing vector in camera coordinates. */
-		glm::vec3		V( 0.0f, 0.0f, 1.0f );
+		float		V[3] = { 0.0f, 0.0f, 1.0f };
 
 		this->lightingModel = lightingModel;
 
@@ -103,9 +103,9 @@ namespace ILines
 		case ILLightingModel::IL_CYLINDER_PHONG:
 			ILTexture::computeTextures(ka, kd, ks, n, texDim, NULL, texDiff, texSpec,
 			                           lightingModel, stretch,
-			                           glm::normalize(L), &glm::normalize(V)[0]);
+			                           normalize(L), normalize(V));
 
-			buildTextureMatrix(glm::normalize(L), glm::normalize(V));
+			buildTextureMatrix(normalize(L), normalize(V));
 			break;
 		case ILLightingModel::IL_CYLINDER_BLINN:
 			ILTexture::computeTextures(ka, kd, ks, n, texDim, NULL, texDiff, texSpec,
@@ -330,7 +330,7 @@ namespace ILines
 			releaseVertices(mappedVBO);
 			/* Restore the previously binded VBO. */
 			if (extVertexBufferObject)
-				pglBindBuffer(GL_ARRAY_BUFFER, bindedVBO);
+				glBindBuffer(GL_ARRAY_BUFFER, bindedVBO);
 
 			return (IL_INVALID_IDENTIFIER);
 		}
@@ -361,15 +361,15 @@ namespace ILines
 			ilInfo->tangentsVBO = 0;
 		else
 		{
-			pglGenBuffers(1, &ilInfo->tangentsVBO);
-			pglBindBuffer(GL_ARRAY_BUFFER, ilInfo->tangentsVBO);
-			pglBufferData(GL_ARRAY_BUFFER, 3 * sizeof(ilInfo->tangents[0]) * arrSize,
+			glGenBuffers(1, &ilInfo->tangentsVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, ilInfo->tangentsVBO);
+			glBufferData(GL_ARRAY_BUFFER, 3 * sizeof(ilInfo->tangents[0]) * arrSize,
 			              ilInfo->tangents, GL_STATIC_DRAW);
 		}
 
 		/* Restore the previously binded VBO. */
 		if (extVertexBufferObject)
-			pglBindBuffer(GL_ARRAY_BUFFER, bindedVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, bindedVBO);
 
 		return (ilInfo);
 	}
@@ -395,7 +395,7 @@ namespace ILines
 		delete[] ilInfo->tangents;
 
 		if ((ilInfo->tangentsVBO != 0) && extVertexBufferObject)
-			pglDeleteBuffers(1, &ilInfo->tangentsVBO);
+			glDeleteBuffers(1, &ilInfo->tangentsVBO);
 
 		delete ilInfo;
 	}
@@ -457,24 +457,24 @@ namespace ILines
 	                             GLuint texCoordsVBO) const
 	{
 		if (extVertexBufferObject)
-			pglBindBuffer(GL_ARRAY_BUFFER, texCoordsVBO);
+			glBindBuffer(GL_ARRAY_BUFFER, texCoordsVBO);
 
-		pglActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
 		enableTexMode(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texIDDiff);
-		pglClientActiveTexture(GL_TEXTURE0);
+		glClientActiveTexture(GL_TEXTURE0);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 		setupTexCoordArrays(size, type, stride, texCoordsDiff);
 
-		pglActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE1);
 		enableTexMode(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texIDSpec);
-		pglClientActiveTexture(GL_TEXTURE1);
+		glClientActiveTexture(GL_TEXTURE1);
 		glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
 		setupTexCoordArrays(size, type, stride, texCoordsSpec);
 
 		if (extVertexBufferObject)
-			pglBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	/**
@@ -629,7 +629,7 @@ namespace ILines
 		if (!doZSort)
 		{
 			if (extMultiDrawArrays)
-				pglMultiDrawArrays(GL_LINE_STRIP, first, vertCount, lineCount);
+				glMultiDrawArrays(GL_LINE_STRIP, first, vertCount, lineCount);
 			else
 				for (i = 0; i < lineCount; i++)
 					glDrawArrays(GL_LINE_STRIP, first[i], vertCount[i]);
@@ -677,11 +677,11 @@ namespace ILines
 		glGetIntegerv(GL_CLIENT_ACTIVE_TEXTURE, (GLint *)&stateClientActiveTexture);
 		glGetLightfv(GL_LIGHT0, GL_SPOT_EXPONENT, &stateSpotExponent);
 
-		pglActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
 		glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
 		glGetDoublev(GL_TEXTURE_MATRIX, stateTextureMatrixDiff);
 
-		pglActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE1);
 		glPushAttrib(GL_ENABLE_BIT | GL_TEXTURE_BIT);
 		glGetDoublev(GL_TEXTURE_MATRIX, stateTextureMatrixSpec);
 
@@ -693,19 +693,19 @@ namespace ILines
 	{
 		glPopClientAttrib();
 
-		pglActiveTexture(GL_TEXTURE1);
+		glActiveTexture(GL_TEXTURE1);
 		glPopAttrib();
 		glMatrixMode(GL_TEXTURE);
 		glLoadMatrixd(stateTextureMatrixSpec);
 
-		pglActiveTexture(GL_TEXTURE0);
+		glActiveTexture(GL_TEXTURE0);
 		glPopAttrib();
 		glMatrixMode(GL_TEXTURE);
 		glLoadMatrixd(stateTextureMatrixDiff);
 
 		glMatrixMode(stateMatrixMode);
-		pglActiveTexture(stateActiveTexture);
-		pglClientActiveTexture(stateClientActiveTexture);
+		glActiveTexture(stateActiveTexture);
+		glClientActiveTexture(stateClientActiveTexture);
 		glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, stateSpotExponent);
 	}
 
@@ -717,6 +717,7 @@ namespace ILines
 		extVertexProgram = isExtensionSupported("GL_ARB_vertex_program");
 		extFragmentProgram = isExtensionSupported("GL_ARB_fragment_program");
 
+		/*
 		// GL_ARB_multitexture
 		pglActiveTexture        = (PFNGLACTIVETEXTUREPROC)
 		                          wglXGetProcAddress("glActiveTextureARB");
@@ -754,6 +755,7 @@ namespace ILines
 		                          wglXGetProcAddress("glDeleteProgramsARB");
 		pglGenPrograms          = (PFNGLGENPROGRAMSPROC)
 		                          wglXGetProcAddress("glGenProgramsARB");
+		*/
 	}
 
 	/**
@@ -1180,15 +1182,15 @@ namespace ILines
 		 * in basic machine units. */
 		offset = (long)vertices;
 
-		pglBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
+		glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
 
 		/* Check whether the vertex buffer object data is already mapped. */
-		pglGetBufferPointerv(GL_ARRAY_BUFFER, GL_BUFFER_MAP_POINTER, &vboMapped);
+		glGetBufferPointerv(GL_ARRAY_BUFFER, GL_BUFFER_MAP_POINTER, &vboMapped);
 		if (vboMapped != NULL)
 			return ((char *)vboMapped + offset);
 
 		/* Map the vertex buffer object data and return it. */
-		vboMapped = pglMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+		vboMapped = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
 
 		mappedVBO = verticesVBO;
 
@@ -1206,9 +1208,9 @@ namespace ILines
 	{
 		if ((mappedVBO != 0) && extVertexBufferObject)
 		{
-			pglBindBuffer(GL_ARRAY_BUFFER, mappedVBO);
-			pglUnmapBuffer(GL_ARRAY_BUFFER);
-			pglBindBuffer(GL_ARRAY_BUFFER, 0);
+			glBindBuffer(GL_ARRAY_BUFFER, mappedVBO);
+			glUnmapBuffer(GL_ARRAY_BUFFER);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 	}
 
@@ -1232,6 +1234,7 @@ namespace ILines
 	bool							ILRender::extVertexProgram        = false;
 	bool							ILRender::extFragmentProgram      = false;
 
+	/*
 	PFNGLACTIVETEXTUREPROC			ILRender::pglActiveTexture        = NULL;
 	PFNGLCLIENTACTIVETEXTUREPROC	ILRender::pglClientActiveTexture  = NULL;
 	PFNGLMULTIDRAWARRAYSPROC		ILRender::pglMultiDrawArrays      = NULL;
@@ -1247,5 +1250,6 @@ namespace ILines
 	PFNGLBINDPROGRAMPROC			ILRender::pglBindProgram          = NULL;
 	PFNGLDELETEPROGRAMSPROC			ILRender::pglDeletePrograms       = NULL;
 	PFNGLGENPROGRAMSPROC			ILRender::pglGenPrograms          = NULL;
+	*/
 }
 
