@@ -1,5 +1,6 @@
 #pragma once
 #include "Object.h"
+#include "IlluminatedLines.h"
 #include <vector>
 
 
@@ -30,11 +31,14 @@ public:
 	int seedCount();                          // Returns the number of seeds in the Slice
 
 	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
+	void generateHairs( float lengthMultiplier = 1.0f );
 
 	virtual void redraw( Shader shader );
 
 private:	
 	std::vector<glm::vec2> circle( int segments );
+
+	IlluminatedLines *il;
 
 	std::vector<Seed> seeds;              // the seeds to populate the Slice
 	std::vector<Vertex> vertices;         // position/normal/tex_coords of each seed's geometry
@@ -42,5 +46,7 @@ private:
 	std::vector<GLvoid*> indices_offsets; // pointers to beginning of each seed's indices in the indices array
 	std::vector<GLsizei> counts;          // holds the number of indices for each geometry primitive
 	float width, height;                  // dimensions of the slice
+
+	bool doIL, ilInit;
 };
 

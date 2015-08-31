@@ -79,6 +79,7 @@
     <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp" />
     <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_vp.cpp" />
     <ClCompile Include="ILines\Vector.cpp" />
+    <ClCompile Include="IlluminatedLines.cpp" />
     <ClCompile Include="Light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Material.cpp" />
@@ -98,6 +99,7 @@
     <ClInclude Include="ILines\ILUtilities.h" />
     <ClInclude Include="ILines\ShaderProgram.h" />
     <ClInclude Include="ILines\Vector.h" />
+    <ClInclude Include="IlluminatedLines.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />
@@ -109,11 +111,14 @@
     <ClInclude Include="Trial.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="IL_cylinder_blinn.frag" />
+    <None Include="IL_cylinder_blinn.vert" />
+    <None Include="IL_cylinder_blinn_tangent.vert" />
     <None Include="materials.frag" />
-    <None Include="materials.vs" />
+    <None Include="materials.vert" />
     <None Include="normals.frag" />
-    <None Include="normals.gs" />
-    <None Include="normals.vs" />
+    <None Include="normals.geom" />
+    <None Include="normals.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

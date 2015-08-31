@@ -55,8 +55,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 
     // Build and compile our shader program
-    Shader lightingShader("materials.vs", "materials.frag");
-    Shader normalShader("normals.vs", "normals.frag", "normals.gs");
+    Shader lightingShader("materials.vert", "materials.frag");
+    Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, dist_mm );
@@ -76,72 +76,64 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
         glfwPollEvents();
         do_movement();
 
-        // Clear the colorbuffer
-        glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  //      // Clear the colorbuffer
+  //      glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+  //      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
-        // Use cooresponding shader when setting uniforms/drawing objects
-        lightingShader.Use();
+  //      // Use cooresponding shader when setting uniforms/drawing objects
+  //      lightingShader.Use();
 
-		glm::vec4 lightPos = light.getPosition();
-		glUniform4f(glGetUniformLocation(lightingShader.Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
-		glm::vec3 cameraPos = camera.getPosition();
-		glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+		//glm::vec4 lightPos = light.getPosition();
+		//glUniform4f(glGetUniformLocation(lightingShader.Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
+		//glm::vec3 cameraPos = camera.getPosition();
+		//glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 
-        // Set lights properties
-		//glm::vec3 lightColor;
-		//lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
-		//lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
-		//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
-				
-		//s->setColor(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f));
-		//light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
+  //      // Set lights properties
+		////glm::vec3 lightColor;
+		////lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
+		////lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
+		////lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
+		//		
+		////s->setColor(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f));
+		////light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
 
-		//light.setColor( 1.0f, 1.0f, 1.0f );
-		glm::vec3 ambientColor = light.getAmbientColor();
-		glm::vec3 diffuseColor = light.getDiffuseColor();
-        glm::vec3 specularColor = light.getSpecularColor(); 
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
-        glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
+		////light.setColor( 1.0f, 1.0f, 1.0f );
+		//glm::vec3 ambientColor = light.getAmbientColor();
+		//glm::vec3 diffuseColor = light.getDiffuseColor();
+  //      glm::vec3 specularColor = light.getSpecularColor(); 
+  //      glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
+  //      glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
+  //      glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
 
-        // Create camera transformations
-        glm::mat4 view = camera.getViewMatrix();
-		//view = glm::translate(view, glm::vec3(-width_mm*0.5f, -height_mm*0.5f, 0));
-		glm::mat4 projection = camera.getProjectionMatrix();
-        // Get the uniform locations
-        GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
-        GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
-        // Pass the matrices to the shader
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+  //      // Create camera transformations
+  //      glm::mat4 view = camera.getViewMatrix();
+		////view = glm::translate(view, glm::vec3(-width_mm*0.5f, -height_mm*0.5f, 0));
+		//glm::mat4 projection = camera.getProjectionMatrix();
+  //      // Get the uniform locations
+  //      GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
+  //      GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
+  //      // Pass the matrices to the shader
+  //      glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+  //      glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		
-		//s->redraw(lightingShader);
+		trial.display(lightingShader);
 
 		//if(draw_normals)
 		//{
 		//	normalShader.Use();
-		//	glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(camera.getViewMatrix()));
+		//	glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 		//	glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 		//	// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-		//	s->redraw(normalShader);
+		//	trial.display(normalShader);
 		//}
-
-		trial.display(lightingShader);
-
-		if(draw_normals)
-		{
-			normalShader.Use();
-			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-			// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-			trial.display(normalShader);
-		}
 
 
         // Swap the screen buffers
         glfwSwapBuffers(window);
+
+		/* Restore the rotational component of the modelview matrix. */
+		glPopMatrix();
     }
 
     // Terminate GLFW, clearing any resources allocated by GLFW.

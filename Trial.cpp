@@ -78,8 +78,9 @@ void Trial::init()
 
 	delete bimap;
 
-	std::cout << "Generating geometry for " << cp.seedCount() << " tubes..." << std::endl;
-	cp.generateTubes( 8 );
+	std::cout << "Generating geometry for " << cp.seedCount() << " glyphs..." << std::endl;
+	//cp.generateTubes( 8 );
+	cp.generateHairs();
 
 	// position in middle of clipping volume and scale to fill screen
 	cp.setPosition( 0.0f, 0.0f, -500.0f );

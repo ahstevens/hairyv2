@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{394df4cb-a416-4a24-9891-4c0ab117a15d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,14 +63,17 @@
     <ClCompile Include="ILines\Vector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_fp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp">
+    <ClCompile Include="IlluminatedLines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_vp.cpp">
-      <Filter>Source Files</Filter>
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_fp.cpp">
+      <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp">
+      <Filter>Shaders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,22 +128,34 @@
     <ClInclude Include="ILines\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="IlluminatedLines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="materials.frag">
-      <Filter>Source Files</Filter>
+    <None Include="IL_cylinder_blinn_tangent.vert">
+      <Filter>Shaders</Filter>
     </None>
-    <None Include="materials.vs">
-      <Filter>Source Files</Filter>
+    <None Include="IL_cylinder_blinn.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="IL_cylinder_blinn.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="normals.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="materials.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="materials.vert">
+      <Filter>Shaders</Filter>
     </None>
     <None Include="normals.frag">
-      <Filter>Source Files</Filter>
+      <Filter>Shaders</Filter>
     </None>
-    <None Include="normals.gs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="normals.vs">
-      <Filter>Source Files</Filter>
+    <None Include="normals.geom">
+      <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
 </Project>
