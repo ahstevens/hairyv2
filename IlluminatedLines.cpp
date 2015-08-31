@@ -1,9 +1,10 @@
 #include "IlluminatedLines.h"
 
 
-IlluminatedLines::IlluminatedLines(int lineCount, int *first, int *vertCount, float *vertices, float *colors)
+IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, int *first, int *vertCount, float *vertices, float *colors)
 {
 	this->lineCount = lineCount;
+	this->totalSize = totalSize;
 	this->first = first;
 	this->vertCount = vertCount;
 	this->vertices = vertices;
@@ -55,6 +56,8 @@ IlluminatedLines::~IlluminatedLines()
 
 void IlluminatedLines::init()
 {
+
+
 	initGL();
 	initIL();
 
@@ -71,6 +74,9 @@ void IlluminatedLines::initGL()
 	glGenBuffersARB(1, &VBO);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, VBO);
 	glBufferDataARB(GL_ARRAY_BUFFER_ARB, 3 * sizeof(vertices[0]) * totalSize, vertices, GL_STATIC_DRAW_ARB);
+	
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) std::cout << "OpenGL Error: " << error << std::endl;
 
 	if (dataHasColors)
 	{

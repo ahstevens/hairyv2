@@ -7,7 +7,7 @@ class IlluminatedLines :
 	public Object
 {
 public:
-	IlluminatedLines(int lineCount, int *first, int *vertCount, float *vertices, float *colors = NULL);
+	IlluminatedLines(int lineCount, int totalCount, int *first, int *vertCount, float *vertices, float *colors = NULL);
 	~IlluminatedLines();
 		
 	void init();

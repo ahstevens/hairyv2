@@ -193,7 +193,7 @@ void Slice::generateHairs(float lengthMultiplier)
 	std::cout << "Generated " << verts.size() / 3 << " vertices..." << std::endl;
 
 
-	this->il = new IlluminatedLines(seeds.size(), &first[0], &counts[0], &verts[0]);
+	this->il = new IlluminatedLines(seeds.size(), verts.size(), &first[0], &counts[0], &verts[0]);
 
 	doIL = true;
 

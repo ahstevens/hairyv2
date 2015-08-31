@@ -16,6 +16,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{394df4cb-a416-4a24-9891-4c0ab117a15d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\ILines">
+      <UniqueIdentifier>{006eda3d-afb0-4553-8c9d-bc8c0744e033}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ILines">
+      <UniqueIdentifier>{44acf30e-9876-4a71-b02f-7668d07a832f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -48,18 +54,6 @@
     <ClCompile Include="Slice.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ILines\ILRender.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ILines\ILTexture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ILines\ILUtilities.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ILines\ShaderProgram.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ILines\Vector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -74,6 +68,18 @@
     </ClCompile>
     <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp">
       <Filter>Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\ILRender.cpp">
+      <Filter>Source Files\ILines</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\ILTexture.cpp">
+      <Filter>Source Files\ILines</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\ILUtilities.cpp">
+      <Filter>Source Files\ILines</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\ShaderProgram.cpp">
+      <Filter>Source Files\ILines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -110,26 +116,26 @@
     <ClInclude Include="Slice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ILines\ILLightingModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ILines\ILRender.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ILines\ILTexture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ILines\ILUtilities.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ILines\ShaderProgram.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ILines\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IlluminatedLines.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ILines\ILLightingModel.h">
+      <Filter>Header Files\ILines</Filter>
+    </ClInclude>
+    <ClInclude Include="ILines\ILTexture.h">
+      <Filter>Header Files\ILines</Filter>
+    </ClInclude>
+    <ClInclude Include="ILines\ILRender.h">
+      <Filter>Header Files\ILines</Filter>
+    </ClInclude>
+    <ClInclude Include="ILines\ILUtilities.h">
+      <Filter>Header Files\ILines</Filter>
+    </ClInclude>
+    <ClInclude Include="ILines\ShaderProgram.h">
+      <Filter>Header Files\ILines</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
