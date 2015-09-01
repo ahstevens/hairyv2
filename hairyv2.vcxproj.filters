@@ -22,6 +22,9 @@
     <Filter Include="Source Files\ILines">
       <UniqueIdentifier>{44acf30e-9876-4a71-b02f-7668d07a832f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\ILines">
+      <UniqueIdentifier>{31231c68-e922-40a3-a900-75ac5147ffbb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,15 +63,6 @@
     <ClCompile Include="IlluminatedLines.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_vp.cpp">
-      <Filter>Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_fp.cpp">
-      <Filter>Shaders</Filter>
-    </ClCompile>
-    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp">
-      <Filter>Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="ILines\ILRender.cpp">
       <Filter>Source Files\ILines</Filter>
     </ClCompile>
@@ -80,6 +74,15 @@
     </ClCompile>
     <ClCompile Include="ILines\ShaderProgram.cpp">
       <Filter>Source Files\ILines</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_vp.cpp">
+      <Filter>Shaders\ILines</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_fp.cpp">
+      <Filter>Shaders\ILines</Filter>
+    </ClCompile>
+    <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp">
+      <Filter>Shaders\ILines</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -139,15 +142,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="IL_cylinder_blinn_tangent.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="IL_cylinder_blinn.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="IL_cylinder_blinn.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="normals.vert">
       <Filter>Shaders</Filter>
     </None>
@@ -162,6 +156,15 @@
     </None>
     <None Include="normals.geom">
       <Filter>Shaders</Filter>
+    </None>
+    <None Include="IL_cylinder_blinn.frag">
+      <Filter>Shaders\ILines</Filter>
+    </None>
+    <None Include="IL_cylinder_blinn.vert">
+      <Filter>Shaders\ILines</Filter>
+    </None>
+    <None Include="IL_cylinder_blinn_tangent.vert">
+      <Filter>Shaders\ILines</Filter>
     </None>
   </ItemGroup>
 </Project>

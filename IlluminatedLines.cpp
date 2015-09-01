@@ -1,7 +1,7 @@
 #include "IlluminatedLines.h"
 
 
-IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, int *first, int *vertCount, float *vertices, float *colors)
+IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors)
 {
 	this->lineCount = lineCount;
 	this->totalSize = totalSize;
@@ -31,7 +31,7 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, int *first, int
 	lightPosition[0] = 1.0f;
 	lightPosition[1] = 1.0f;
 	lightPosition[2] = 1.0f;
-	lightPosition[3] = 1.0f;
+	lightPosition[3] = 0.0f;
 
 	dataHasColors = false;
 
@@ -50,7 +50,7 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, int *first, int
 IlluminatedLines::~IlluminatedLines()
 {
 	ILines::ILRender::deleteIdentifier(ilID);
-	delete[] vertices;
+	//delete[] vertices;
 	delete[] colors;
 }
 
@@ -68,16 +68,13 @@ void IlluminatedLines::init()
 
 void IlluminatedLines::initGL()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 
 	glGenBuffersARB(1, &VBO);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, VBO);
-	glBufferDataARB(GL_ARRAY_BUFFER_ARB, 3 * sizeof(vertices[0]) * totalSize, vertices, GL_STATIC_DRAW_ARB);
+	glBufferDataARB(GL_ARRAY_BUFFER_ARB, 3 * sizeof(vertices[0]) * totalSize, &(vertices.front()), GL_STATIC_DRAW_ARB);
 	
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR) std::cout << "OpenGL Error: " << error << std::endl;
-
 	if (dataHasColors)
 	{
 		glGenBuffersARB(1, &VBOcol);
@@ -130,20 +127,20 @@ void IlluminatedLines::initIL()
 		std::cout << "Cylinder averaging Phong lighting model not supported." << std::endl;
 
 
-	if (cylinderPhongSupported)
+	if (cylinderBlinnSupported)
 	{
-		curIL = &cylinderPhongIL;
-		lightingModel = ILines::ILLightingModel::IL_CYLINDER_PHONG;
+		curIL = &cylinderBlinnIL;
+		lightingModel = ILines::ILLightingModel::IL_CYLINDER_BLINN;
 	}
 	else if (maximumPhongSupported)
 	{
 		curIL = &maximumPhongIL;
 		lightingModel = ILines::ILLightingModel::IL_MAXIMUM_PHONG;
 	}
-	else if (cylinderBlinnSupported)
+	else if(cylinderPhongSupported)
 	{
-		curIL = &cylinderBlinnIL;
-		lightingModel = ILines::ILLightingModel::IL_CYLINDER_BLINN;
+		curIL = &cylinderPhongIL;
+		lightingModel = ILines::ILLightingModel::IL_CYLINDER_PHONG;
 	}
 
 	if (curIL == NULL)
@@ -204,8 +201,8 @@ void IlluminatedLines::redraw(Shader shader)
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	displayScene();
-	
 }
+
 
 void IlluminatedLines::displayScene()
 {
@@ -213,7 +210,7 @@ void IlluminatedLines::displayScene()
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	
-	glBindBufferARB(GL_ARRAY_BUFFER_ARB, VBOcol);
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, VBO);
 	glVertexPointer(3, GL_FLOAT, 0, 0);
 	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
 
@@ -240,7 +237,7 @@ void IlluminatedLines::displayScene()
 	if (!isInitialized)
 	{
 		isInitialized = true;
-		ilID = ILines::ILRender::prepareMultiDrawArrays(first, vertCount, lineCount);
+		ilID = ILines::ILRender::prepareMultiDrawArrays(&(first.front()), &(vertCount.front()), lineCount);
 	}
 
 	curIL->enableZSort(true);

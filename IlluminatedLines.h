@@ -2,12 +2,13 @@
 #include "Object.h"
 #include "ILines/ILRender.h"
 #include "ILines/Vector.h"
+#include <vector>
 
 class IlluminatedLines :
 	public Object
 {
 public:
-	IlluminatedLines(int lineCount, int totalCount, int *first, int *vertCount, float *vertices, float *colors = NULL);
+	IlluminatedLines(int lineCount, int totalCount, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors = NULL);
 	~IlluminatedLines();
 		
 	void init();
@@ -56,9 +57,9 @@ private:
 	bool doColors;
 
 	int	lineCount;
-	int	*first;
-	int	*vertCount;
-	float *vertices;
+	std::vector<int> first;
+	std::vector<int> vertCount;
+	std::vector<float> vertices;
 	float *colors;
 	int	totalSize;
 

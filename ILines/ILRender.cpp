@@ -319,6 +319,8 @@ namespace ILines
 
 		getExtensions();
 
+
+
 		/* Remember the currently binded VBO. */
 		if (extVertexBufferObject)
 			glGetIntegerv(GL_VERTEX_ARRAY_BUFFER_BINDING, (GLint *)&bindedVBO);
@@ -1151,7 +1153,6 @@ namespace ILines
 		if (lastGLError != GL_NO_ERROR)
 			setError(IL_GL_ERROR);
 	}
-
 	/**
 	 * If the vertices passed to OpenGL are stored in a vertex buffer object
 	 * which is not mapped, the vertex buffer object is mapped and its
@@ -1173,7 +1174,7 @@ namespace ILines
 
 		verticesVBO = 0;
 		if (extVertexBufferObject)
-			glGetIntegerv(GL_VERTEX_ARRAY_BUFFER_BINDING, (GLint *)&verticesVBO);
+			glGetIntegerv(GL_VERTEX_ARRAY_BUFFER_BINDING_ARB, (GLint *)&verticesVBO);
 
 		/* If no vertex buffer object is binded, return the vertex array pointer. */
 		if ((verticesVBO == 0) || !extVertexBufferObject)
@@ -1183,15 +1184,15 @@ namespace ILines
 		 * in basic machine units. */
 		offset = (long)vertices;
 
-		glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
+		glBindBufferARB(GL_ARRAY_BUFFER_ARB, verticesVBO);
 
 		/* Check whether the vertex buffer object data is already mapped. */
-		glGetBufferPointerv(GL_ARRAY_BUFFER, GL_BUFFER_MAP_POINTER, &vboMapped);
+		glGetBufferPointerv(GL_ARRAY_BUFFER_ARB, GL_BUFFER_MAP_POINTER_ARB, &vboMapped);
 		if (vboMapped != NULL)
 			return ((char *)vboMapped + offset);
 
 		/* Map the vertex buffer object data and return it. */
-		vboMapped = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_ONLY);
+		vboMapped = glMapBufferARB(GL_ARRAY_BUFFER_ARB, GL_READ_ONLY_ARB);
 
 		mappedVBO = verticesVBO;
 
