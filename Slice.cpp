@@ -192,10 +192,8 @@ void Slice::generateHairs(float lengthMultiplier)
 
 	std::cout << "Generated " << verts.size() / 3 << " vertices..." << std::endl;
 
-	//this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, &(first.front()), &(counts.front()), &(verts.front()));
 	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts);
-	//this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first2, counts2, verts2);
-
+	ilInit = false;
 	doIL = true;
 
 }
@@ -206,6 +204,7 @@ void Slice::redraw( Shader shader )
 	{
 		if (!ilInit)
 		{
+			std::cout << "Initializing Illuminate Streamlines..." << std::endl;
 			ilInit = true;
 			il->init();
 		}

@@ -21,6 +21,8 @@ private:
 	void initGL();
 	void initIL();
 	void displayScene();
+		
+	bool isInitialized;
 
 	GLuint VBOcol;
 	

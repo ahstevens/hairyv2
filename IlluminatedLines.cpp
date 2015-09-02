@@ -10,6 +10,8 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	this->vertices = vertices;
 	this->colors = colors;
 
+	isInitialized = false;
+
 	texDim = 256;
 	ka = 0.05f;
 	kd = 0.8f;
@@ -17,9 +19,9 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	gloss = 10.0f;
 	
 	uniformColor[0] = 1.0f;
-	uniformColor[1] = 0.5f;
+	uniformColor[1] = 0.6f;
 	uniformColor[2] = 0.1f;
-	uniformColor[3] = 0.5f;
+	uniformColor[3] = 0.55f;
 
 	lightDirection[0] = -1.0f;
 	lightDirection[1] = -1.0f;
@@ -52,8 +54,8 @@ void IlluminatedLines::init()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(-518.4f * 0.5f, 518.4f * 0.5f,
-			  -324.0f * 0.5f, 324.0f * 0.5f,
+	glFrustum(-197.1f * 0.5f, 197.1f * 0.5f,
+			  -147.82f * 0.5f, 147.82f * 0.5f,
 			   560.0f, 1560.0f);
 
 	initGL();
@@ -212,7 +214,6 @@ void IlluminatedLines::displayScene()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glColor4fv(uniformColor);
 
-	static bool	isInitialized = false;
 
 	if (!isInitialized)
 	{

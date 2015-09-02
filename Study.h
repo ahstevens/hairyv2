@@ -37,7 +37,7 @@ private:
 
 	void do_movement();
 
-	void generateTrial();
+	void generateTrial(Trial::RenderMode renderMode);
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;

@@ -1,3 +1,4 @@
+//Illuminated Lines FRAGMENT PROGRAM GLSL 3.3
 //!!ARBfp1.0   
 #version 330 core
 
@@ -19,7 +20,7 @@ in vec3 vcolor;
 
 //# ******* parameters *********                         
 //                                                       
-//PARAM spec_exp = state.light[0].attenuation;           
+//PARAM spec_exp = state.light[0].attenuation; // ka/kd/ks params and SPOTLIGHT exponent
 //PARAM const    = { 0, 0.5, 1, 2 };            
 uniform float spec_exp;
 
@@ -110,8 +111,8 @@ void main()
 	//TEX spec.x, lu_tc.zwxy, texture[1], 2D;                
 
 
-	//# (1 - half . tan^2)^(exp/2)                           
-	//POW lu_tc.w, sqr_f.w, -spec_exp.w;                     
+	//# (1 - half . tan^2)^(exp/2)
+	//POW lu_tc.w, sqr_f.w, -spec_exp.w; // spec_exp.w = spotlight exponent from IlRender::render()
 
 
 	//MUL_SAT spec.w, spec.x, lu_tc;                         

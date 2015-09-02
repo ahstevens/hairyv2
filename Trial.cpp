@@ -9,6 +9,7 @@ using namespace glm;
 
 Trial::Trial(float xSize, float ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), cp(Slice(xSize, ySize))
 {
+	renderMode = TRIAL_RENDER_LINES_ILLUMINATED;
 }
 
 
@@ -79,8 +80,21 @@ void Trial::init()
 	delete bimap;
 
 	std::cout << "Generating geometry for " << cp.seedCount() << " glyphs..." << std::endl;
-	//cp.generateTubes( 8 );
-	cp.generateHairs();
+
+	switch(renderMode)
+	{
+		case TRIAL_RENDER_LINES_PLAIN:
+		case TRIAL_RENDER_LINES_ILLUMINATED:
+			cp.generateHairs( 1.0f );
+			break;
+		case TRIAL_RENDER_TUBES_PLAIN:
+		case TRIAL_RENDER_TUBES_RINGED:
+			cp.generateTubes( 8 );
+			break;
+		case TRIAL_RENDER_SHADOWED_HEDGEHOGS:
+			
+			break;
+	}
 
 	// position in middle of clipping volume and scale to fill screen
 	cp.setPosition( 0.0f, 0.0f, -500.0f );
