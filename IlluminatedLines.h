@@ -35,15 +35,10 @@ private:
 	GLfloat	lightPosition[4];
 
 	bool dataHasColors;
-
-	int	oldX, oldY, rotX, rotY, zoomZ;
-	int	oldTransX, oldTransY, transX, transY;
-	bool zoom, trans;
-
+	
 	ILines::Vector3f	cameraPosition;
 	ILines::Vector3f	sceneCenter;
 	ILines::Vector3f	cameraUp;
-	GLdouble	cameraPerspective[4];
 
 	ILines::ILRender maximumPhongIL;
 	ILines::ILRender cylinderPhongIL;

@@ -15,13 +15,11 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	kd = 0.8f;
 	ks = 1.0f;
 	gloss = 10.0f;
-
-	rotX = rotY = zoomZ = transX = transY = 0;
-
+	
 	uniformColor[0] = 1.0f;
 	uniformColor[1] = 0.5f;
-	uniformColor[2] = 0.0f;
-	uniformColor[3] = 0.4f;
+	uniformColor[2] = 0.1f;
+	uniformColor[3] = 0.5f;
 
 	lightDirection[0] = -1.0f;
 	lightDirection[1] = -1.0f;
@@ -38,10 +36,6 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	cameraPosition = ILines::Vector3f(0.0f, 0.0f, 560.0f);
 	sceneCenter = ILines::Vector3f(0.0f, 0.0f, 0.0f);
 	cameraUp = ILines::Vector3f(0.0f, 1.0f, 0.0f);
-	cameraPerspective[0] = 45.0;
-	cameraPerspective[1] = 1.0;
-	cameraPerspective[2] = 1.0;
-	cameraPerspective[3] = 1000.0;
 
 	doColors = false;
 }
@@ -56,7 +50,11 @@ IlluminatedLines::~IlluminatedLines()
 
 void IlluminatedLines::init()
 {
-
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-518.4f * 0.5f, 518.4f * 0.5f,
+			  -324.0f * 0.5f, 324.0f * 0.5f,
+			   560.0f, 1560.0f);
 
 	initGL();
 	initIL();
@@ -68,7 +66,7 @@ void IlluminatedLines::init()
 
 void IlluminatedLines::initGL()
 {
-	glClearColor(0.2f, 0.2f, 0.2f, 0.0f);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 	glEnable(GL_DEPTH_TEST);
 
 	glGenBuffersARB(1, &VBO);
@@ -164,20 +162,8 @@ void IlluminatedLines::errorCallbackIL(ILines::ILRender *ilRender)
 
 void IlluminatedLines::redraw(Shader shader)
 {
-	float	mvMatrix[16];
-
-	glGetFloatv(GL_MODELVIEW_MATRIX, mvMatrix);
-
 	/* Handle rotations and translations separately. */
 	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	glRotatef(rotY, Y.x, Y.y, Y.z);
-	glRotatef(rotX, X.x, X.y, X.z);
-	glMultMatrixf(mvMatrix);
-
-	/* Save the rotational component of the modelview matrix. */
-	glPushMatrix();
 	glLoadIdentity();
 
 	/* Specifiy the light position in eye coordinates. */
@@ -187,16 +173,13 @@ void IlluminatedLines::redraw(Shader shader)
 		sceneCenter.x, sceneCenter.y, sceneCenter.z,
 		cameraUp.x, cameraUp.y, cameraUp.z);
 
-	ILines::Vector3f trans;
-	trans = zoomZ / 20.0f * Z + transX / 150.0f * X - transY / 150.0f * Y;
-	glTranslatef(trans.x, trans.y, trans.z);
-	glTranslatef(+sceneCenter.x, +sceneCenter.y, +sceneCenter.z);
-	glRotatef(rotY, Y.x, Y.y, Y.z);
-	glRotatef(rotX, X.x, X.y, X.z);
-	glMultMatrixf(mvMatrix);
-	glTranslatef(-sceneCenter.x, -sceneCenter.y, -sceneCenter.z);
 
-	rotX = rotY = 0;
+	// translate object to middle of viewing frustum 
+	glTranslatef(0.0f, 0.0f, -500.0f);
+
+	// scale it to fill screen
+	float temp = (560.f + 500.f) / 560.f;
+	glScalef(temp, temp, temp);
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -224,13 +207,10 @@ void IlluminatedLines::displayScene()
 	else
 		glDisableClientState(GL_COLOR_ARRAY);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glColor4fv(uniformColor);
-
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glColor4fv(uniformColor);
 
 	static bool	isInitialized = false;
 

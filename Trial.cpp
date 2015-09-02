@@ -88,6 +88,16 @@ void Trial::init()
 	cp.setSize( temp, temp, temp );
 }
 
+void Trial::setRenderMode(Trial::RenderMode renderMode)
+{
+	this->renderMode = renderMode;
+}
+
+Trial::RenderMode Trial::getRenderMode()
+{
+	return this->renderMode;
+}
+
 void Trial::display( Shader shader )
 {
 	cp.redraw( shader );
