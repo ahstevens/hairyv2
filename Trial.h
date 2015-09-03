@@ -20,12 +20,17 @@ public:
 
 	void init();
 
+	void makeBiMap();
+	void sampleBiMap();
+
 	void setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel = ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	Trial::RenderMode getRenderMode();
 
+	void setSliceShader( Shader *shader );
+
 	void passThroughPVMatrix( float *pM, float *vM );
 
-	void display( Shader shader );
+	void display();
 
 private:
 	float xSize, ySize;

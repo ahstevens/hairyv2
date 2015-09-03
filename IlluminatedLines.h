@@ -4,8 +4,7 @@
 #include "ILines/Vector.h"
 #include <vector>
 
-class IlluminatedLines :
-	public Object
+class IlluminatedLines
 {
 public:
 	IlluminatedLines(int lineCount, int totalCount, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors = NULL, ILines::ILLightingModel::Model lightModel = ILines::ILLightingModel::IL_CYLINDER_PHONG);
@@ -19,17 +18,18 @@ public:
 
 	static void errorCallbackIL(ILines::ILRender *ilRender);
 
-	virtual void redraw(Shader shader);
+	void redraw();
 
 private:
 	void initGL();
 	void initIL();
 	void displayScene();
+
+	void checkLighting();
 		
 	bool isInitialized;
-	bool lightingChecked;
 
-	GLuint VBOcol;
+	GLuint VBO, VBOcol;
 	
 	float *pM, *vM;
 

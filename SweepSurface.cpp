@@ -465,25 +465,25 @@ void SweepSurface::update( bool pack = true )
 }
 
 //------------- redraw ---------------------------
-void SweepSurface::redraw( Shader shader )
+void SweepSurface::redraw()
 {
 	update();
 
-	glUniform3f(glGetUniformLocation(shader.Program, "material.ambient"), 
+	glUniform3f(glGetUniformLocation(shader->Program, "material.ambient"), 
 		mat.getAmbientColor().r, mat.getAmbientColor().g, mat.getAmbientColor().b);
-	glUniform3f(glGetUniformLocation(shader.Program, "material.diffuse"), 
+	glUniform3f(glGetUniformLocation(shader->Program, "material.diffuse"), 
 		mat.getDiffuseColor().r, mat.getDiffuseColor().g, mat.getDiffuseColor().b);
-	glUniform3f(glGetUniformLocation(shader.Program, "material.specular"), 
+	glUniform3f(glGetUniformLocation(shader->Program, "material.specular"), 
 		mat.getSpecularColor().r, mat.getSpecularColor().g, mat.getSpecularColor().b);
-	glUniform1f(glGetUniformLocation(shader.Program, "material.shininess"), 
+	glUniform1f(glGetUniformLocation(shader->Program, "material.shininess"), 
 		mat.getShininess());
-	glUniform1i(glGetUniformLocation(shader.Program, "use_texture"),
+	glUniform1i(glGetUniformLocation(shader->Program, "use_texture"),
 		use_texture);
 		
 	//glActiveTexture(GL_TEXTURE0);
 	if (use_texture) tex.enable();
 		
-	glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"), 
+	glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"), 
 					   1,
 					   GL_FALSE,
 					   glm::value_ptr(getModelMatrix())

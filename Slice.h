@@ -30,20 +30,20 @@ public:
 	void clearSeeds( void );                  // Clear all seeds from the Slice
 	int seedCount();                          // Returns the number of seeds in the Slice
 
-	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
-	void generateHairs( float lengthMultiplier = 1.0f );
-
-	void renderIL(ILines::ILLightingModel::Model lightModel);
-	void renderPL();
-	void renderRT();
-	void renderPT();
-	void renderSH();
+	void renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier = 1.0f );
+	void renderPL( float lengthMultiplier = 1.0f );
+	void renderRT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
+	void renderPT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
+	void renderSH( float lengthMultiplier = 1.0f );
 
 	void setILPVMatrix(float * pM, float *vM);
 
-	virtual void redraw( Shader shader );
+	virtual void redraw();
 
-private:	
+private:
+	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
+	void generateHairs( float lengthMultiplier = 1.0f );
+
 	std::vector<glm::vec2> circle( int segments );
 
 	IlluminatedLines *il;
@@ -55,6 +55,6 @@ private:
 	std::vector<GLsizei> counts;          // holds the number of indices for each geometry primitive
 	float width, height;                  // dimensions of the slice
 
-	bool doIL, ilInit;
+	bool doIL, ilInit, geometryChange, tubesGenerated, linesGenerated;
 };
 

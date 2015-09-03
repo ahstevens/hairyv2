@@ -27,6 +27,8 @@ Object::Object()
     setRotate( 0.0f, 0.0f, 0.0f, 1.0f);
 
 	use_texture = false;
+
+	shader = NULL;
 }
 
 //------------------ Destructor ------------------------------------
@@ -127,6 +129,16 @@ void Object::setColor( float r, float g, float b )
 Material Object::getMaterial()
 {
 	return mat;
+}
+
+void Object::setShader( Shader *shader )
+{
+	this->shader = shader;
+}
+
+Shader* Object::getShader()
+{
+	return shader;
 }
 
 mat4 Object::getModelMatrix()

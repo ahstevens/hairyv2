@@ -42,9 +42,12 @@ public:
 	void setColor( float r, float g, float b);
 	Material getMaterial();
 
+	void setShader( Shader *s );
+	Shader* getShader();
+
 	glm::mat4 getModelMatrix();
     
-	virtual void redraw( Shader shader ) = 0;
+	virtual void redraw() = 0;
         
 protected:
 	void computeModelMatrix();
@@ -63,6 +66,8 @@ protected:
 
 	Texture tex;
 	bool use_texture;
+
+	Shader *shader;
 
 	bool update_model_matrix;
 };

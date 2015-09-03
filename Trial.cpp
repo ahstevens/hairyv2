@@ -10,11 +10,13 @@ using namespace glm;
 Trial::Trial(float xSize, float ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), cp(Slice(xSize, ySize))
 {
 	renderMode = TRIAL_RENDER_LINES_ILLUMINATED;
+	bimap = NULL;
 }
 
 
 Trial::~Trial()
 {
+	delete bimap;
 }
 
 
@@ -23,6 +25,20 @@ void Trial::init()
 	// seed the rand function for use in BiMap
 	srand((unsigned int) time(NULL));
 	
+	makeBiMap();
+
+	sampleBiMap();
+
+	setRenderMode(renderMode);
+
+	// position in middle of clipping volume and scale to fill screen
+	cp.setPosition( 0.0f, 0.0f, -500.0f );
+	float temp = ( 560.f + 500.f ) / 560.f;
+	cp.setSize( temp, temp, temp );
+}
+
+void Trial::makeBiMap()
+{
 	// aspect ratio
 	float ar = xSize / ySize;
 	float bmMaxX, bmMaxY;
@@ -36,14 +52,21 @@ void Trial::init()
 		bmMaxY = BIMAP_BASE_SIZE;
 	}
 
-	std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")..." << std::endl;
-	
-	bimap = new BiMap( bmMaxX, bmMaxY );
+	// free memory held by any existing BiMap
+	if(bimap != NULL)
+		delete bimap;
 
+	std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")... ";
+	bimap = new BiMap( bmMaxX, bmMaxY );
+	std::cout << "done" << std::endl;	
+}
+
+void Trial::sampleBiMap()
+{
 	float xStep = 1 / density;
 	float yStep = 1 / density;
 
-	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane using xStep = " << xStep << ", yStep = "<< yStep << "..." << std::endl;
+	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the BiMap... ";
 	
     for( float i = fmod( ( xSize / 2 ), xStep ); i < ( xSize + EPSILON ); i += xStep )
 	{
@@ -69,37 +92,15 @@ void Trial::init()
             seed.x = (float) i + ( x_jitter * xStep );
             seed.y = (float) j + ( y_jitter * yStep );
 
-            bimap->getVecValues( ( seed.x / xSize ) * bmMaxX, 
-								 ( seed.y / ySize ) * bmMaxY,
+            bimap->getVecValues( ( seed.x / xSize ) * bimap->getXSize(), 
+								 ( seed.y / ySize ) * bimap->getYSize(),
 								 seed.dx, seed.dy, seed.dz);
 
 			cp.addSeed( seed );
         }
-	}	
-
-	delete bimap;
-
-	std::cout << "Generating geometry for " << cp.seedCount() << " glyphs..." << std::endl;
-
-	switch(renderMode)
-	{
-		case TRIAL_RENDER_LINES_PLAIN:
-		case TRIAL_RENDER_LINES_ILLUMINATED:
-			cp.generateHairs( 1.0f );
-			break;
-		case TRIAL_RENDER_TUBES_PLAIN:
-		case TRIAL_RENDER_TUBES_RINGED:
-			cp.generateTubes( 8 );
-			break;
-		case TRIAL_RENDER_SHADOWED_HEDGEHOGS:
-			
-			break;
 	}
 
-	// position in middle of clipping volume and scale to fill screen
-	cp.setPosition( 0.0f, 0.0f, -500.0f );
-	float temp = ( 560.f + 500.f ) / 560.f;
-	cp.setSize( temp, temp, temp );
+	std::cout << "done" << std::endl;
 }
 
 void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel)
@@ -109,17 +110,19 @@ void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel:
 	switch (renderMode)
 	{
 	case Trial::TRIAL_RENDER_LINES_PLAIN:
+		cp.renderPL();
 		break;
 	case Trial::TRIAL_RENDER_LINES_ILLUMINATED:
 		cp.renderIL(lightModel);
 		break;
 	case Trial::TRIAL_RENDER_TUBES_PLAIN:
+		cp.renderPT( 8, 0.5f );
 		break;
 	case Trial::TRIAL_RENDER_TUBES_RINGED:
+		cp.renderRT();
 		break;
 	case Trial::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
-		break;
-	default:
+		cp.renderSH();
 		break;
 	}
 }
@@ -129,12 +132,17 @@ Trial::RenderMode Trial::getRenderMode()
 	return this->renderMode;
 }
 
+void Trial::setSliceShader( Shader *shader )
+{
+	cp.setShader( shader );
+}
+
 void Trial::passThroughPVMatrix( float *pM, float *vM )
 {
 	cp.setILPVMatrix( pM, vM );
 }
 
-void Trial::display( Shader shader )
+void Trial::display()
 {
-	cp.redraw( shader );
+	cp.redraw();
 }

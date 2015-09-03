@@ -12,7 +12,8 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	this->lightingModel = lightModel;
 
 	isInitialized = false;
-	lightingChecked = false;
+
+	pM = vM = NULL;
 
 	texDim = 256;
 	ka = 0.05f;
@@ -35,9 +36,18 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	lightPosition[2] = 1.0f;
 	lightPosition[3] = 0.0f;
 
-	dataHasColors = false;
+	if(this->colors != NULL)
+	{
+		dataHasColors = true;	
+		doColors = true;
+	}
+	else
+	{
+		dataHasColors = false;	
+		doColors = false;
+	}
 
-	doColors = false;
+	checkLighting();
 }
 
 
@@ -84,68 +94,43 @@ void IlluminatedLines::initGL()
 
 void IlluminatedLines::initIL()
 {
-	if (!lightingChecked)
-	{
-		maximumPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
-		cylinderBlinnSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_BLINN);
-		cylinderPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_PHONG);
-
-		maximumPhongIL.setErrorCallback(errorCallbackIL);
-		cylinderBlinnIL.setErrorCallback(errorCallbackIL);
-		cylinderPhongIL.setErrorCallback(errorCallbackIL);
-
-		lightingChecked = true;
-	}
-
 	if ( cylinderBlinnSupported )
 	{
-		if ( lightingModel == ILines::ILLightingModel::IL_CYLINDER_BLINN )
-		{
-			std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
-			cylinderBlinnIL.setupTextures(ka, kd, ks, 4.0f * gloss, texDim,
-				ILines::ILLightingModel::IL_CYLINDER_BLINN, false);
-			std::cout << " done." << std::endl;
+		std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
+		cylinderBlinnIL.setupTextures(ka, kd, ks, 4.0f * gloss, texDim,
+			ILines::ILLightingModel::IL_CYLINDER_BLINN, false);
+		std::cout << " done." << std::endl;
 
+		if(lightingModel == ILines::ILLightingModel::IL_CYLINDER_BLINN)
 			curIL = &cylinderBlinnIL;
-
-			return;
-		}
 	}
 	else
 		std::cout << "Cylinder averaging Phong/Blinn lighting model not supported." << std::endl;
 
 	if (cylinderPhongSupported)
 	{
-		if( lightingModel == ILines::ILLightingModel::IL_CYLINDER_PHONG )
-		{
-			std::cout << "Setting up textures for the cylinder averaging Phong lighting model...";
-			cylinderPhongIL.setupTextures(ka, kd, ks, gloss, texDim,
-				ILines::ILLightingModel::IL_CYLINDER_PHONG, false,
-				lightDirection);
-			std::cout << " done." << std::endl;
+		std::cout << "Setting up textures for the cylinder averaging Phong lighting model...";
+		cylinderPhongIL.setupTextures(ka, kd, ks, gloss, texDim,
+			ILines::ILLightingModel::IL_CYLINDER_PHONG, false,
+			lightDirection);
+		std::cout << " done." << std::endl;
 
+		if(lightingModel == ILines::ILLightingModel::IL_CYLINDER_PHONG)
 			curIL = &cylinderPhongIL;
-
-			return;
-		}
 	}
 	else
 		std::cout << "Cylinder averaging Phong lighting model not supported." << std::endl;
 
 	if (maximumPhongSupported)
 	{
-		if ( lightingModel == ILines::ILLightingModel::IL_MAXIMUM_PHONG )
-		{
-			std::cout << "Setting up textures for the maximum principle Phong lighting model...";
-			maximumPhongIL.setupTextures(ka, 0.6f * kd, 0.3f * ks, gloss, texDim,
-				ILines::ILLightingModel::IL_MAXIMUM_PHONG, false,
-				lightDirection);
-			std::cout << " done." << std::endl;
+		std::cout << "Setting up textures for the maximum principle Phong lighting model...";
+		maximumPhongIL.setupTextures(ka, 0.6f * kd, 0.3f * ks, gloss, texDim,
+			ILines::ILLightingModel::IL_MAXIMUM_PHONG, false,
+			lightDirection);
+		std::cout << " done." << std::endl;
 
+		if(lightingModel == ILines::ILLightingModel::IL_MAXIMUM_PHONG)
 			curIL = &maximumPhongIL;
-
-			return;
-		}
 	}
 	else
 		std::cout << "Maximum principle Phong lighting model not supported." << std::endl;
@@ -169,7 +154,18 @@ void IlluminatedLines::errorCallbackIL(ILines::ILRender *ilRender)
 
 }
 
-void IlluminatedLines::redraw(Shader shader)
+void IlluminatedLines::checkLighting()
+{
+	maximumPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
+	cylinderBlinnSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_BLINN);
+	cylinderPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_PHONG);
+
+	maximumPhongIL.setErrorCallback(errorCallbackIL);
+	cylinderBlinnIL.setErrorCallback(errorCallbackIL);
+	cylinderPhongIL.setErrorCallback(errorCallbackIL);
+}
+
+void IlluminatedLines::redraw()
 {
 	/* Handle rotations and translations separately. */
 	glMatrixMode(GL_MODELVIEW);
@@ -238,7 +234,35 @@ void IlluminatedLines::displayScene()
 }
 
 void IlluminatedLines::setLightingModel(ILines::ILLightingModel::Model lightModel)
-{
-	this->lightingModel = lightModel;
-	initIL();
+{	
+	switch (lightModel)
+	{
+	case ILines::ILLightingModel::IL_MAXIMUM_PHONG:
+		if(maximumPhongSupported)
+		{
+			this->lightingModel = lightModel;
+			curIL = &maximumPhongIL;
+		}
+		else
+			std::cout << "Cylinder averaging Phong lighting model not supported." << std::endl;
+		break;
+	case ILines::ILLightingModel::IL_CYLINDER_BLINN:
+		if(cylinderBlinnSupported)
+		{
+			this->lightingModel = lightModel;
+			curIL = &cylinderBlinnIL;
+		}
+		else
+			std::cout << "Cylinder averaging Phong/Blinn lighting model not supported." << std::endl;
+		break;
+	case ILines::ILLightingModel::IL_CYLINDER_PHONG:
+		if(cylinderPhongSupported)
+		{
+			this->lightingModel = lightModel;
+			curIL = &cylinderPhongIL;
+		}
+		else
+			std::cout << "Maximum principle Phong lighting model not supported." << std::endl;
+		break;
+	}
 }

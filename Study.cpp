@@ -64,6 +64,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED);
 
+	trial.setSliceShader( &lightingShader );
+
     // main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -76,11 +78,17 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
         glfwPollEvents();
         do_movement();
 
+		// Create camera transformations
+		glm::mat4 view = camera.getViewMatrix();
+		//view = glm::translate(view, glm::vec3(-width_mm*0.5f, -height_mm*0.5f, 0));
+		glm::mat4 projection = camera.getProjectionMatrix();
+		// Get the uniform locations
+
 		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
 		{
-			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()), 
-									  (float*)glm::value_ptr(camera.getViewMatrix()));
-			trial.display(lightingShader);
+			trial.passThroughPVMatrix((float*)glm::value_ptr(projection), 
+									  (float*)glm::value_ptr(view));
+			trial.display();
 		}
 		else
 		{
@@ -92,6 +100,15 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			// Use cooresponding shader when setting uniforms/drawing objects
 			lightingShader.Use();
 
+			
+			// Get uniform matrix locations in shader
+			GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
+			GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
+			// Pass the matrices to the shader
+			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+			// Pass light and camera positions to shader
 			glm::vec4 lightPos = light.getPosition();
 			glUniform4f(glGetUniformLocation(lightingShader.Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
 			glm::vec3 cameraPos = camera.getPosition();
@@ -113,27 +130,18 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
-
-			// Create camera transformations
-			glm::mat4 view = camera.getViewMatrix();
-			//view = glm::translate(view, glm::vec3(-width_mm*0.5f, -height_mm*0.5f, 0));
-			glm::mat4 projection = camera.getProjectionMatrix();
-			// Get the uniform locations
-			GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
-			GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
-			// Pass the matrices to the shader
-			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 		
-			trial.display(lightingShader);
+			trial.setSliceShader(&lightingShader);
+			trial.display();
 
 			if(draw_normals)
 			{
+				trial.setSliceShader(&normalShader);
 				normalShader.Use();
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
-				trial.display(normalShader);
+				trial.display();
 			}
 
 		}
@@ -179,24 +187,21 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R])
-				generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED);
+				generateTrial(trial.getRenderMode());
 			if (keys[GLFW_KEY_T])
-			{
-				if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
-					trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_BLINN);
-			}
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 			if (keys[GLFW_KEY_Y])
-			{
-				if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
-					trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_PHONG);
-			}
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_PHONG);
 			if (keys[GLFW_KEY_U])
-			{
-				if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
-					trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_MAXIMUM_PHONG);
-			}
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_MAXIMUM_PHONG);
+			if (keys[GLFW_KEY_I])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN);
 			if (keys[GLFW_KEY_F])
-				generateTrial(Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN);
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN);
+			if (keys[GLFW_KEY_G])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_RINGED);
+			if (keys[GLFW_KEY_H])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS);
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;

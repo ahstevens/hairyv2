@@ -33,7 +33,7 @@ public:
 	std::vector<Vertex> getVertices();
 	std::vector<GLuint> getIndices();
 	
-    virtual void redraw( Shader shader );
+    virtual void redraw();
    
 protected:
     void computeGeometry();

@@ -12,19 +12,38 @@
 
 using namespace glm;
 
-Slice::Slice(void)
-	: width( 1.0f ), height( 1.0f ), doIL( false ), ilInit( false )
+Slice::Slice(void) 
 {
+	width = height = 1.0f;
+	doIL = ilInit = false;
+	geometryChange = true;
+	linesGenerated = tubesGenerated = false;
+
+	il = NULL;
 }
 
 Slice::Slice( float width, float height )
-	: width( width ), height( height ), doIL( false ), ilInit( false )
 {
+	this->width = width;
+	this->height = height;
+	doIL = ilInit = false;
+	geometryChange = true;
+	linesGenerated = tubesGenerated = false;
+
+	il = NULL;
 }
 
 Slice::Slice( float width, float height, std::vector<Seed> seeds )
-	: width( width ), height( height ), seeds( seeds ), doIL( false ), ilInit( false )
+	: width( width ), height( height ), seeds( seeds ), doIL( false ), ilInit( false ), geometryChange( true ), linesGenerated( false ), tubesGenerated( false )
 {
+	this->width = width;
+	this->height = height;
+	this->seeds = seeds;
+	doIL = ilInit = false;
+	geometryChange = true;
+	linesGenerated = tubesGenerated = false;
+
+	il = NULL;
 }
 
 Slice::~Slice(void)
@@ -54,6 +73,8 @@ float Slice::getHeight( void )
 void Slice::addSeed( Seed s )
 {
 	seeds.push_back( s );
+
+	geometryChange = true;
 }
 
 void Slice::addSeeds( std::vector<Seed> seeds )
@@ -63,21 +84,29 @@ void Slice::addSeeds( std::vector<Seed> seeds )
 	newSeeds.insert( newSeeds.end(), this->seeds.begin(), this->seeds.end() );
 	newSeeds.insert( newSeeds.end(), seeds.begin(), seeds.end() );
 	this->seeds = newSeeds;
+
+	geometryChange = true;
 }
 
 void Slice::removeSeed( void )
 {
 	seeds.pop_back();
+	
+	geometryChange = true;
 }
 
 void Slice::removeSeeds( int n )
 {
 	for( int i = 0; i < n; ++i ) seeds.pop_back();
+	
+	geometryChange = true;
 }
 
 void Slice::clearSeeds( void )
 {
 	seeds.clear();
+	
+	geometryChange = true;
 }
 
 int Slice::seedCount()
@@ -100,7 +129,6 @@ std::vector<vec2> Slice::circle(int segments)
 
 void Slice::generateTubes( int segments, float thickness, float lengthMultiplier )
 {
-	doIL = false;
 	vertices.clear();
 	indices.clear();
 	indices_offsets.clear();
@@ -109,8 +137,9 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 	std::vector<vec2> circle = this->circle( segments );
 	GLuint offset = 0;
 
-	mat4 trans = translate( mat4(1.f), vec3(-width/2, -height/2, 0.0));
-
+	mat4 trans = translate( mat4(1.f), vec3(-width/2, -height/2, 0.0));	
+	
+	std::cout << "Generating geometry for " << seedCount() << " tube glyphs... ";
 	std::vector<Seed>::iterator it;
 	for( it = seeds.begin(); it != seeds.end(); ++it )
 	{
@@ -135,8 +164,6 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		offset += tubeVerts.size();
 	}
 
-	std::cout << "Generated " << vertices.size() << " vertices..." << std::endl;
-
 	// set up VAO
 	glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -155,6 +182,10 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, texture)));
 		glEnableVertexAttribArray(2);
 	glBindVertexArray(0);
+
+	geometryChange = false;
+	tubesGenerated = true;
+	std::cout << "done (" << vertices.size() / 3 << " vertices generated)" << std::endl;
 }
 
 void Slice::generateHairs(float lengthMultiplier)
@@ -169,6 +200,7 @@ void Slice::generateHairs(float lengthMultiplier)
 
 	mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
 
+	std::cout << "Generating geometry for " << seedCount() << " line glyphs... ";
 	std::vector<Seed>::iterator it;
 	for (it = seeds.begin(); it != seeds.end(); ++it)
 	{
@@ -190,22 +222,51 @@ void Slice::generateHairs(float lengthMultiplier)
 		offset += 2;
 		counts.push_back(2);
 	}
-
-	std::cout << "Generated " << verts.size() / 3 << " vertices..." << std::endl;
+	
+	geometryChange = false;
+	linesGenerated = true;
+	std::cout << "done (" << verts.size() / 3 << " vertices generated)" << std::endl;
 
 	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts, NULL, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	ilInit = false;
-	doIL = true;
-
 }
 
-void Slice::renderIL( ILines::ILLightingModel::Model lightModel )
-{
-	doIL = true;
+void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )
+{	
+
+	if( geometryChange || !linesGenerated ) 
+		generateHairs( lengthMultiplier );	
+		
 	il->setLightingModel(lightModel);
+
+	doIL = true;
 }
 
-void Slice::renderPT()
+void Slice::renderPL( float lengthMultiplier )
+{
+	if( geometryChange || !linesGenerated ) 
+		generateHairs( lengthMultiplier );	
+
+	doIL = true;
+}
+
+void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
+{
+	if( geometryChange || !tubesGenerated )
+		generateTubes( segments, thickness, lengthMultiplier );
+
+	doIL = false;
+}
+
+void Slice::renderRT( int segments, float thickness, float lengthMultiplier )
+{
+	if( geometryChange || !tubesGenerated )
+		generateTubes( segments, thickness, lengthMultiplier );
+
+	doIL = false;
+}
+
+void Slice::renderSH( float lengthMultiplier )
 {
 	doIL = false;
 }
@@ -215,34 +276,34 @@ void Slice::setILPVMatrix( float * pM, float *vM )
 	il->setPVMatrix( pM, vM );
 }
 
-void Slice::redraw( Shader shader )
+void Slice::redraw()
 {
 	if (doIL)
 	{
 		if (!ilInit)
 		{
-			std::cout << "Initializing Illuminate Streamlines..." << std::endl;
+			std::cout << "Initializing Illuminated Streamlines..." << std::endl;
 			ilInit = true;
 			il->init();
 		}
-		il->redraw(shader);
+		il->redraw();
 	}
 	else {
-		glUniform3f(glGetUniformLocation(shader.Program, "material.ambient"),
+		glUniform3f(glGetUniformLocation(shader->Program, "material.ambient"),
 			mat.getAmbientColor().r, mat.getAmbientColor().g, mat.getAmbientColor().b);
-		glUniform3f(glGetUniformLocation(shader.Program, "material.diffuse"),
+		glUniform3f(glGetUniformLocation(shader->Program, "material.diffuse"),
 			mat.getDiffuseColor().r, mat.getDiffuseColor().g, mat.getDiffuseColor().b);
-		glUniform3f(glGetUniformLocation(shader.Program, "material.specular"),
+		glUniform3f(glGetUniformLocation(shader->Program, "material.specular"),
 			mat.getSpecularColor().r, mat.getSpecularColor().g, mat.getSpecularColor().b);
-		glUniform1f(glGetUniformLocation(shader.Program, "material.shininess"),
+		glUniform1f(glGetUniformLocation(shader->Program, "material.shininess"),
 			mat.getShininess());
-		glUniform1i(glGetUniformLocation(shader.Program, "use_texture"),
+		glUniform1i(glGetUniformLocation(shader->Program, "use_texture"),
 			use_texture);
 
 		//glActiveTexture(GL_TEXTURE0);
 		if (use_texture) tex.enable();
 
-		glUniformMatrix4fv(glGetUniformLocation(shader.Program, "model"),
+		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"),
 			1,
 			GL_FALSE,
 			glm::value_ptr(getModelMatrix())
