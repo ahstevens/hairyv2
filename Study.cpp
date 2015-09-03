@@ -76,8 +76,12 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
         glfwPollEvents();
         do_movement();
 
-		if(trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
+		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
+		{
+			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()), 
+									  (float*)glm::value_ptr(camera.getViewMatrix()));
 			trial.display(lightingShader);
+		}
 		else
 		{
 			// Clear the colorbuffer
@@ -175,8 +179,23 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R])
-				generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED);			
+				generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED);
 			if (keys[GLFW_KEY_T])
+			{
+				if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
+					trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_BLINN);
+			}
+			if (keys[GLFW_KEY_Y])
+			{
+				if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
+					trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_PHONG);
+			}
+			if (keys[GLFW_KEY_U])
+			{
+				if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
+					trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_MAXIMUM_PHONG);
+			}
+			if (keys[GLFW_KEY_F])
 				generateTrial(Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN);
 		}
         else if (action == GLFW_RELEASE)
@@ -239,7 +258,7 @@ void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
 	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
-	trial.setRenderMode(renderMode);
 	trial.init();
+	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;
 }

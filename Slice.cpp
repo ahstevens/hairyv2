@@ -100,6 +100,7 @@ std::vector<vec2> Slice::circle(int segments)
 
 void Slice::generateTubes( int segments, float thickness, float lengthMultiplier )
 {
+	doIL = false;
 	vertices.clear();
 	indices.clear();
 	indices_offsets.clear();
@@ -192,10 +193,26 @@ void Slice::generateHairs(float lengthMultiplier)
 
 	std::cout << "Generated " << verts.size() / 3 << " vertices..." << std::endl;
 
-	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts);
+	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts, NULL, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	ilInit = false;
 	doIL = true;
 
+}
+
+void Slice::renderIL( ILines::ILLightingModel::Model lightModel )
+{
+	doIL = true;
+	il->setLightingModel(lightModel);
+}
+
+void Slice::renderPT()
+{
+	doIL = false;
+}
+
+void Slice::setILPVMatrix( float * pM, float *vM )
+{
+	il->setPVMatrix( pM, vM );
 }
 
 void Slice::redraw( Shader shader )

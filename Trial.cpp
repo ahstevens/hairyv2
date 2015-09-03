@@ -102,14 +102,36 @@ void Trial::init()
 	cp.setSize( temp, temp, temp );
 }
 
-void Trial::setRenderMode(Trial::RenderMode renderMode)
+void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel)
 {
 	this->renderMode = renderMode;
+
+	switch (renderMode)
+	{
+	case Trial::TRIAL_RENDER_LINES_PLAIN:
+		break;
+	case Trial::TRIAL_RENDER_LINES_ILLUMINATED:
+		cp.renderIL(lightModel);
+		break;
+	case Trial::TRIAL_RENDER_TUBES_PLAIN:
+		break;
+	case Trial::TRIAL_RENDER_TUBES_RINGED:
+		break;
+	case Trial::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
+		break;
+	default:
+		break;
+	}
 }
 
 Trial::RenderMode Trial::getRenderMode()
 {
 	return this->renderMode;
+}
+
+void Trial::passThroughPVMatrix( float *pM, float *vM )
+{
+	cp.setILPVMatrix( pM, vM );
 }
 
 void Trial::display( Shader shader )

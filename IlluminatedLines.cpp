@@ -1,7 +1,7 @@
 #include "IlluminatedLines.h"
 
 
-IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors)
+IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors, ILines::ILLightingModel::Model lightModel)
 {
 	this->lineCount = lineCount;
 	this->totalSize = totalSize;
@@ -9,8 +9,10 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	this->vertCount = vertCount;
 	this->vertices = vertices;
 	this->colors = colors;
+	this->lightingModel = lightModel;
 
 	isInitialized = false;
+	lightingChecked = false;
 
 	texDim = 256;
 	ka = 0.05f;
@@ -35,10 +37,6 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 
 	dataHasColors = false;
 
-	cameraPosition = ILines::Vector3f(0.0f, 0.0f, 560.0f);
-	sceneCenter = ILines::Vector3f(0.0f, 0.0f, 0.0f);
-	cameraUp = ILines::Vector3f(0.0f, 1.0f, 0.0f);
-
 	doColors = false;
 }
 
@@ -50,20 +48,20 @@ IlluminatedLines::~IlluminatedLines()
 	delete[] colors;
 }
 
+void IlluminatedLines::setPVMatrix(float *pM, float *vM)
+{
+	this->pM = pM;
+	this->vM = vM;
+}
+
 void IlluminatedLines::init()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glFrustum(-197.1f * 0.5f, 197.1f * 0.5f,
-			  -147.82f * 0.5f, 147.82f * 0.5f,
-			   560.0f, 1560.0f);
+	glMultMatrixf(pM);
 
 	initGL();
 	initIL();
-
-	Y = ILines::normalize(cameraUp);
-	Z = ILines::normalize(cameraPosition - sceneCenter);
-	X = ILines::normalize(ILines::cross(Y, Z));
 }
 
 void IlluminatedLines::initGL()
@@ -86,63 +84,72 @@ void IlluminatedLines::initGL()
 
 void IlluminatedLines::initIL()
 {
-	maximumPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
-	cylinderBlinnSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_BLINN);
-	cylinderPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_PHONG);
-
-	maximumPhongIL.setErrorCallback(errorCallbackIL);
-	cylinderBlinnIL.setErrorCallback(errorCallbackIL);
-	cylinderPhongIL.setErrorCallback(errorCallbackIL);
-	
-	if (maximumPhongSupported)
+	if (!lightingChecked)
 	{
-		std::cout << "Setting up textures for the maximum principle Phong lighting model...";
-		maximumPhongIL.setupTextures(ka, 0.6f * kd, 0.3f * ks, gloss, texDim,
-			ILines::ILLightingModel::IL_MAXIMUM_PHONG, false,
-			lightDirection);
-		std::cout << " done." << std::endl;
+		maximumPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
+		cylinderBlinnSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_BLINN);
+		cylinderPhongSupported = ILines::ILRender::isLightingModelSupported(ILines::ILLightingModel::IL_CYLINDER_PHONG);
+
+		maximumPhongIL.setErrorCallback(errorCallbackIL);
+		cylinderBlinnIL.setErrorCallback(errorCallbackIL);
+		cylinderPhongIL.setErrorCallback(errorCallbackIL);
+
+		lightingChecked = true;
 	}
-	else
-		std::cout << "Maximum principle Phong lighting model not supported." << std::endl;
 
-	if (cylinderBlinnSupported)
+	if ( cylinderBlinnSupported )
 	{
-		std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
-		cylinderBlinnIL.setupTextures(ka, kd, ks, 4.0f * gloss, texDim,
-			ILines::ILLightingModel::IL_CYLINDER_BLINN, false);
-		std::cout << " done." << std::endl;
+		if ( lightingModel == ILines::ILLightingModel::IL_CYLINDER_BLINN )
+		{
+			std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
+			cylinderBlinnIL.setupTextures(ka, kd, ks, 4.0f * gloss, texDim,
+				ILines::ILLightingModel::IL_CYLINDER_BLINN, false);
+			std::cout << " done." << std::endl;
+
+			curIL = &cylinderBlinnIL;
+
+			return;
+		}
 	}
 	else
 		std::cout << "Cylinder averaging Phong/Blinn lighting model not supported." << std::endl;
 
 	if (cylinderPhongSupported)
 	{
-		std::cout << "Setting up textures for the cylinder averaging Phong lighting model...";
-		cylinderPhongIL.setupTextures(ka, kd, ks, gloss, texDim,
-			ILines::ILLightingModel::IL_CYLINDER_PHONG, false,
-			lightDirection);
-		std::cout << " done." << std::endl;
+		if( lightingModel == ILines::ILLightingModel::IL_CYLINDER_PHONG )
+		{
+			std::cout << "Setting up textures for the cylinder averaging Phong lighting model...";
+			cylinderPhongIL.setupTextures(ka, kd, ks, gloss, texDim,
+				ILines::ILLightingModel::IL_CYLINDER_PHONG, false,
+				lightDirection);
+			std::cout << " done." << std::endl;
+
+			curIL = &cylinderPhongIL;
+
+			return;
+		}
 	}
 	else
 		std::cout << "Cylinder averaging Phong lighting model not supported." << std::endl;
 
+	if (maximumPhongSupported)
+	{
+		if ( lightingModel == ILines::ILLightingModel::IL_MAXIMUM_PHONG )
+		{
+			std::cout << "Setting up textures for the maximum principle Phong lighting model...";
+			maximumPhongIL.setupTextures(ka, 0.6f * kd, 0.3f * ks, gloss, texDim,
+				ILines::ILLightingModel::IL_MAXIMUM_PHONG, false,
+				lightDirection);
+			std::cout << " done." << std::endl;
 
-	if (cylinderBlinnSupported)
-	{
-		curIL = &cylinderBlinnIL;
-		lightingModel = ILines::ILLightingModel::IL_CYLINDER_BLINN;
-	}
-	else if (maximumPhongSupported)
-	{
-		curIL = &maximumPhongIL;
-		lightingModel = ILines::ILLightingModel::IL_MAXIMUM_PHONG;
-	}
-	else if(cylinderPhongSupported)
-	{
-		curIL = &cylinderPhongIL;
-		lightingModel = ILines::ILLightingModel::IL_CYLINDER_PHONG;
-	}
+			curIL = &maximumPhongIL;
 
+			return;
+		}
+	}
+	else
+		std::cout << "Maximum principle Phong lighting model not supported." << std::endl;
+	
 	if (curIL == NULL)
 	{
 		std::cerr << "Could not find a supported lighting model!" << std::endl;
@@ -171,10 +178,10 @@ void IlluminatedLines::redraw(Shader shader)
 	/* Specifiy the light position in eye coordinates. */
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
-	gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
-		sceneCenter.x, sceneCenter.y, sceneCenter.z,
-		cameraUp.x, cameraUp.y, cameraUp.z);
-
+	//gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
+	//	sceneCenter.x, sceneCenter.y, sceneCenter.z,
+	//	cameraUp.x, cameraUp.y, cameraUp.z);
+	glMultMatrixf(vM);
 
 	// translate object to middle of viewing frustum 
 	glTranslatef(0.0f, 0.0f, -500.0f);
@@ -228,4 +235,10 @@ void IlluminatedLines::displayScene()
 	curIL->multiDrawArrays(ilID);
 
 	glDepthMask(GL_TRUE);
+}
+
+void IlluminatedLines::setLightingModel(ILines::ILLightingModel::Model lightModel)
+{
+	this->lightingModel = lightModel;
+	initIL();
 }

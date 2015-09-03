@@ -8,10 +8,14 @@ class IlluminatedLines :
 	public Object
 {
 public:
-	IlluminatedLines(int lineCount, int totalCount, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors = NULL);
+	IlluminatedLines(int lineCount, int totalCount, std::vector<int> first, std::vector<int> vertCount, std::vector<float> vertices, float *colors = NULL, ILines::ILLightingModel::Model lightModel = ILines::ILLightingModel::IL_CYLINDER_PHONG);
 	~IlluminatedLines();
 		
+	void setPVMatrix(float *pM, float *vM);
+
 	void init();
+
+	void setLightingModel(ILines::ILLightingModel::Model lightModel);
 
 	static void errorCallbackIL(ILines::ILRender *ilRender);
 
@@ -23,10 +27,11 @@ private:
 	void displayScene();
 		
 	bool isInitialized;
+	bool lightingChecked;
 
 	GLuint VBOcol;
 	
-	ILines::Vector3f X, Y, Z;
+	float *pM, *vM;
 
 	int	texDim;
 	float ka, kd, ks, gloss;
@@ -37,10 +42,6 @@ private:
 	GLfloat	lightPosition[4];
 
 	bool dataHasColors;
-	
-	ILines::Vector3f	cameraPosition;
-	ILines::Vector3f	sceneCenter;
-	ILines::Vector3f	cameraUp;
 
 	ILines::ILRender maximumPhongIL;
 	ILines::ILRender cylinderPhongIL;

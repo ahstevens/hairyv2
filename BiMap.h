@@ -13,6 +13,7 @@ public:
 	void mkDataMap(float **t);
 	void gabor(float **t, int cx, int cy, float r, float size, float contrast, float rat);
 	void getVecValues(float x, float y, float &m1, float &m2, float &m3);
+	void getVecValues(float x, float y, float &m1, float &m2, float &m3, float &len);
 	void normalize();
 	float getXSize();
 	float getYSize();

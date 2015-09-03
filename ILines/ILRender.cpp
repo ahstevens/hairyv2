@@ -84,7 +84,6 @@ namespace ILines
 		this->lightingModel = lightingModel;
 
 		getExtensions();
-		catchGLErrors();
 
 		/* Clear a possible previous error. */
 		getError();

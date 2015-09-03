@@ -111,7 +111,7 @@ void BiMap::mkDataMap(float **t)
 
 	float range = max - min;
 	float adj; 
-	adj = min + range/2.0;
+	adj = min + range/2.0f;
   
 	for(i=0;i<FSIZE;++i)
 		for(j=0;j<FSIZE;++j)
@@ -130,11 +130,11 @@ void BiMap::gabor(float **t, int cx, int cy, float r, float size,float contrast,
     int ix, iy, ccx, ccy;
 	int TPATCH;
 
-	TPATCH = size*2;
+	TPATCH = static_cast<int>(size) * 2;
 
     ccx = cx - TPATCH/2;
     ccy = cy - TPATCH/2;
-    r = r*M_PI/180.0f;
+    r = r*(float)M_PI/180.0f;
 
     sinr = float(sin(r));
     cosr = float(-cos(r));
@@ -142,8 +142,8 @@ void BiMap::gabor(float **t, int cx, int cy, float r, float size,float contrast,
     halfx = float(TPATCH)/2.0f;
     halfy = float(TPATCH)/2.0f;
 
-    freq = 2.0f*M_PI/size;
-    rat = 1.0f/(rat*2.0f*M_PI);
+    freq = 2.0f*(float)M_PI/size;
+    rat = 1.0f/(rat*2.0f*(float)M_PI);
     rat = -rat*rat;
 
     for (ix=0;ix<TPATCH;++ix)
@@ -169,7 +169,6 @@ void BiMap::getVecValues(float x, float y, float &m1, float &m2, float &m3)
 {
 	// only the middle part of the data field is exposed
 	int r,c;
-	float len;
 
 	r = FSIZE*(0.5*x/xspace + 0.25);
 	c = FSIZE*(0.5*y/xspace + 0.25);
@@ -177,6 +176,21 @@ void BiMap::getVecValues(float x, float y, float &m1, float &m2, float &m3)
 	m1 = fieldX[r][c];
 	m2 = fieldY[r][c];	
 	m3 = fieldZ[r][c];		
+}
+
+void BiMap::getVecValues(float x, float y, float &m1, float &m2, float &m3, float &len)
+{
+	// only the middle part of the data field is exposed
+	int r, c;
+
+	r = FSIZE*(0.5*x / xspace + 0.25);
+	c = FSIZE*(0.5*y / xspace + 0.25);
+
+	m1 = fieldX[r][c];
+	m2 = fieldY[r][c];
+	m3 = fieldZ[r][c];
+
+	len = sqrtf( m1 * m1 + m2 * m2 + m3 * m3 );
 }
 
 void BiMap::normalize()

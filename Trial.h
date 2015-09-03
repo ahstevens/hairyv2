@@ -20,8 +20,10 @@ public:
 
 	void init();
 
-	void setRenderMode(Trial::RenderMode renderMode);
+	void setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel = ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	Trial::RenderMode getRenderMode();
+
+	void passThroughPVMatrix( float *pM, float *vM );
 
 	void display( Shader shader );
 

@@ -33,6 +33,14 @@ public:
 	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
 	void generateHairs( float lengthMultiplier = 1.0f );
 
+	void renderIL(ILines::ILLightingModel::Model lightModel);
+	void renderPL();
+	void renderRT();
+	void renderPT();
+	void renderSH();
+
+	void setILPVMatrix(float * pM, float *vM);
+
 	virtual void redraw( Shader shader );
 
 private:	

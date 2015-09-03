@@ -112,7 +112,7 @@ void SweepSurface::computeGeometry()
 	mat4 coordFrameTrans;
 
 	// for all points along the defined path
-	for( unsigned int i = 0; i < pathSize; i++ )
+	for( int i = 0; i < pathSize; i++ )
 	{
 		vec3 w;
 
@@ -208,7 +208,6 @@ void SweepSurface::computePhongNormals()
 	int ribSize = polySize + 1;
 	int endCapSize = polySize + 1;
 	int nVerts = vertex_buffer.size();
-	float dotProd, cosTheta, theta;
 	vec3 normal;
 	// vectors from current vertex to next vertex, previous vertex,
 	// adjacent vertex in the next or previous polygon, the adjacent
@@ -332,7 +331,7 @@ void SweepSurface::computeTextureCoords()
 	for (int i = 0; i < pathSize; i++) {
 		for (int j = 0; j < ribSize; j++) {
 			s = (float) j / polySize;
-			t = i;                                  // texture per segment
+			t = (float) i;                                  // texture per segment
 			//t = (float) i / pathSize;               // texture per object
 			texture_buffer.push_back(vec2(s, t));	
 		}
@@ -348,14 +347,14 @@ void SweepSurface::computeTextureCoords()
 
 void SweepSurface::computeIndices()
 {
-	int pathSize = path.size();
-	int polySize = polygon.size();
-	int ribSize = polySize + 1;
+	GLsizei pathSize = path.size();
+	GLsizei polySize = polygon.size();
+	GLsizei ribSize = polySize + 1;
 
 	index_buffer.clear();
 
 	// triangles for front endcap
-	for (int i = 1; i < polySize; ++i)
+	for (GLsizei i = 1; i < polySize; ++i)
 	{
 		index_buffer.push_back(0);
 		index_buffer.push_back(i);
@@ -367,7 +366,7 @@ void SweepSurface::computeIndices()
 	index_buffer.push_back(1);
 
 	// create strips of triangles connecting ribs together along path
-	for (int i = 1; i < pathSize; i++) {
+	for (GLsizei i = 1; i < pathSize; i++) {
 		int j;
 		for (j = ribSize * i; j < ribSize * (i + 1) - 1; j++) {
 			//triangle 1
@@ -382,8 +381,8 @@ void SweepSurface::computeIndices()
 	}
 
 	// triangles for back endcap
-	GLuint end = vertex_buffer.size() - 1;
-	for (int i = end - polySize; i < end - 1; ++i)
+	GLsizei end = vertex_buffer.size() - 1;
+	for (GLsizei i = end - polySize; i < end - 1; ++i)
 	{
 		index_buffer.push_back(end);
 		index_buffer.push_back(i + 1);
