@@ -15,7 +15,7 @@ public:
 		TRIAL_RENDER_SHADOWED_HEDGEHOGS
 	};
 
-	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f);
+	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = TRIAL_RENDER_LINES_ILLUMINATED);
 	~Trial();
 
 	void init();

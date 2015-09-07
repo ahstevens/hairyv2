@@ -28,6 +28,8 @@ class Texture
 		void checker(int w, int h);
 		void stripes(int nStripes, GLubyte s1r,
 			GLubyte s1g, GLubyte s1b, GLubyte s2r, GLubyte s2g, GLubyte s2b);
+		void stripes2D(int nStripes, GLubyte s1r,
+			GLubyte s1g, GLubyte s1b, GLubyte s2r, GLubyte s2g, GLubyte s2b);
 
     protected:
         GLuint  textureID;

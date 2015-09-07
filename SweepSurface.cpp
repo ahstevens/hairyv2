@@ -25,7 +25,7 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	geomChange = true;
 	
 	use_texture = true;
-	tex.stripes(16, 0xAA, 0x33, 0x33, 0xBB, 0xBB, 0xBB);
+	tex.stripes(16, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF);
 	tex.setMinFilter(GL_NEAREST);
 	tex.setMagFilter(GL_NEAREST);
 }
@@ -118,28 +118,19 @@ void SweepSurface::computeGeometry()
 
 		if( i == 0 ) {
 			if( pathSize > 1 ) {
-				w = normalize( vec3( path[ i ].x - path[ i + 1 ].x,
-					 path[ i ].y - path[ i + 1 ].y,
-					 path[ i ].z - path[ i + 1 ].z ) );
+				w = normalize( path[ i ] - path[ i + 1 ] );
 			}
 			else {
-				w = vec3( 0.0, 0.0, 1.0 ); // normal z axis
+				w = vec3( 0.0, 0.0, -1.0 ); // normal z axis
 			}			
 		}
 		else if( i == pathSize - 1 ){
 			// current path point minus prev path point gives vector pointing
 			// towards prev polygon's center.
-			w = normalize( vec3( path[ i - 1 ].x - path[ i ].x,
-								 path[ i - 1 ].y - path[ i ].y,
-								 path[ i - 1 ].z - path[ i ].z ) );
+			w = normalize( path[ i - 1 ] - path[ i ] );
 		}
 		else {
-			w = normalize( vec3( path[ i ].x - path[ i + 1 ].x,
-								 path[ i ].y - path[ i + 1 ].y,
-								 path[ i ].z - path[ i + 1 ].z) +
-						   vec3( path[ i - 1 ].x - path[ i ].x,
-								 path[ i - 1 ].y - path[ i ].y,
-								 path[ i - 1 ].z - path[ i ].z ) );
+			w = normalize( path[ i ] - path[ i + 1 ] );
 		}
 
 		// calculate up vector for angle offset

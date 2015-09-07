@@ -1,5 +1,4 @@
 #include "Slice.h"
-#include "SweepSurface.h"
 #include "IlluminatedLines.h"
 
 #define _USE_MATH_DEFINES
@@ -137,32 +136,129 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 	std::vector<vec2> circle = this->circle( segments );
 	GLuint offset = 0;
 
-	mat4 trans = translate( mat4(1.f), vec3(-width/2, -height/2, 0.0));	
+	vec3 trans(-width / 2, -height / 2, 0.f);
 	
 	std::cout << "Generating geometry for " << seedCount() << " tube glyphs... ";
-	std::vector<Seed>::iterator it;
-	for( it = seeds.begin(); it != seeds.end(); ++it )
+
+	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
 	{
-		std::vector<vec3> path;
-		path.push_back( vec3( trans * vec4( it->x, it->y, 0.0f, 1.0f ) ) );
-		path.push_back( vec3( trans * vec4( it->x + ( it->dx * lengthMultiplier ),
-											it->y + ( it->dy * lengthMultiplier ),
-											it->dz * lengthMultiplier, 1.0f ) ) );
+		vec3 basePoint(it->x, it->y, 0.f);
+		
+		vec3 seedVector = vec3(basePoint.x + it->dx, basePoint.y + it->dy, it->dz) - basePoint;
 
-		SweepSurface s( circle, path );
-		s.updateScales( thickness );
+		vec3 seedTrans = trans + basePoint;
+				
+		vec3 w = normalize(seedVector);
 
-		std::vector<Vertex> tubeVerts = s.getVertices();
-		vertices.insert( vertices.end(), tubeVerts.begin(), tubeVerts.end() );
+		vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
 
-		std::vector<GLuint> tubeIndices = s.getIndices();
-		for(GLuint& i : tubeIndices)
-			i += offset;
+		vec3 v = normalize(cross(w, u));
+		
+		// build coordinate frame transformation matrix (CFTM) at seed point
+		mat4 coordFrameTransNorm = mat4(vec4(u, 0.f),
+										vec4(v, 0.f),
+										vec4(w, 0.f),
+										vec4(seedTrans, 1.f));
+		
+		// build CFTM for scaling the tubes
+		mat4 coordFrameTransScaled = mat4(vec4(u * thickness, 0.f),
+										  vec4(v * thickness, 0.f),
+										  vec4(w * length(seedVector) * lengthMultiplier, 0.f),
+										  vec4(seedTrans, 1.f));
+				
+		Vertex tV; // temp Vertex
+		// push origin
+		tV.position = vec3(coordFrameTransScaled * vec4(0.f, 0.f, 0.f, 1.f));
+		tV.normal = -w;
+		tV.texture = vec2(0.99f, 0.f);
+
+		vertices.push_back(tV);
+
+		// push first rib for base endcap
+		for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
+		{
+			tV.position = vec3(coordFrameTransScaled * vec4(*iter, 0.f, 1.f));
+			tV.normal = -w;
+			tV.texture = vec2(0.99f, 0.f);
+			vertices.push_back(tV);
+		}
+
+		// push base rib for tube		
+		for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
+		{
+			tV.position = vec3(coordFrameTransScaled * vec4(*iter, 0.f, 1.f));
+			tV.normal = normalize(vec3(coordFrameTransNorm * vec4(*iter, 0.f, 0.f)));
+			tV.texture = vec2(0.f, 0.f);
+			vertices.push_back(tV);
+		}
+
+		// push tip rib for tube		
+		for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
+		{
+			tV.position = vec3(coordFrameTransScaled * vec4(*iter, 1.f, 1.f));
+			tV.normal = normalize(vec3(coordFrameTransNorm * vec4(*iter, 0.f, 0.f)));
+			tV.texture = vec2(length(seedVector) * lengthMultiplier, 0.f);
+			vertices.push_back(tV);
+		}
+
+		// push tip rib for tip endcap		
+		for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
+		{
+			tV.position = vec3(coordFrameTransScaled * vec4(*iter, 1.f, 1.f));
+			tV.normal = w;
+			tV.texture = vec2(0.f, 0.f);
+			vertices.push_back(tV);
+		}
+		
+		// push tip centerpoint
+		tV.position = vec3(coordFrameTransScaled * vec4(0.f, 0.f, 1.f, 1.f));
+		tV.normal = w;
+		tV.texture = vec2(0.f, 0.f);
+
+		vertices.push_back(tV);
+
+		//+++++++++++++++++++++++++++++++ INDICES +++++++++++++++++++++++++++++
+
 		indices_offsets.push_back((GLvoid*)(indices.size() * sizeof(GLuint)));
-		indices.insert( indices.end(), tubeIndices.begin(), tubeIndices.end() );
-		counts.push_back( tubeIndices.size() );
-		offset += tubeVerts.size();
+
+		// triangles for front endcap
+		for (GLsizei i = 1; i < segments + 1; ++i)
+		{
+			indices.push_back(offset);
+			indices.push_back(offset + i % segments + 1);
+			indices.push_back(offset + i);
+		}
+
+		offset += segments + 1;
+
+		// create strip of triangles connecting ribs together
+		for (GLsizei i = 0; i < segments; ++i) {
+			//triangle 1
+			indices.push_back(offset + i);
+			indices.push_back(offset + (i + 1) % segments);
+			indices.push_back(offset + (i + 1) % segments + segments);
+			//triangle 2
+			indices.push_back(offset + (i + 1) % segments + segments);
+			indices.push_back(offset + i + segments);
+			indices.push_back(offset + i);
+		}
+
+		offset += segments * 2;
+
+		// triangles for back endcap
+		GLsizei end = offset + segments;
+		for (GLsizei i = 0; i < segments; ++i)
+		{
+			indices.push_back(end);
+			indices.push_back(offset + i);
+			indices.push_back(offset + (i + 1) % segments);
+		}
+		
+		counts.push_back( 3 * 4 * segments );
+		offset += segments + 1;
 	}
+
+
 
 	// set up VAO
 	glBindVertexArray(VAO);
@@ -256,6 +352,7 @@ void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
 		generateTubes( segments, thickness, lengthMultiplier );
 
 	doIL = false;
+	use_texture = false;
 }
 
 void Slice::renderRT( int segments, float thickness, float lengthMultiplier )
@@ -264,6 +361,11 @@ void Slice::renderRT( int segments, float thickness, float lengthMultiplier )
 		generateTubes( segments, thickness, lengthMultiplier );
 
 	doIL = false;
+	
+	use_texture = true;
+	tex.stripes2D(2, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF);
+	tex.setMinFilter(GL_NEAREST);
+	tex.setMagFilter(GL_NEAREST);
 }
 
 void Slice::renderSH( float lengthMultiplier )

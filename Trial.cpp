@@ -7,16 +7,16 @@
 
 using namespace glm;
 
-Trial::Trial(float xSize, float ySize, float density, float jitter) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), cp(Slice(xSize, ySize))
+Trial::Trial(float xSize, float ySize, float density, float jitter, RenderMode renderMode) : xSize(xSize), ySize(ySize), density(density), jitter(jitter), renderMode(renderMode), cp(Slice(xSize, ySize))
 {
-	renderMode = TRIAL_RENDER_LINES_ILLUMINATED;
 	bimap = NULL;
 }
 
 
 Trial::~Trial()
 {
-	delete bimap;
+	if ( bimap != NULL )
+		delete bimap;
 }
 
 
@@ -116,10 +116,10 @@ void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel:
 		cp.renderIL(lightModel);
 		break;
 	case Trial::TRIAL_RENDER_TUBES_PLAIN:
-		cp.renderPT( 8, 0.5f );
+		cp.renderPT( 8, 5.f, 5.f );
 		break;
 	case Trial::TRIAL_RENDER_TUBES_RINGED:
-		cp.renderRT();
+		cp.renderRT( 8, 2.f, 5.f );
 		break;
 	case Trial::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
 		cp.renderSH();
