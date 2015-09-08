@@ -160,33 +160,32 @@ void Texture::stripes(int nStripes, GLubyte s1r, GLubyte s1g,
 	delete[] stripes;
 }
 
-void Texture::stripes2D(int nStripes, GLubyte s1r, GLubyte s1g,
-	GLubyte s1b, GLubyte s2r, GLubyte s2g, GLubyte s2b)
+void Texture::stripes1D(int nStripes, glm::vec3 stripe_color1, glm::vec3 stripe_color2)
 {
 	width = nStripes;
 	height = 1;
 
-	GLubyte* stripes = new GLubyte[width * height * RGB_SIZE];
+	GLfloat* stripes = new GLfloat[width * height * RGB_SIZE];
 
 	int base;
 	for (int i = 0; i < width; ++i)
 	{
 		base = i * RGB_SIZE;
 		if (i % 2 == 0) {           // EVEN STRIPES
-			stripes[base + 0] = s1r; // r
-			stripes[base + 1] = s1g; // g
-			stripes[base + 2] = s1b; // b
+			stripes[base + 0] = stripe_color1.r; // r
+			stripes[base + 1] = stripe_color1.g; // g
+			stripes[base + 2] = stripe_color1.b; // b
 		}
 		else {                       // ODD STRIPES
-			stripes[base + 0] = s2r; // r
-			stripes[base + 1] = s2g; // g
-			stripes[base + 2] = s2b; // b
+			stripes[base + 0] = stripe_color2.r; // r
+			stripes[base + 1] = stripe_color2.g; // g
+			stripes[base + 2] = stripe_color2.b; // b
 		}
 	}
 
 	glBindTexture(GL_TEXTURE_2D, textureID);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
-		GL_RGB, GL_UNSIGNED_BYTE, stripes);
+		GL_RGB, GL_FLOAT, stripes);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, 0);
 

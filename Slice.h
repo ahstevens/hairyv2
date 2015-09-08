@@ -32,8 +32,8 @@ public:
 
 	void renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier = 1.0f );
 	void renderPL( float lengthMultiplier = 1.0f );
-	void renderRT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
 	void renderPT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
+	void renderRT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f, float stripes_per_mm = 1.f, glm::vec3 stripe_color1 = glm::vec3(1.f, 1.f, 1.f), glm::vec3 stripe_color2 = glm::vec3(0.f, 0.f, 0.f));
 	void renderSH( float lengthMultiplier = 1.0f );
 
 	void setILPVMatrix(float * pM, float *vM);

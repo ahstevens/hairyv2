@@ -170,7 +170,7 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		// push origin
 		tV.position = vec3(coordFrameTransScaled * vec4(0.f, 0.f, 0.f, 1.f));
 		tV.normal = -w;
-		tV.texture = vec2(0.99f, 0.f);
+		tV.texture = vec2(length(seedVector)/10.f, 0.f);
 
 		vertices.push_back(tV);
 
@@ -179,7 +179,7 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		{
 			tV.position = vec3(coordFrameTransScaled * vec4(*iter, 0.f, 1.f));
 			tV.normal = -w;
-			tV.texture = vec2(0.99f, 0.f);
+			tV.texture = vec2(length(seedVector)/10.f, 0.f);
 			vertices.push_back(tV);
 		}
 
@@ -197,7 +197,7 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		{
 			tV.position = vec3(coordFrameTransScaled * vec4(*iter, 1.f, 1.f));
 			tV.normal = normalize(vec3(coordFrameTransNorm * vec4(*iter, 0.f, 0.f)));
-			tV.texture = vec2(length(seedVector) * lengthMultiplier, 0.f);
+			tV.texture = vec2(length(seedVector)/10.f * lengthMultiplier, 0.f);
 			vertices.push_back(tV);
 		}
 
@@ -355,15 +355,16 @@ void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
 	use_texture = false;
 }
 
-void Slice::renderRT( int segments, float thickness, float lengthMultiplier )
+void Slice::renderRT( int segments, float thickness, float lengthMultiplier, float stripe_pairs_per_mm, vec3 stripe_color1, vec3 stripe_color2 )
 {
 	if( geometryChange || !tubesGenerated )
 		generateTubes( segments, thickness, lengthMultiplier );
 
 	doIL = false;
-	
 	use_texture = true;
-	tex.stripes2D(2, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF);
+	
+	int nStripes = (int) (stripe_pairs_per_mm * 2 * 10);
+	tex.stripes1D(nStripes, stripe_color1, stripe_color2);
 	tex.setMinFilter(GL_NEAREST);
 	tex.setMagFilter(GL_NEAREST);
 }

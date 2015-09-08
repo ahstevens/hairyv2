@@ -7,6 +7,8 @@
 
 #include <GL/glew.h>
 
+#include <glm/glm.hpp>
+
 class Texture
 {
     public:
@@ -28,8 +30,7 @@ class Texture
 		void checker(int w, int h);
 		void stripes(int nStripes, GLubyte s1r,
 			GLubyte s1g, GLubyte s1b, GLubyte s2r, GLubyte s2g, GLubyte s2b);
-		void stripes2D(int nStripes, GLubyte s1r,
-			GLubyte s1g, GLubyte s1b, GLubyte s2r, GLubyte s2g, GLubyte s2b);
+		void stripes1D(int nStripes, glm::vec3 stripe_color1, glm::vec3 stripe_color2);
 
     protected:
         GLuint  textureID;

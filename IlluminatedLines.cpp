@@ -76,7 +76,7 @@ void IlluminatedLines::init()
 
 void IlluminatedLines::initGL()
 {
-	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
 	glGenBuffersARB(1, &VBO);

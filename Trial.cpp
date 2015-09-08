@@ -116,10 +116,10 @@ void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel:
 		cp.renderIL(lightModel);
 		break;
 	case Trial::TRIAL_RENDER_TUBES_PLAIN:
-		cp.renderPT( 8, 5.f, 5.f );
+		cp.renderPT();
 		break;
 	case Trial::TRIAL_RENDER_TUBES_RINGED:
-		cp.renderRT( 8, 2.f, 5.f );
+		cp.renderRT();
 		break;
 	case Trial::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
 		cp.renderSH();

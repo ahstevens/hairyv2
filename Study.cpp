@@ -93,7 +93,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		else
 		{
 			// Clear the colorbuffer
-			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+			glClearColor(0.f, 0.f, 0.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -262,7 +262,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.1f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 1.f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;
