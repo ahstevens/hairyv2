@@ -64,7 +64,7 @@ protected:
 
 	Material mat;
 
-	Texture tex;
+	Texture *tex;
 	bool use_texture;
 
 	Shader *shader;

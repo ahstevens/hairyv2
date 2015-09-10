@@ -27,7 +27,7 @@ Object::Object()
     setRotate( 0.0f, 0.0f, 0.0f, 1.0f);
 
 	use_texture = false;
-
+	tex = NULL;
 	shader = NULL;
 }
 

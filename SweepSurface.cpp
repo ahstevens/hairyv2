@@ -25,9 +25,10 @@ SweepSurface::SweepSurface( std::vector<vec2> polygon,
 	geomChange = true;
 	
 	use_texture = true;
-	tex.stripes(16, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF);
-	tex.setMinFilter(GL_NEAREST);
-	tex.setMagFilter(GL_NEAREST);
+	tex = new Texture();
+	tex->stripes(16, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0xFF);
+	tex->setMinFilter(GL_NEAREST);
+	tex->setMagFilter(GL_NEAREST);
 }
 
 SweepSurface::SweepSurface( std::vector<vec2> polygon,
@@ -472,7 +473,7 @@ void SweepSurface::redraw()
 		use_texture);
 		
 	//glActiveTexture(GL_TEXTURE0);
-	if (use_texture) tex.enable();
+	if (use_texture) tex->enable();
 		
 	glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"), 
 					   1,
@@ -485,5 +486,5 @@ void SweepSurface::redraw()
 	glDrawElements(GL_TRIANGLES, index_buffer.size(), GL_UNSIGNED_INT, (GLvoid*) 0);
 	glBindVertexArray(0);
 
-	if (use_texture) tex.disable();
+	if (use_texture) tex->disable();
 }

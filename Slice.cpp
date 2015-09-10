@@ -362,11 +362,13 @@ void Slice::renderRT( int segments, float thickness, float lengthMultiplier, flo
 
 	doIL = false;
 	use_texture = true;
+
+	tex = new Texture();
 	
 	int nStripes = (int) (stripe_pairs_per_mm * 2 * 10);
-	tex.stripes1D(nStripes, stripe_color1, stripe_color2);
-	tex.setMinFilter(GL_NEAREST);
-	tex.setMagFilter(GL_NEAREST);
+	tex->stripes1D(nStripes, stripe_color1, stripe_color2);
+	tex->setMinFilter(GL_NEAREST);
+	tex->setMagFilter(GL_NEAREST);
 }
 
 void Slice::renderSH( float lengthMultiplier )
@@ -404,7 +406,7 @@ void Slice::redraw()
 			use_texture);
 
 		//glActiveTexture(GL_TEXTURE0);
-		if (use_texture) tex.enable();
+		if (use_texture) tex->enable();
 
 		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"),
 			1,
@@ -417,6 +419,6 @@ void Slice::redraw()
 		glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], seeds.size());
 		glBindVertexArray(0);
 
-		if (use_texture) tex.disable();
+		if (use_texture) tex->disable();
 	}
 }
