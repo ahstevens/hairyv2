@@ -1,5 +1,6 @@
 #include "Slice.h"
 #include "IlluminatedLines.h"
+#include "Icosphere.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
@@ -15,7 +16,7 @@ Slice::Slice(void)
 {
 	width = height = 1.0f;
 	doIL = ilInit = false;
-	geometryChange = true;
+	geometryChange = directionality = true;
 	linesGenerated = tubesGenerated = false;
 
 	il = NULL;
@@ -26,7 +27,7 @@ Slice::Slice( float width, float height )
 	this->width = width;
 	this->height = height;
 	doIL = ilInit = false;
-	geometryChange = true;
+	geometryChange = directionality = true;
 	linesGenerated = tubesGenerated = false;
 
 	il = NULL;
@@ -39,7 +40,7 @@ Slice::Slice( float width, float height, std::vector<Seed> seeds )
 	this->height = height;
 	this->seeds = seeds;
 	doIL = ilInit = false;
-	geometryChange = true;
+	geometryChange = directionality = true;
 	linesGenerated = tubesGenerated = false;
 
 	il = NULL;
@@ -134,7 +135,16 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 	counts.clear();
 
 	std::vector<vec2> circle = this->circle( segments );
-	GLuint offset = 0;
+	GLuint offset;
+
+	if(directionality)
+	{
+		offset = generateDirectionality();
+	}
+	else
+	{
+		offset = 0;
+	}
 
 	vec3 trans(-width / 2, -height / 2, 0.f);
 	
@@ -325,6 +335,26 @@ void Slice::generateHairs(float lengthMultiplier)
 
 	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts, NULL, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	ilInit = false;
+}
+
+GLuint Slice::generateDirectionality()
+{
+	Icosphere s = Icosphere();
+	Icosphere::MeshGeometry3D temp = s.Create(4);
+
+	for(auto pos : temp.positions)
+	{
+		Vertex v;
+		v.position = pos;
+		v.normal = pos; // normal for a vertex on a unit sphere is just the vertex position
+		v.texture = vec2(0.f, 0.f);
+		vertices.push_back(v);
+	}
+
+	for(auto i : temp.triangleIndices)
+	{
+		indices.push_back(i);
+	}
 }
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )

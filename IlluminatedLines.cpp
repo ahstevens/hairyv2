@@ -21,10 +21,10 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	ks = 1.0f;
 	gloss = 10.0f;
 	
-	uniformColor[0] = 1.0f;
-	uniformColor[1] = 1.0f;
-	uniformColor[2] = 1.0f;
-	uniformColor[3] = 0.55f;
+	uniformColor[0] = 1.f;
+	uniformColor[1] = 0.6f;
+	uniformColor[2] = 0.2f;
+	uniformColor[3] = 1.f;
 
 	lightDirection[0] = -1.0f;
 	lightDirection[1] = -1.0f;

@@ -33,7 +33,10 @@ public:
 	void renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier = 1.0f );
 	void renderPL( float lengthMultiplier = 1.0f );
 	void renderPT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
-	void renderRT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f, float stripes_per_mm = 1.f, glm::vec3 stripe_color1 = glm::vec3(1.f, 1.f, 1.f), glm::vec3 stripe_color2 = glm::vec3(0.f, 0.f, 0.f));
+	void renderRT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f, 
+		float stripe_pairs_per_mm = 1.f, 
+		glm::vec3 stripe_color1 = glm::vec3(1.f, 1.f, 1.f),
+		glm::vec3 stripe_color2 = glm::vec3(0.f, 0.f, 0.f));
 	void renderSH( float lengthMultiplier = 1.0f );
 
 	void setILPVMatrix(float * pM, float *vM);
@@ -43,6 +46,8 @@ public:
 private:
 	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
 	void generateHairs( float lengthMultiplier = 1.0f );
+
+	GLuint generateDirectionality();
 
 	std::vector<glm::vec2> circle( int segments );
 
@@ -55,6 +60,6 @@ private:
 	std::vector<GLsizei> counts;          // holds the number of indices for each geometry primitive
 	float width, height;                  // dimensions of the slice
 
-	bool doIL, ilInit, geometryChange, tubesGenerated, linesGenerated;
+	bool doIL, ilInit, geometryChange, tubesGenerated, linesGenerated, directionality;
 };
 

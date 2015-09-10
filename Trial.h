@@ -23,6 +23,8 @@ public:
 	void makeBiMap();
 	void sampleBiMap();
 
+	void testPattern();
+
 	void setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel = ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	Trial::RenderMode getRenderMode();
 

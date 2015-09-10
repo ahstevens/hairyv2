@@ -14,7 +14,7 @@
 
 class Object
 {
-public:
+public:	
 	struct Vertex
 	{
 		glm::vec3 position;

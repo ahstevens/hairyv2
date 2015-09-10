@@ -5,7 +5,7 @@
 
 using namespace glm;
 
-Material::Material() : ambientRatio(MAT_AR), ambient(vec3(0.2, 0.2, 0.2)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), shininess(MAT_SHN)
+Material::Material() : ambientRatio(MAT_AR), ambient(vec3(1.0, 1.0, 1.0)), diffuse(vec3(1.0, 1.0, 1.0)), specular(vec3(0.5, 0.5, 0.5)), shininess(MAT_SHN)
 {
 }
 

@@ -25,9 +25,10 @@ void Trial::init()
 	// seed the rand function for use in BiMap
 	srand((unsigned int) time(NULL));
 	
-	makeBiMap();
+	//makeBiMap();
+	//sampleBiMap();
 
-	sampleBiMap();
+	testPattern();
 
 	setRenderMode(renderMode);
 
@@ -95,6 +96,50 @@ void Trial::sampleBiMap()
             bimap->getVecValues( ( seed.x / xSize ) * bimap->getXSize(), 
 								 ( seed.y / ySize ) * bimap->getYSize(),
 								 seed.dx, seed.dy, seed.dz);
+
+			cp.addSeed( seed );
+        }
+	}
+
+	std::cout << "done" << std::endl;
+}
+
+void Trial::testPattern()
+{
+	float xStep = 1 / density;
+	float yStep = 1 / density;
+
+	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the test pattern... ";
+	
+    for( float i = fmod( ( xSize / 2 ), xStep ); i < ( xSize + EPSILON ); i += xStep )
+	{
+        for( float j = fmod( ( ySize / 2 ), yStep ); j < ( ySize + EPSILON ); j += yStep )
+        {
+			float x_jitter;
+            if( i < EPSILON )
+                x_jitter = ( rand() % 2 ) * jitter;
+            else if( abs( i - ( xSize - xStep ) ) < EPSILON )
+                x_jitter = ( rand() % 2 - 1 ) * jitter;
+            else
+                x_jitter = ( rand() % 3 - 1 ) * jitter;
+
+			float y_jitter;
+            if( j < EPSILON )
+                y_jitter = ( rand() % 2 ) * jitter;
+            else if( abs( j - ( ySize - yStep ) ) < EPSILON )
+                y_jitter = ( rand() % 2 - 1 ) * jitter;
+            else
+                y_jitter = ( rand() % 3 - 1 ) * jitter;
+
+			Slice::Seed seed;
+            seed.x = (float) i + ( x_jitter * xStep );
+            seed.y = (float) j + ( y_jitter * yStep );
+
+			vec3 temp = normalize(vec3(seed.x, seed.y, 10.0) - vec3(xSize / 2, ySize / 2, 0.f)) * 10.f;
+
+			seed.dx = temp.x;
+			seed.dy = temp.y;
+			seed.dz = temp.z;
 
 			cp.addSeed( seed );
         }
