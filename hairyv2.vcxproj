@@ -71,6 +71,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BiMap.cpp" />
+    <ClCompile Include="Icosphere.cpp" />
     <ClCompile Include="ILines\ILRender.cpp" />
     <ClCompile Include="ILines\ILTexture.cpp" />
     <ClCompile Include="ILines\ILUtilities.cpp" />
@@ -93,6 +94,7 @@
   <ItemGroup>
     <ClInclude Include="BiMap.h" />
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Icosphere.h" />
     <ClInclude Include="ILines\ILLightingModel.h" />
     <ClInclude Include="ILines\ILRender.h" />
     <ClInclude Include="ILines\ILTexture.h" />

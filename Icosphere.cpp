@@ -46,7 +46,7 @@ int Icosphere::getMiddlePoint(int p1, int p2)
     return i;
 }
 
-Icosphere::MeshGeometry3D Icosphere::Create(int recursionLevel)
+Icosphere::MeshGeometry3D Icosphere::Create(int recursionLevel, std::vector<glm::vec3> &positions, std::vector<int> &indices)
 {
     this->geometry.clear();
     this->middlePointIndexCache.clear();

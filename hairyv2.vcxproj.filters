@@ -84,6 +84,9 @@
     <ClCompile Include="ILines\shader_programs\IL_cylinder_blinn_tangent_vp.cpp">
       <Filter>Shaders\ILines</Filter>
     </ClCompile>
+    <ClCompile Include="Icosphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -139,6 +142,9 @@
     </ClInclude>
     <ClInclude Include="ILines\ShaderProgram.h">
       <Filter>Header Files\ILines</Filter>
+    </ClInclude>
+    <ClInclude Include="Icosphere.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

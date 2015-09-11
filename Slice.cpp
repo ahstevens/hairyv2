@@ -136,14 +136,20 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 
 	std::vector<vec2> circle = this->circle( segments );
 	GLuint offset;
+	
+	std::vector<glm::vec3> sphereVerts;
+	std::vector<int> sphereIndices;
+	mat4 sphereSizeMat = mat4(1.f);
 
-	if(directionality)
+	if (directionality)
 	{
-		offset = generateDirectionality();
+		Icosphere::MeshGeometry3D temp = Icosphere().Create(1, sphereVerts, sphereIndices);
+
+		sphereSizeMat = scale(sphereSizeMat, vec3(1.f) * 2.f * thickness);
 	}
 	else
 	{
-		offset = 0;
+		0;
 	}
 
 	vec3 trans(-width / 2, -height / 2, 0.f);
@@ -340,12 +346,15 @@ void Slice::generateHairs(float lengthMultiplier)
 GLuint Slice::generateDirectionality()
 {
 	Icosphere s = Icosphere();
-	Icosphere::MeshGeometry3D temp = s.Create(4);
+	Icosphere::MeshGeometry3D temp = s.Create(1, positions, indices);
+
+	mat4 sphereSizeMat = mat4(1.f);
+	sphereSizeMat = scale(sphereSizeMat, vec3(5.f,5.f,5.f) );
 
 	for(auto pos : temp.positions)
 	{
 		Vertex v;
-		v.position = pos;
+		v.position = vec3(sphereSizeMat * vec4(pos, 1.f));
 		v.normal = pos; // normal for a vertex on a unit sphere is just the vertex position
 		v.texture = vec2(0.f, 0.f);
 		vertices.push_back(v);
@@ -355,6 +364,12 @@ GLuint Slice::generateDirectionality()
 	{
 		indices.push_back(i);
 	}
+
+	indices_offsets.push_back((GLvoid*)(indices.size() * sizeof(GLuint)));
+
+	counts.push_back(vertices.size() / 3);
+
+	return vertices.size();
 }
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )

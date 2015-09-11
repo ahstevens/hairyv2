@@ -8,8 +8,8 @@ public:
 
 	struct MeshGeometry3D
 	{
-		std::list<glm::vec3> positions;
-		std::list<int> triangleIndices;
+		std::vector<glm::vec3> positions;
+		std::vector<int> triangleIndices;
 
 		void clear()
 		{
@@ -21,7 +21,7 @@ public:
 	Icosphere(void);
 	~Icosphere(void);
 
-	MeshGeometry3D Icosphere::Create(int recursionLevel);
+	MeshGeometry3D Icosphere::Create(int recursionLevel, std::vector<glm::vec3> &positions, std::vector<int> &indices );
 
 private:	
 
