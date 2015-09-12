@@ -47,8 +47,6 @@ private:
 	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
 	void generateHairs( float lengthMultiplier = 1.0f );
 
-	GLuint generateDirectionality();
-
 	std::vector<glm::vec2> circle( int segments );
 
 	IlluminatedLines *il;

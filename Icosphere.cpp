@@ -1,7 +1,6 @@
 #include "Icosphere.h"
 #include <list>
 
-
 Icosphere::Icosphere(void)
 {
 }
@@ -11,10 +10,14 @@ Icosphere::~Icosphere(void)
 {
 }
 
+std::vector<glm::vec3> Icosphere::getVertices(void) { return vertices; }
+
+std::vector<unsigned int> Icosphere::getIndices(void) { return indices; }
+
 // add vertex to mesh, fix position to be on unit sphere, return index
 int Icosphere::addVertex(glm::vec3 p)
 {
-	geometry.positions.push_back(glm::normalize(p));
+	vertices.push_back(glm::normalize(p));
 	return index++;
 }
 
@@ -29,13 +32,11 @@ int Icosphere::getMiddlePoint(int p1, int p2)
 
 	// look to see if middle point already computed
     if (this->middlePointIndexCache.find(key) != this->middlePointIndexCache.end())
-    {
-		return this->middlePointIndexCache[key];
-    }
+    	return this->middlePointIndexCache[key];    
 
     // not in cache, calculate it
-    glm::vec3 point1 = this->geometry.positions[p1];
-    glm::vec3 point2 = this->geometry.positions[p2];
+	glm::vec3 point1 = this->vertices[p1];
+	glm::vec3 point2 = this->vertices[p2];
     glm::vec3 middle = (point1 + point2) / 2.f;
 
     // add vertex makes sure point is on unit sphere
@@ -46,9 +47,10 @@ int Icosphere::getMiddlePoint(int p1, int p2)
     return i;
 }
 
-Icosphere::MeshGeometry3D Icosphere::Create(int recursionLevel, std::vector<glm::vec3> &positions, std::vector<int> &indices)
+void Icosphere::create(int recursionLevel)
 {
-    this->geometry.clear();
+	this->vertices.clear();
+	this->indices.clear();
     this->middlePointIndexCache.clear();
     this->index = 0;
 
@@ -125,10 +127,8 @@ Icosphere::MeshGeometry3D Icosphere::Create(int recursionLevel, std::vector<glm:
     // done, now add triangles to mesh
     for(auto &tri : faces)
     {
-        this->geometry.triangleIndices.push_back(tri.v1);
-        this->geometry.triangleIndices.push_back(tri.v2);
-        this->geometry.triangleIndices.push_back(tri.v3);
+        this->indices.push_back(tri.v1);
+		this->indices.push_back(tri.v2);
+		this->indices.push_back(tri.v3);
     }
-
-    return this->geometry;
 }

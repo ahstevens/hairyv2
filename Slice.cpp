@@ -135,22 +135,13 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 	counts.clear();
 
 	std::vector<vec2> circle = this->circle( segments );
-	GLuint offset;
+	GLsizei offset = 0;
 	
-	std::vector<glm::vec3> sphereVerts;
-	std::vector<int> sphereIndices;
-	mat4 sphereSizeMat = mat4(1.f);
+	Icosphere sphere;
+	GLfloat sphereSize = thickness * 1.f;
 
 	if (directionality)
-	{
-		Icosphere::MeshGeometry3D temp = Icosphere().Create(1, sphereVerts, sphereIndices);
-
-		sphereSizeMat = scale(sphereSizeMat, vec3(1.f) * 2.f * thickness);
-	}
-	else
-	{
-		0;
-	}
+		sphere.create(3);
 
 	vec3 trans(-width / 2, -height / 2, 0.f);
 	
@@ -181,8 +172,35 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 										  vec4(v * thickness, 0.f),
 										  vec4(w * length(seedVector) * lengthMultiplier, 0.f),
 										  vec4(seedTrans, 1.f));
+
+		// build CFTM for scaling the spherical endings
+		mat4 coordFrameTransSphere = mat4(vec4(u * sphereSize, 0.f),
+										  vec4(v * sphereSize, 0.f),
+										  vec4(w * sphereSize, 0.f),
+										  vec4(seedTrans, 1.f));
 				
 		Vertex tV; // temp Vertex
+
+		if (directionality)
+		{
+			indices_offsets.push_back((GLvoid*)(indices.size() * sizeof(GLuint)));
+
+			for (auto &vert : sphere.getVertices())
+			{
+				tV.position = vec3(coordFrameTransSphere * vec4(vert, 1.f));
+				tV.normal = normalize(vec3(coordFrameTransNorm * vec4(vert, 0.f))) ; // normal for a vertex on a unit sphere is just the vertex position
+				tV.texture = vec2(0.f, 0.f);
+				vertices.push_back(tV);
+			}
+
+			for (auto &i : sphere.getIndices())
+				indices.push_back(offset + i);
+
+			counts.push_back(sphere.getIndices().size());
+
+			offset += sphere.getVertices().size();
+		}
+
 		// push origin
 		tV.position = vec3(coordFrameTransScaled * vec4(0.f, 0.f, 0.f, 1.f));
 		tV.normal = -w;
@@ -274,8 +292,6 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 		offset += segments + 1;
 	}
 
-
-
 	// set up VAO
 	glBindVertexArray(VAO);
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -297,7 +313,7 @@ void Slice::generateTubes( int segments, float thickness, float lengthMultiplier
 
 	geometryChange = false;
 	tubesGenerated = true;
-	std::cout << "done (" << vertices.size() / 3 << " vertices generated)" << std::endl;
+	std::cout << "done (" << vertices.size() << " vertices generated)" << std::endl;
 }
 
 void Slice::generateHairs(float lengthMultiplier)
@@ -341,35 +357,6 @@ void Slice::generateHairs(float lengthMultiplier)
 
 	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts, NULL, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	ilInit = false;
-}
-
-GLuint Slice::generateDirectionality()
-{
-	Icosphere s = Icosphere();
-	Icosphere::MeshGeometry3D temp = s.Create(1, positions, indices);
-
-	mat4 sphereSizeMat = mat4(1.f);
-	sphereSizeMat = scale(sphereSizeMat, vec3(5.f,5.f,5.f) );
-
-	for(auto pos : temp.positions)
-	{
-		Vertex v;
-		v.position = vec3(sphereSizeMat * vec4(pos, 1.f));
-		v.normal = pos; // normal for a vertex on a unit sphere is just the vertex position
-		v.texture = vec2(0.f, 0.f);
-		vertices.push_back(v);
-	}
-
-	for(auto i : temp.triangleIndices)
-	{
-		indices.push_back(i);
-	}
-
-	indices_offsets.push_back((GLvoid*)(indices.size() * sizeof(GLuint)));
-
-	counts.push_back(vertices.size() / 3);
-
-	return vertices.size();
 }
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )
@@ -461,7 +448,7 @@ void Slice::redraw()
 
 		// Draw the container (using container's vertex attributes)
 		glBindVertexArray(VAO);
-		glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], seeds.size());
+		glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], directionality ? seeds.size() * 2 : seeds.size());
 		glBindVertexArray(0);
 
 		if (use_texture) tex->disable();

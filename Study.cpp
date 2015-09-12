@@ -93,7 +93,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		else
 		{
 			// Clear the colorbuffer
-			glClearColor(0.f, 0.f, 0.f, 1.0f);
+			glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
