@@ -130,7 +130,13 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
+
+			GLfloat lengthMultiplier = 1.f;
+			GLfloat thicknessMultiplier = 1.f;
 		
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), lengthMultiplier);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), thicknessMultiplier);
+
 			trial.setShader(&lightingShader);
 			trial.display();
 
