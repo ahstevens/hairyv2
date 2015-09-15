@@ -148,7 +148,7 @@ void Trial::testPattern()
 	std::cout << "done" << std::endl;
 }
 
-void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel)
+void Trial::setRenderMode(Trial::RenderMode renderMode)
 {
 	this->renderMode = renderMode;
 
@@ -157,11 +157,17 @@ void Trial::setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel:
 	case Trial::TRIAL_RENDER_LINES_PLAIN:
 		cp.renderPL();
 		break;
-	case Trial::TRIAL_RENDER_LINES_ILLUMINATED:
-		cp.renderIL(lightModel);
+	case Trial::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN:
+		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_BLINN);
+		break;
+	case Trial::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG:
+		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_PHONG);
+		break;
+	case Trial::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG:
+		cp.renderIL(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
 		break;
 	case Trial::TRIAL_RENDER_TUBES_PLAIN:
-		cp.renderPT();
+		cp.renderPT(8, 1.f, 0.5f);
 		break;
 	case Trial::TRIAL_RENDER_TUBES_RINGED:
 		cp.renderRT();
@@ -177,7 +183,7 @@ Trial::RenderMode Trial::getRenderMode()
 	return this->renderMode;
 }
 
-void Trial::setSliceShader( Shader *shader )
+void Trial::setShader( Shader *shader )
 {
 	cp.setShader( shader );
 }

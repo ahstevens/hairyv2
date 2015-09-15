@@ -62,10 +62,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	glm::vec3 eyePos( 0.f, 0.f, dist_mm );
 	camera = Camera( eyePos, width_mm, height_mm, dist_mm, dist_mm + 1000.0f);
 
-	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED);
-
-	trial.setSliceShader( &lightingShader );
-
+	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
+	
     // main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -84,7 +82,9 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		glm::mat4 projection = camera.getProjectionMatrix();
 		// Get the uniform locations
 
-		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED)
+		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN ||
+			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
+			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG)
 		{
 			trial.passThroughPVMatrix((float*)glm::value_ptr(projection), 
 									  (float*)glm::value_ptr(view));
@@ -131,12 +131,12 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
 		
-			trial.setSliceShader(&lightingShader);
+			trial.setShader(&lightingShader);
 			trial.display();
 
 			if(draw_normals)
 			{
-				trial.setSliceShader(&normalShader);
+				trial.setShader(&normalShader);
 				normalShader.Use();
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -189,11 +189,11 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_R])
 				generateTrial(trial.getRenderMode());
 			if (keys[GLFW_KEY_T])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_BLINN);
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
 			if (keys[GLFW_KEY_Y])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_CYLINDER_PHONG);
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG);
 			if (keys[GLFW_KEY_U])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED, ILines::ILLightingModel::IL_MAXIMUM_PHONG);
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG);
 			if (keys[GLFW_KEY_I])
 				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN);
 			if (keys[GLFW_KEY_F])
@@ -262,7 +262,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.1f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;

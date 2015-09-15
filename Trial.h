@@ -9,13 +9,15 @@ class Trial
 public:
 	enum RenderMode {
 		TRIAL_RENDER_LINES_PLAIN,
-		TRIAL_RENDER_LINES_ILLUMINATED,
+		TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN,
+		TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG,
+		TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG,
 		TRIAL_RENDER_TUBES_PLAIN,
 		TRIAL_RENDER_TUBES_RINGED,
 		TRIAL_RENDER_SHADOWED_HEDGEHOGS
 	};
 
-	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = TRIAL_RENDER_LINES_ILLUMINATED);
+	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
 	~Trial();
 
 	void init();
@@ -25,10 +27,10 @@ public:
 
 	void testPattern();
 
-	void setRenderMode(Trial::RenderMode renderMode, ILines::ILLightingModel::Model lightModel = ILines::ILLightingModel::IL_CYLINDER_BLINN);
+	void setRenderMode(Trial::RenderMode renderMode);
 	Trial::RenderMode getRenderMode();
 
-	void setSliceShader( Shader *shader );
+	void setShader( Shader *shader );
 
 	void passThroughPVMatrix( float *pM, float *vM );
 
