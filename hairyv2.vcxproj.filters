@@ -172,5 +172,11 @@
     <None Include="IL_cylinder_blinn_tangent.vert">
       <Filter>Shaders\ILines</Filter>
     </None>
+    <None Include="materials_new.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="materials_new.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

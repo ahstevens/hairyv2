@@ -60,7 +60,7 @@ protected:
     float angle;						   // rotation angle and axis
 	glm::vec3 axis;
 
-	GLuint VAO, VBO, EBO;
+	GLuint VAO, VBO, EBO, UBO;
 
 	Material mat;
 

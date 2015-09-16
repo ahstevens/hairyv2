@@ -55,7 +55,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 
     // Build and compile our shader program
-    Shader lightingShader("materials.vert", "materials.frag");
+	Shader lightingShader("materials.vert", "materials.frag");
+	Shader lightingShaderNew("materials_new.vert", "materials_new.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
@@ -268,7 +269,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.1f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;

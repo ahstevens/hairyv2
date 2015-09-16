@@ -118,6 +118,8 @@
     <None Include="IL_cylinder_blinn_tangent.vert" />
     <None Include="materials.frag" />
     <None Include="materials.vert" />
+    <None Include="materials_new.frag" />
+    <None Include="materials_new.vert" />
     <None Include="normals.frag" />
     <None Include="normals.geom" />
     <None Include="normals.vert" />

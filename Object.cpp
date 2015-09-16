@@ -20,7 +20,8 @@ Object::Object()
 {
 	glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+	glGenBuffers(1, &EBO);
+	glGenBuffers(1, &UBO);
 
     setPosition( 0.0f, 0.0f, 0.0f );
     setSize( 1.0f, 1.0f, 1.0f );
