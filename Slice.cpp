@@ -329,7 +329,7 @@ void Slice::generateTubes2(int segments)
 	GLsizei offset = 0;
 
 	// create directionality geometry
-	if (directionality)
+	if (!directionality)
 	{
 		Icosphere sphere;
 
@@ -566,8 +566,8 @@ void Slice::renderPL( float lengthMultiplier )
 void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
 {
 	if (geometryChange || !tubesGenerated)
-		generateTubes( segments, thickness, lengthMultiplier );
-		//generateTubes2( segments );
+		//generateTubes( segments, thickness, lengthMultiplier );
+		generateTubes2( segments );
 
 	doIL = false;
 	use_texture = false;
@@ -634,8 +634,12 @@ void Slice::redraw()
 
 		// Draw the container (using container's vertex attributes)
 		glBindVertexArray(VAO);
-		glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], directionality ? seeds.size() * 2 : seeds.size());
-		//glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, &indices[0], seeds.size());
+		//glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], directionality ? seeds.size() * 2 : seeds.size());
+		glDrawElementsInstanced(GL_TRIANGLES,     // rendering triangle primitives
+								indices.size(),   // number of indices to be used in rendering
+								GL_UNSIGNED_INT,  // indices array type is unsigned int
+								0,                // pointer to indices array; 0 because they are bound to GL_ELEMENT_ARRAY_BUFFER
+								seeds.size());    // number of instances to render
 		glBindVertexArray(0);
 
 		if (use_texture) tex->disable();

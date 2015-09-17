@@ -21,22 +21,16 @@ void main()
 {
 	vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
 	vec3 v = normalize(cross(w, u));
-
-	// build coordinate frame transformation matrix (CFTM) at seed point
-	mat4 coordFrameTransNorm = mat4(vec4(u, 0.f),
-									vec4(v, 0.f),
-									vec4(normalize(w), 0.f),
-									vec4(instanceLocation, 1.f));
 		
 	// build CFTM for scaling the tubes
-	mat4 coordFrameTransScaled = mat4(vec4(u * thicknessMult, 0.f),
-									  vec4(v * thicknessMult, 0.f),
-									  vec4(w * lengthMult, 0.f),
-									  vec4(instanceLocation, 1.f));
-
-	gl_Position = projection * view * model * coordFrameTransScaled * vec4(position, 1.0f);
-	FragPos = vec3(model * coordFrameTransScaled * vec4(position, 1.0f));
-	Normal = mat3(transpose(inverse(model))) * mat3(coordFrameTransNorm) * normal;
+	mat4 coordFrameTrans = model * mat4(vec4(u * thicknessMult, 0.f),
+										vec4(v * thicknessMult, 0.f),
+										vec4(w * lengthMult, 0.f),
+										vec4(instanceLocation, 1.f));
+	
+	gl_Position = projection * view * coordFrameTrans * vec4(position, 1.0f);
+	FragPos = vec3(coordFrameTrans * vec4(position, 1.0f));
+	Normal = mat3(transpose(inverse(coordFrameTrans))) * normal;
 	
 	TexCoords = vec2(texCoord.x, 1.0 - texCoord.y);
 } 

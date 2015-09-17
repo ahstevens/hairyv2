@@ -25,6 +25,8 @@ Study::Study( GLFWwindow* window )
 
 	draw_normals = 0;
 
+	lengthMultiplier = thicknessMultiplier = 1.f;
+
 	camera = Camera();
 	light = Light(glm::vec3(1.0, 1.0, 1.0));
 
@@ -55,13 +57,13 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 
     // Build and compile our shader program
-	Shader lightingShader("materials.vert", "materials.frag");
-	Shader lightingShaderNew("materials_new.vert", "materials_new.frag");
+	//Shader lightingShader("materials.vert", "materials.frag");
+	Shader lightingShader("materials_new.vert", "materials_new.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
-	glm::vec3 eyePos( 0.f, 0.f, dist_mm );
-	camera = Camera( eyePos, width_mm, height_mm, dist_mm, dist_mm + 1000.0f);
+	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
+	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 1000.0f );
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
 	
@@ -132,8 +134,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
 
-			GLfloat lengthMultiplier = 1.f;
-			GLfloat thicknessMultiplier = 1.f;
+
 		
 			glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), lengthMultiplier);
 			glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), thicknessMultiplier);
@@ -209,6 +210,11 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_RINGED);
 			if (keys[GLFW_KEY_H])
 				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS);
+			if (keys[GLFW_KEY_SPACE])
+			{
+				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
+				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 1000.0f);
+			}
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;
@@ -230,6 +236,14 @@ void Study::do_movement()
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	if (keys[GLFW_KEY_L])
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	if (keys[GLFW_KEY_MINUS])
+		lengthMultiplier -= (lengthMultiplier > 0.f) ? 0.1f : 0.f;
+	if (keys[GLFW_KEY_EQUAL])
+		lengthMultiplier += 0.1f;
+	if (keys[GLFW_KEY_LEFT_BRACKET])
+		thicknessMultiplier -= (thicknessMultiplier > 0.f) ? 0.1f : 0.f;
+	if (keys[GLFW_KEY_RIGHT_BRACKET])
+		thicknessMultiplier += 0.1f;
 }
 
 
@@ -269,7 +283,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.1f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;

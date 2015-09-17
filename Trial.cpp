@@ -25,10 +25,10 @@ void Trial::init()
 	// seed the rand function for use in BiMap
 	srand((unsigned int) time(NULL));
 	
-	//makeBiMap();
-	//sampleBiMap();
+	makeBiMap();
+	sampleBiMap();
 
-	testPattern();
+	//testPattern();
 
 	setRenderMode(renderMode);
 

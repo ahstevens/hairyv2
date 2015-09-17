@@ -49,6 +49,8 @@ private:
 	GLfloat lastFrame;		// Time of last frame
 
 	int draw_normals;
+
+	GLfloat lengthMultiplier, thicknessMultiplier;
 	
 	Camera camera;
 	Light light;
