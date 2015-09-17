@@ -167,7 +167,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 		cp.renderIL(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
 		break;
 	case Trial::TRIAL_RENDER_TUBES_PLAIN:
-		cp.renderPT(8, 1.f, 0.5f);
+		cp.renderPT();
 		break;
 	case Trial::TRIAL_RENDER_TUBES_RINGED:
 		cp.renderRT();

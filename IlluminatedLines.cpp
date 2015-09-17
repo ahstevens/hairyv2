@@ -21,9 +21,13 @@ IlluminatedLines::IlluminatedLines(int lineCount, int totalSize, std::vector<int
 	ks = 1.0f;
 	gloss = 10.0f;
 	
+	//uniformColor[0] = 1.f;
+	//uniformColor[1] = 0.6f;
+	//uniformColor[2] = 0.2f;
+	//uniformColor[3] = 1.f;
 	uniformColor[0] = 1.f;
-	uniformColor[1] = 0.6f;
-	uniformColor[2] = 0.2f;
+	uniformColor[1] = 1.f;
+	uniformColor[2] = 1.f;
 	uniformColor[3] = 1.f;
 
 	lightDirection[0] = -1.0f;
@@ -76,7 +80,8 @@ void IlluminatedLines::init()
 
 void IlluminatedLines::initGL()
 {
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
+	glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
+	//glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 
 	glGenBuffersARB(1, &VBO);

@@ -178,5 +178,11 @@
     <None Include="materials_new.frag">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="halo.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="halo.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

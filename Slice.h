@@ -57,6 +57,7 @@ private:
 	std::vector<GLuint> indices;          // indices for rendering each seed's geometry
 	std::vector<GLvoid*> indices_offsets; // pointers to beginning of each seed's indices in the indices array
 	std::vector<GLsizei> counts;          // holds the number of indices for each geometry primitive
+	GLsizei directionalIndicesCount;      // number of indices used to render the directionality geometry
 	float width, height;                  // dimensions of the slice
 
 	bool doIL, ilInit, geometryChange, tubesGenerated, linesGenerated, directionality;

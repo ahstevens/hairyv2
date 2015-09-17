@@ -48,9 +48,9 @@ private:
 	GLfloat deltaTime;		// Time between current frame and last frame
 	GLfloat lastFrame;		// Time of last frame
 
-	int draw_normals;
+	int draw_normals, draw_halos;
 
-	GLfloat lengthMultiplier, thicknessMultiplier;
+	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale;
 	
 	Camera camera;
 	Light light;

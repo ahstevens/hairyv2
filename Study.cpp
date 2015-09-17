@@ -23,9 +23,9 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_normals = 0;
+	draw_normals = draw_halos = 0;
 
-	lengthMultiplier = thicknessMultiplier = 1.f;
+	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 
 	camera = Camera();
 	light = Light(glm::vec3(1.0, 1.0, 1.0));
@@ -59,6 +59,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
     // Build and compile our shader program
 	//Shader lightingShader("materials.vert", "materials.frag");
 	Shader lightingShader("materials_new.vert", "materials_new.frag");
+	Shader haloShader("halo.vert", "halo.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
@@ -97,6 +98,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		{
 			// Clear the colorbuffer
 			glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
+			//glClearColor(0.f, 0.f, 0.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
@@ -123,7 +125,6 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			//lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
 			//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
 				
-			//s->setColor(sin(glfwGetTime() * 2.0f), sin(glfwGetTime() * 0.7f), sin(glfwGetTime() * 1.3f));
 			//light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
 
 			//light.setColor( 1.0f, 1.0f, 1.0f );
@@ -138,8 +139,25 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		
 			glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), lengthMultiplier);
 			glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), thicknessMultiplier);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), directionalGeomScale);
+
+			if(draw_halos)
+			{
+				glFrontFace( GL_CW );
+				trial.setShader(&haloShader);
+				haloShader.Use();
+				glUniform1f(glGetUniformLocation(haloShader.Program, "lengthMult"), lengthMultiplier);
+				glUniform1f(glGetUniformLocation(haloShader.Program, "thicknessMult"), thicknessMultiplier);
+				glUniform1f(glGetUniformLocation(haloShader.Program, "directionalGeomScale"), directionalGeomScale);
+				glUniformMatrix4fv(glGetUniformLocation(haloShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(haloShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+				trial.display();
+				glFrontFace( GL_CCW );
+			}
 
 			trial.setShader(&lightingShader);
+			lightingShader.Use();
 			trial.display();
 
 			if(draw_normals)
@@ -192,6 +210,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
     {
         if (action == GLFW_PRESS) {
             keys[key] = true;
+			if (keys[GLFW_KEY_H])
+				draw_halos = abs(draw_halos - 1);
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R])
@@ -214,6 +234,10 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			{
 				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
 				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 1000.0f);
+			}
+			if (keys[GLFW_KEY_BACKSPACE])
+			{
+				thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
 			}
 		}
         else if (action == GLFW_RELEASE)
@@ -244,6 +268,10 @@ void Study::do_movement()
 		thicknessMultiplier -= (thicknessMultiplier > 0.f) ? 0.1f : 0.f;
 	if (keys[GLFW_KEY_RIGHT_BRACKET])
 		thicknessMultiplier += 0.1f;
+	if (keys[GLFW_KEY_SEMICOLON])
+		directionalGeomScale -= (directionalGeomScale > 0.f) ? 0.1f : 0.f;
+	if (keys[GLFW_KEY_APOSTROPHE])
+		directionalGeomScale += 0.1f;
 }
 
 
