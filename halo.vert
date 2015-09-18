@@ -20,12 +20,12 @@ void main()
 	vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
 	vec3 v = normalize(cross(w, u));
 		
-	float temp = thicknessMult / 2.f;
+	float haloSize = 0.5f;
 
 	// build CFTM for scaling the tubes
-	mat4 coordFrameTrans = model * mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult) * 1.5f, 0.f),
-										vec4(v * (directionalGeom ? directionalGeomScale : thicknessMult) * 1.5f, 0.f),
-										vec4(normalize(w) * (directionalGeom ? directionalGeomScale * 1.5f : length(w) * lengthMult + temp), 0.f),
+	mat4 coordFrameTrans = model * mat4(vec4(u * (directionalGeom ? directionalGeomScale + haloSize : thicknessMult + haloSize * 2), 0.f),
+										vec4(v * (directionalGeom ? directionalGeomScale + haloSize : thicknessMult + haloSize * 2), 0.f),
+										vec4(normalize(w) * ((directionalGeom ? directionalGeomScale : length(w) * lengthMult) + haloSize), 0.f),
 										vec4(instanceLocation, 1.f));
 	
 	gl_Position = projection * view * coordFrameTrans * vec4(position, 1.0f);
