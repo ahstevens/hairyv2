@@ -26,6 +26,7 @@ Study::Study( GLFWwindow* window )
 	draw_normals = draw_halos = 0;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
+	haloSize = 0.5f;
 
 	camera = Camera();
 	light = Light(glm::vec3(1.0, 1.0, 1.0));
@@ -143,21 +144,24 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 			if(draw_halos)
 			{
+				// reverse the vertex winding order
 				glFrontFace( GL_CW );
 				trial.setShader(&haloShader);
 				haloShader.Use();
 				glUniform1f(glGetUniformLocation(haloShader.Program, "lengthMult"), lengthMultiplier);
 				glUniform1f(glGetUniformLocation(haloShader.Program, "thicknessMult"), thicknessMultiplier);
 				glUniform1f(glGetUniformLocation(haloShader.Program, "directionalGeomScale"), directionalGeomScale);
+				glUniform1f(glGetUniformLocation(haloShader.Program, "haloSize"), haloSize);
 				glUniformMatrix4fv(glGetUniformLocation(haloShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(haloShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+				// Draw model using the halo shader (regular model will be drawn on top)
 				trial.display();
+				// reset vertex winding order
 				glFrontFace( GL_CCW );
 			}
-
-			trial.setShader(&lightingShader);
+			
 			lightingShader.Use();
+			trial.setShader(&lightingShader);
 			trial.display();
 
 			if(draw_normals)
@@ -238,6 +242,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_BACKSPACE])
 			{
 				thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
+				haloSize = 0.5f;
 			}
 		}
         else if (action == GLFW_RELEASE)
@@ -272,6 +277,10 @@ void Study::do_movement()
 		directionalGeomScale -= (directionalGeomScale > 0.f) ? 0.1f : 0.f;
 	if (keys[GLFW_KEY_APOSTROPHE])
 		directionalGeomScale += 0.1f;
+	if (keys[GLFW_KEY_COMMA])
+		haloSize -= (haloSize > 0.f) ? 0.1f : 0.f;
+	if (keys[GLFW_KEY_PERIOD])
+		haloSize += 0.1f;
 }
 
 
@@ -311,7 +320,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.25f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;

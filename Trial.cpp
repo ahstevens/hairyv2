@@ -170,7 +170,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 		cp.renderPT();
 		break;
 	case Trial::TRIAL_RENDER_TUBES_RINGED:
-		cp.renderRT();
+		cp.renderRT(8, 1.f, 1.f, 1.f, vec3(1.f,1.f,1.f), vec3(.7f,.5f,.5f) );
 		break;
 	case Trial::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
 		cp.renderSH();

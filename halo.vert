@@ -14,13 +14,12 @@ uniform float thicknessMult;
 
 uniform bool directionalGeom;
 uniform float directionalGeomScale;
+uniform float haloSize;
 
 void main()
 {
 	vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
 	vec3 v = normalize(cross(w, u));
-		
-	float haloSize = 0.5f;
 
 	// build CFTM for scaling the tubes
 	mat4 coordFrameTrans = model * mat4(vec4(u * (directionalGeom ? directionalGeomScale + haloSize : thicknessMult + haloSize * 2), 0.f),
