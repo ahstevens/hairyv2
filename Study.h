@@ -50,7 +50,7 @@ private:
 
 	int draw_normals, draw_halos;
 
-	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize;
+	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
 	Camera camera;
 	Light light;

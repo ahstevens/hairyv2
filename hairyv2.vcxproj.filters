@@ -184,5 +184,11 @@
     <None Include="halo.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="hedgehogs.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="hedgehogs.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -568,7 +568,6 @@ void Slice::renderPL( float lengthMultiplier )
 void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
 {
 	if (geometryChange || !tubesGenerated)
-		//generateTubes( segments, thickness, lengthMultiplier );
 		generateTubes2( segments );
 
 	doIL = false;
@@ -578,7 +577,7 @@ void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
 void Slice::renderRT( int segments, float thickness, float lengthMultiplier, float stripe_pairs_per_mm, vec3 stripe_color1, vec3 stripe_color2 )
 {
 	if( geometryChange || !tubesGenerated )
-		generateTubes( segments, thickness, lengthMultiplier );
+		generateTubes2( segments );
 
 	doIL = false;
 	use_texture = true;
@@ -593,7 +592,11 @@ void Slice::renderRT( int segments, float thickness, float lengthMultiplier, flo
 
 void Slice::renderSH( float lengthMultiplier )
 {
+	if (geometryChange || !tubesGenerated)
+		generateTubes2(8);
+
 	doIL = false;
+	use_texture = false;
 }
 
 void Slice::setILPVMatrix( float * pM, float *vM )

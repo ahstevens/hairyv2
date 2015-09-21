@@ -27,6 +27,7 @@ Study::Study( GLFWwindow* window )
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
+	hedgehogOffset = 5.f;
 
 	camera = Camera();
 	light = Light(glm::vec3(1.0, 1.0, 1.0));
@@ -61,11 +62,12 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	//Shader lightingShader("materials.vert", "materials.frag");
 	Shader lightingShader("materials_new.vert", "materials_new.frag");
 	Shader haloShader("halo.vert", "halo.frag");
+	Shader hogShader("hedgehogs.vert", "hedgehogs.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
-	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 1000.0f );
+	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f );
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
 	
@@ -93,6 +95,52 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		{
 			trial.passThroughPVMatrix((float*)glm::value_ptr(projection), 
 									  (float*)glm::value_ptr(view));
+			trial.display();
+		}
+		else if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS)
+		{
+			// Clear the colorbuffer
+			glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
+			//glClearColor(0.f, 0.f, 0.f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+
+			// Use cooresponding shader when setting uniforms/drawing objects
+			hogShader.Use();
+			trial.setShader(&hogShader);
+
+			// Get uniform matrix locations in shader
+			GLint viewLoc = glGetUniformLocation(hogShader.Program, "view");
+			GLint projLoc = glGetUniformLocation(hogShader.Program, "projection");
+			// Pass the matrices to the shader
+			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+
+			// Pass light and camera positions to shader
+			glm::vec4 lightPos = light.getPosition();
+			glUniform4f(glGetUniformLocation(hogShader.Program, "lightPos"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
+			glm::vec3 cameraPos = camera.getPosition();
+			glUniform3f(glGetUniformLocation(hogShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+
+			glm::vec3 ambientColor = light.getAmbientColor();
+			glm::vec3 diffuseColor = light.getDiffuseColor();
+			glm::vec3 specularColor = light.getSpecularColor();
+			glUniform3f(glGetUniformLocation(hogShader.Program, "light.ambient"), ambientColor.r, ambientColor.g, ambientColor.b);
+			glUniform3f(glGetUniformLocation(hogShader.Program, "light.diffuse"), diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(glGetUniformLocation(hogShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
+
+
+
+			glUniform1f(glGetUniformLocation(hogShader.Program, "lengthMult"), lengthMultiplier);
+			glUniform1f(glGetUniformLocation(hogShader.Program, "thicknessMult"), thicknessMultiplier);
+			glUniform1f(glGetUniformLocation(hogShader.Program, "directionalGeomScale"), directionalGeomScale);
+			
+			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), 0.f);
+
+			trial.display();
+
+			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), hedgehogOffset);
+
 			trial.display();
 		}
 		else
@@ -214,7 +262,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
     {
         if (action == GLFW_PRESS) {
             keys[key] = true;
-			if (keys[GLFW_KEY_H])
+			if (keys[GLFW_KEY_M])
 				draw_halos = abs(draw_halos - 1);
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
@@ -237,7 +285,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_SPACE])
 			{
 				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
-				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 1000.0f);
+				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
 			}
 			if (keys[GLFW_KEY_BACKSPACE])
 			{
@@ -274,13 +322,13 @@ void Study::do_movement()
 	if (keys[GLFW_KEY_RIGHT_BRACKET])
 		thicknessMultiplier += 0.1f;
 	if (keys[GLFW_KEY_SEMICOLON])
-		directionalGeomScale -= (directionalGeomScale > 0.f) ? 0.1f : 0.f;
+		directionalGeomScale -= (directionalGeomScale > 0.f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_APOSTROPHE])
-		directionalGeomScale += 0.1f;
+		directionalGeomScale += 0.01f;
 	if (keys[GLFW_KEY_COMMA])
-		haloSize -= (haloSize > 0.f) ? 0.1f : 0.f;
+		haloSize -= (haloSize > 0.f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_PERIOD])
-		haloSize += 0.1f;
+		haloSize += 0.01f;
 }
 
 

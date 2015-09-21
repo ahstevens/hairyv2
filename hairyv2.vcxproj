@@ -115,6 +115,8 @@
   <ItemGroup>
     <None Include="halo.frag" />
     <None Include="halo.vert" />
+    <None Include="hedgehogs.frag" />
+    <None Include="hedgehogs.vert" />
     <None Include="IL_cylinder_blinn.frag" />
     <None Include="IL_cylinder_blinn.vert" />
     <None Include="IL_cylinder_blinn_tangent.vert" />
