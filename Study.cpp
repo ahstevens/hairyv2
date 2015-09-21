@@ -88,6 +88,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		//view = glm::translate(view, glm::vec3(-width_mm*0.5f, -height_mm*0.5f, 0));
 		glm::mat4 projection = camera.getProjectionMatrix();
 		// Get the uniform locations
+						
+		light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
 
 		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN ||
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
@@ -135,11 +137,13 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glUniform1f(glGetUniformLocation(hogShader.Program, "thicknessMult"), thicknessMultiplier);
 			glUniform1f(glGetUniformLocation(hogShader.Program, "directionalGeomScale"), directionalGeomScale);
 			
-			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), 0.f);
+			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), hedgehogOffset);
+
+			glUniform1i(glGetUniformLocation(hogShader.Program, "doShadows"), true);
 
 			trial.display();
 
-			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), hedgehogOffset);
+			glUniform1i(glGetUniformLocation(hogShader.Program, "doShadows"), false);
 
 			trial.display();
 		}
@@ -173,8 +177,6 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			//lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
 			//lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
 			//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
-				
-			//light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
 
 			//light.setColor( 1.0f, 1.0f, 1.0f );
 			glm::vec3 ambientColor = light.getAmbientColor();
