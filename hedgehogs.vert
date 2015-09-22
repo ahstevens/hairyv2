@@ -61,46 +61,44 @@ void main()
 {
 	vec3 lightU = normalize(cross(vec3(0.f, 1.f, 0.f), lightPos.xyz));
 	vec3 lightV = normalize(cross(lightPos.xyz, lightU));
-
-	
-
-	
+			
 
 	vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
 	vec3 v = normalize(cross(w, u));
 
-	vec4 offsetLoc = vec4(instanceLocation.x, instanceLocation.y, instanceLocation.z + offset, 1.f);
+	vec4 offsetLoc = vec4(0.f, 0.f, offset, 1.f);
 
 	// build CFTM for scaling the tubes
 	mat4 coordFrameTrans = mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
 								vec4(v * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
 								vec4(directionalGeom ? normalize(w) * directionalGeomScale : w * lengthMult, 0.f),
-								offsetLoc);
+								vec4(0.f, 0.f, 0.f, 1.f));
 								
-	
+	mat4 trans = mat4(1.f);
+
 	if(doShadows)
 	{
-		mat4 s = myShadowMatrix( vec4(0.f, 0.f, 1.f, 0.f), lightPos);
+		mat4 shadow = myShadowMatrix( vec4(0.f, 0.f, 1.f, 0.f), lightPos);
 
+		// Calculate vector from offset point to plane along light vector
 		vec4 lightVec = vec4(normalize(offsetLoc.xyz - lightPos.xyz), 0.f);
 		float scaleAmount = offset / lightVec.z;
-		lightVec *= scaleAmount;
-		offsetLoc = lightVec * offsetLoc;
+		lightVec = scaleAmount * lightVec;
 
-		coordFrameTrans[3] = vec4(instanceLocation, 1.f);
-
-		coordFrameTrans = s * coordFrameTrans;
+		trans[3] = vec4(instanceLocation.x + lightVec.x, instanceLocation.y + lightVec.y, instanceLocation.z, 1.f);
+		
+		coordFrameTrans = trans * shadow * coordFrameTrans;
 
 		col = vec4(vec3(0.5f), 1.f);
 	}
 	else
 	{
-		mat4 squish = mat4(vec4(1.f, 0.f, 0.f, 0.f),
-						   vec4(0.f, 1.f, 0.f, 0.f),
-						   vec4(0.f),
-						   vec4(1.f, 1.f, 1.f, 1.f));
+		mat4 squish = mat4(1.f);
+		squish[2] = vec4(0.f);
 
-		coordFrameTrans = squish * coordFrameTrans;
+		trans[3] = vec4(instanceLocation.x, instanceLocation.y, instanceLocation.z + offset, 1.f);
+
+		coordFrameTrans = trans * squish * coordFrameTrans;
 
 		col = vec4(0.8f, 0.1f, 0.1f, 1.f);
 	}	

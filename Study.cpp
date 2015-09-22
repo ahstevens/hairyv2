@@ -293,6 +293,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			{
 				thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
 				haloSize = 0.5f;
+				hedgehogOffset = 5.f;
 			}
 		}
         else if (action == GLFW_RELEASE)
@@ -331,6 +332,10 @@ void Study::do_movement()
 		haloSize -= (haloSize > 0.f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_PERIOD])
 		haloSize += 0.01f;
+	if (keys[GLFW_KEY_PAGE_DOWN])
+		hedgehogOffset -= (hedgehogOffset > 0.f) ? 0.1f : 0.f;
+	if (keys[GLFW_KEY_PAGE_UP])
+		hedgehogOffset += 0.1f;
 }
 
 
@@ -370,7 +375,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.25f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.1f, 0.f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;
