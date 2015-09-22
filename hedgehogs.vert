@@ -27,32 +27,51 @@ uniform float offset;
 
 uniform bool doShadows;
 
-mat4 myShadowMatrix(vec4 ground, vec4 light)
+// Adapted from OpenGL Red Book Ch. 14, pg. 583-584
+mat4 makeShadowMatrix(vec4 plane, vec4 light)
 {
-    float  dotProd;
+    float  dist;
     mat4  shadowMat;
 
-    dotProd = dot(ground, light);
+	// plane is given as a normal vector (to the plane), so distance is simply
+	// the dot product of the plane normal with the light vector
+	// distance = ( light.x * plane.normal.x ) + 
+	//            ( light.y * plane.normal.y ) + 
+	//            ( light.z * plane.normal.z ) + 
+	//            ( light.w * plane.distance )
+    dist = dot( light, plane );
+
+	float plane_normal_x = plane[ 0 ];
+	float plane_normal_y = plane[ 1 ];
+	float plane_normal_z = plane[ 2 ];
+	float plane_distance = plane[ 3 ];
     
-    shadowMat[0][0] = dotProd - light[0] * ground[0];
-    shadowMat[1][0] = 0.0 - light[0] * ground[1];
-    shadowMat[2][0] = 0.0 - light[0] * ground[2];
-    shadowMat[3][0] = 0.0 - light[0] * ground[3];
-    
-    shadowMat[0][1] = 0.0 - light[1] * ground[0];
-    shadowMat[1][1] = dotProd - light[1] * ground[1];
-    shadowMat[2][1] = 0.0 - light[1] * ground[2];
-    shadowMat[3][1] = 0.0 - light[1] * ground[3];
-    
-    shadowMat[0][2] = 0.0 - light[2] * ground[0];
-    shadowMat[1][2] = 0.0 - light[2] * ground[1];
-    shadowMat[2][2] = dotProd - light[2] * ground[2];
-    shadowMat[3][2] = 0.0 - light[2] * ground[3];
-    
-    shadowMat[0][3] = 0.0 - light[3] * ground[0];
-    shadowMat[1][3] = 0.0 - light[3] * ground[1];
-    shadowMat[2][3] = 0.0 - light[3] * ground[2];
-    shadowMat[3][3] = dotProd - light[3] * ground[3];
+	// The following is a cleaned-up version of the matrix presented on pg. 584
+	// of the OpenGL Red Book, 3rd Ed.
+
+	// Column 1
+    shadowMat[ 0 ].x = dist - light.x * plane_normal_x;
+    shadowMat[ 0 ].y =      - light.y * plane_normal_x;
+    shadowMat[ 0 ].z =      - light.z * plane_normal_x;
+    shadowMat[ 0 ].w =      - light.w * plane_normal_x;
+
+	// Column 2
+    shadowMat[ 1 ].x =      - light.x * plane_normal_y;
+    shadowMat[ 1 ].y = dist - light.y * plane_normal_y;
+    shadowMat[ 1 ].z =      - light.z * plane_normal_y;
+    shadowMat[ 1 ].w =      - light.w * plane_normal_y;
+
+	// Column 3
+    shadowMat[ 2 ].x =      - light.x * plane_normal_z;
+    shadowMat[ 2 ].y =      - light.y * plane_normal_z;
+    shadowMat[ 2 ].z = dist - light.z * plane_normal_z;
+    shadowMat[ 2 ].w =      - light.w * plane_normal_z;
+
+	// Column 4
+    shadowMat[ 3 ].x =      - light.x * plane_distance;    
+    shadowMat[ 3 ].y =      - light.y * plane_distance;    
+    shadowMat[ 3 ].z =      - light.z * plane_distance;    
+    shadowMat[ 3 ].w = dist - light.w * plane_distance;
 
     return shadowMat;
 }
@@ -75,17 +94,11 @@ void main()
 								vec4(0.f, 0.f, 0.f, 1.f));
 								
 	mat4 trans = mat4(1.f);
+	trans[3] = vec4(instanceLocation, 1.f);
 
 	if(doShadows)
 	{
-		mat4 shadow = myShadowMatrix( vec4(0.f, 0.f, 1.f, 0.f), lightPos);
-
-		// Calculate vector from offset point to plane along light vector
-		vec4 lightVec = vec4(normalize(offsetLoc.xyz - lightPos.xyz), 0.f);
-		float scaleAmount = offset / lightVec.z;
-		lightVec = scaleAmount * lightVec;
-
-		trans[3] = vec4(instanceLocation.x + lightVec.x, instanceLocation.y + lightVec.y, instanceLocation.z, 1.f);
+		mat4 shadow = makeShadowMatrix( vec4(0.f, 0.f, 1.f, offset), lightPos);
 		
 		coordFrameTrans = trans * shadow * coordFrameTrans;
 
@@ -95,9 +108,7 @@ void main()
 	{
 		mat4 squish = mat4(1.f);
 		squish[2] = vec4(0.f);
-
-		trans[3] = vec4(instanceLocation.x, instanceLocation.y, instanceLocation.z + offset, 1.f);
-
+		
 		coordFrameTrans = trans * squish * coordFrameTrans;
 
 		col = vec4(0.8f, 0.1f, 0.1f, 1.f);
