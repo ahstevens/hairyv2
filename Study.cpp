@@ -23,7 +23,7 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_normals = draw_halos = 0;
+	draw_normals = draw_halos = cycle_light = 0;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
@@ -89,7 +89,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		glm::mat4 projection = camera.getProjectionMatrix();
 		// Get the uniform locations
 						
-		light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
+		if(cycle_light) light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
+		else light.setPosition( 1.f, 1.f, 1.f );
 
 		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN ||
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
@@ -266,6 +267,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
             keys[key] = true;
 			if (keys[GLFW_KEY_M])
 				draw_halos = abs(draw_halos - 1);
+			if (keys[GLFW_KEY_L])
+				cycle_light = abs(cycle_light - 1);
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
 			if (keys[GLFW_KEY_R])
@@ -312,28 +315,24 @@ void Study::do_movement()
         camera.processKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
         camera.processKeyboard(RIGHT, deltaTime);
-	if (keys[GLFW_KEY_K])
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-	if (keys[GLFW_KEY_L])
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	if (keys[GLFW_KEY_MINUS])
-		lengthMultiplier -= (lengthMultiplier > 0.f) ? 0.1f : 0.f;
+		lengthMultiplier -= (lengthMultiplier > 0.1f) ? 0.1f : 0.f;
 	if (keys[GLFW_KEY_EQUAL])
 		lengthMultiplier += 0.1f;
 	if (keys[GLFW_KEY_LEFT_BRACKET])
-		thicknessMultiplier -= (thicknessMultiplier > 0.f) ? 0.1f : 0.f;
+		thicknessMultiplier -= (thicknessMultiplier > 0.1f) ? 0.1f : 0.f;
 	if (keys[GLFW_KEY_RIGHT_BRACKET])
 		thicknessMultiplier += 0.1f;
 	if (keys[GLFW_KEY_SEMICOLON])
-		directionalGeomScale -= (directionalGeomScale > 0.f) ? 0.01f : 0.f;
+		directionalGeomScale -= (directionalGeomScale > 0.01f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_APOSTROPHE])
 		directionalGeomScale += 0.01f;
 	if (keys[GLFW_KEY_COMMA])
-		haloSize -= (haloSize > 0.f) ? 0.01f : 0.f;
+		haloSize -= (haloSize > 0.01f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_PERIOD])
 		haloSize += 0.01f;
 	if (keys[GLFW_KEY_PAGE_DOWN])
-		hedgehogOffset -= (hedgehogOffset > 0.f) ? 0.1f : 0.f;
+		hedgehogOffset -= (hedgehogOffset > 0.1f) ? 0.1f : 0.f;
 	if (keys[GLFW_KEY_PAGE_UP])
 		hedgehogOffset += 0.1f;
 }

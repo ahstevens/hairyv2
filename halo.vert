@@ -25,7 +25,7 @@ void main()
 	mat4 coordFrameTrans = model * mat4(vec4(u * (directionalGeom ? directionalGeomScale + haloSize : thicknessMult + haloSize * 2), 0.f),
 										vec4(v * (directionalGeom ? directionalGeomScale + haloSize : thicknessMult + haloSize * 2), 0.f),
 										vec4(normalize(w) * ((directionalGeom ? directionalGeomScale : length(w) * lengthMult) + haloSize), 0.f),
-										vec4(instanceLocation, 1.f));
+										vec4(directionalGeom ? instanceLocation + w * lengthMult : instanceLocation, 1.f));
 	
 	gl_Position = projection * view * coordFrameTrans * vec4(position, 1.0f);
 } 

@@ -343,10 +343,13 @@ void Slice::generateTubes2(int segments)
 			vertices.push_back(tV);
 		}
 
-		for (auto &i : sphere.getIndices())
-			indices.push_back(offset + i);
+		directionalIndicesCount = 0;
 
-		directionalIndicesCount = indices.size();
+		for (auto &i : sphere.getIndices())
+		{
+			indices.push_back(offset + i);
+			directionalIndicesCount++;
+		}
 
 		offset += sphere.getVertices().size();
 	}
@@ -548,7 +551,6 @@ void Slice::generateHairs(float lengthMultiplier)
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )
 {	
-
 	if( geometryChange || !linesGenerated ) 
 		generateHairs( lengthMultiplier );	
 		

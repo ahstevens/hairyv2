@@ -26,12 +26,12 @@ void main()
 	vec3 v = normalize(cross(w, u));
 		
 	// build CFTM for scaling the tubes
-	mat4 coordFrameTrans = model * mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
-										vec4(v * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
-										vec4(directionalGeom ? normalize(w) * directionalGeomScale : w * lengthMult, 0.f),
-										vec4(instanceLocation, 1.f));
+	mat4 coordFrameTrans = mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
+								vec4(v * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
+								vec4(directionalGeom ? normalize(w) * directionalGeomScale : w * lengthMult, 0.f),
+								vec4(directionalGeom ? instanceLocation + w * lengthMult : instanceLocation, 1.f));
 	
-	gl_Position = projection * view * coordFrameTrans * vec4(position, 1.0f);
+	gl_Position = projection * view * model * coordFrameTrans * vec4(position, 1.0f);
 	FragPos = vec3(coordFrameTrans * vec4(position, 1.0f));
 	Normal = mat3(transpose(inverse(coordFrameTrans))) * normal;
 	

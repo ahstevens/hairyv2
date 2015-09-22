@@ -91,7 +91,7 @@ void main()
 	mat4 coordFrameTrans = mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
 								vec4(v * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
 								vec4(directionalGeom ? normalize(w) * directionalGeomScale : w * lengthMult, 0.f),
-								vec4(0.f, 0.f, 0.f, 1.f));
+								vec4(directionalGeom ? vec3(w * lengthMult) : vec3(0.f), 1.f));
 								
 	mat4 trans = mat4(1.f);
 	trans[3] = vec4(instanceLocation, 1.f);
@@ -111,7 +111,7 @@ void main()
 		
 		coordFrameTrans = trans * squish * coordFrameTrans;
 
-		col = vec4(0.8f, 0.1f, 0.1f, 1.f);
+		col = vec4(0.f, 0.f, 0.f, 1.f);
 	}	
 	
 	coordFrameTrans = model * coordFrameTrans;
