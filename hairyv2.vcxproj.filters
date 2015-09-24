@@ -87,6 +87,9 @@
     <ClCompile Include="Icosphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Polhemus.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -144,6 +147,9 @@
       <Filter>Header Files\ILines</Filter>
     </ClInclude>
     <ClInclude Include="Icosphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Polhemus.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

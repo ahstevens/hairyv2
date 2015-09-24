@@ -70,7 +70,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f );
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
-	
+
     // main loop
     while (!glfwWindowShouldClose(window))
     {
@@ -85,7 +85,6 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 		// Create camera transformations
 		glm::mat4 view = camera.getViewMatrix();
-		//view = glm::translate(view, glm::vec3(-width_mm*0.5f, -height_mm*0.5f, 0));
 		glm::mat4 projection = camera.getProjectionMatrix();
 		// Get the uniform locations
 						
@@ -96,6 +95,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG)
 		{
+			lightingShader.Off();
 			trial.passThroughPVMatrix((float*)glm::value_ptr(projection), 
 									  (float*)glm::value_ptr(view));
 			trial.display();
@@ -315,6 +315,8 @@ void Study::do_movement()
         camera.processKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
         camera.processKeyboard(RIGHT, deltaTime);
+
+	// Study parameter modifiers
 	if (keys[GLFW_KEY_MINUS])
 		lengthMultiplier -= (lengthMultiplier > 0.1f) ? 0.1f : 0.f;
 	if (keys[GLFW_KEY_EQUAL])
