@@ -86,9 +86,10 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Polhemus.cpp" />
+    <ClCompile Include="Probe.cpp" />
+    <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Slice.cpp" />
     <ClCompile Include="Study.cpp" />
-    <ClCompile Include="SweepSurface.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Trial.cpp" />
   </ItemGroup>
@@ -107,10 +108,11 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Polhemus.h" />
+    <ClInclude Include="Probe.h" />
+    <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Slice.h" />
     <ClInclude Include="Study.h" />
-    <ClInclude Include="SweepSurface.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Trial.h" />
   </ItemGroup>

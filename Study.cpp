@@ -27,7 +27,9 @@ Study::Study( GLFWwindow* window )
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
-	hedgehogOffset = 5.f;
+	hedgehogOffset = 0.f;
+
+	polhemus = Polhemus::getInstance();
 
 	camera = Camera();
 	light = Light(glm::vec3(1.0, 1.0, 1.0));
@@ -78,6 +80,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
         GLfloat currentFrame = (GLfloat) glfwGetTime();
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
+
+		polhemus->update();
 
         // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
         glfwPollEvents();
@@ -138,7 +142,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glUniform1f(glGetUniformLocation(hogShader.Program, "thicknessMult"), thicknessMultiplier);
 			glUniform1f(glGetUniformLocation(hogShader.Program, "directionalGeomScale"), directionalGeomScale);
 			
-			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), hedgehogOffset);
+			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
 
 			glUniform1i(glGetUniformLocation(hogShader.Program, "doShadows"), true);
 
@@ -265,6 +269,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
     {
         if (action == GLFW_PRESS) {
             keys[key] = true;
+			if (keys[GLFW_KEY_P])
+				polhemus->printInfo();
 			if (keys[GLFW_KEY_M])
 				draw_halos = abs(draw_halos - 1);
 			if (keys[GLFW_KEY_L])

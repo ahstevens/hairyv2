@@ -34,6 +34,8 @@ public:
 
 	void passThroughPVMatrix( float *pM, float *vM );
 
+	float getShadowOffset();
+
 	void display();
 
 private:
@@ -44,6 +46,8 @@ private:
 	RenderMode renderMode;
 
 	BiMap* bimap;
+
+	float shadowOffset;
 
 	Slice cp;
 };

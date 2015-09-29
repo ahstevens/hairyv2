@@ -64,6 +64,8 @@ void Trial::makeBiMap()
 
 void Trial::sampleBiMap()
 {
+	shadowOffset = 0.f;
+
 	float xStep = 1 / density;
 	float yStep = 1 / density;
 
@@ -98,6 +100,8 @@ void Trial::sampleBiMap()
 								 seed.dx, seed.dy, seed.dz);
 
 			cp.addSeed( seed );
+
+			if(seed.dz < shadowOffset) shadowOffset = seed.dz;
         }
 	}
 
@@ -191,6 +195,11 @@ void Trial::setShader( Shader *shader )
 void Trial::passThroughPVMatrix( float *pM, float *vM )
 {
 	cp.setILPVMatrix( pM, vM );
+}
+
+float Trial::getShadowOffset()
+{
+	return shadowOffset;
 }
 
 void Trial::display()

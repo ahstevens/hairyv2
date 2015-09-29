@@ -9,6 +9,7 @@
 #include "Camera.h"
 #include "Light.h"
 #include "Trial.h"
+#include "Polhemus.h"
 
 class Study
 {
@@ -38,6 +39,8 @@ private:
 	void do_movement();
 
 	void generateTrial(Trial::RenderMode renderMode);
+
+	Polhemus* polhemus;
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;

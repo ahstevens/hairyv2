@@ -11,6 +11,8 @@ public:
 	struct Seed {
 		GLfloat x, y;
 		GLfloat dx, dy, dz;
+
+		float length() { return sqrt( dx*dx + dy*dy + dz*dz ); }
 	};
 
 	Slice( void );
@@ -62,4 +64,3 @@ private:
 
 	bool doIL, ilInit, geometryChange, tubesGenerated, linesGenerated, directionality;
 };
-
