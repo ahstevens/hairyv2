@@ -8,6 +8,8 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+#include <vector>
+
 #include "Shader.h"
 #include "Texture.h"
 #include "Material.h"
@@ -61,6 +63,11 @@ protected:
 	glm::vec3 axis;
 
 	GLuint VAO, VBO, EBO, UBO;
+
+	std::vector<Vertex> vertices;         // position/normal/tex_coords of each seed's geometry
+	std::vector<GLuint> indices;          // indices for rendering each seed's geometry
+	std::vector<GLvoid*> indices_offsets; // pointers to beginning of each seed's indices in the indices array
+	std::vector<GLsizei> counts;          // holds the number of indices for each geometry primitive
 
 	Material mat;
 
