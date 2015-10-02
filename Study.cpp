@@ -23,7 +23,7 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_normals = draw_halos = cycle_light = 0;
+	draw_normals = draw_halos = cycle_light = draw_probe = 0;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
@@ -66,6 +66,8 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	Shader haloShader("halo.vert", "halo.frag");
 	Shader hogShader("hedgehogs.vert", "hedgehogs.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
+
+	probe.setShader(&lightingShader);
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
@@ -231,6 +233,15 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 		}
 
+		if(draw_probe)
+		{
+			lightingShader.Use();
+			//probe.setOrientation(normalize(polhemus->getVector()));
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 50.f);
+			glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 25.f);
+			probe.redraw();
+		}
+
         // Swap the screen buffers
         glfwSwapBuffers(window);
     }
@@ -277,6 +288,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				cycle_light = abs(cycle_light - 1);
 			if (keys[GLFW_KEY_N])
 				draw_normals = abs(draw_normals - 1);
+			if (keys[GLFW_KEY_INSERT])
+				draw_probe = abs(draw_probe - 1);
 			if (keys[GLFW_KEY_R])
 				generateTrial(trial.getRenderMode());
 			if (keys[GLFW_KEY_T])

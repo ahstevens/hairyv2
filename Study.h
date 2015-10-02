@@ -10,6 +10,7 @@
 #include "Light.h"
 #include "Trial.h"
 #include "Polhemus.h"
+#include "Probe.h"
 
 class Study
 {
@@ -41,6 +42,7 @@ private:
 	void generateTrial(Trial::RenderMode renderMode);
 
 	Polhemus* polhemus;
+	Probe probe;
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
@@ -51,7 +53,7 @@ private:
 	GLfloat deltaTime;		// Time between current frame and last frame
 	GLfloat lastFrame;		// Time of last frame
 
-	int draw_normals, draw_halos, cycle_light;
+	int draw_normals, draw_halos, cycle_light, draw_probe;
 
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	

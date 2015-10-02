@@ -8,6 +8,8 @@ class Probe :
 public:
 	Probe(void);
 	~Probe(void);
+
+	void setOrientation(glm::vec3 orientation);
 	
 	virtual void redraw();
 

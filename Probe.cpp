@@ -3,11 +3,18 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
 
+// glm::value_ptr
+#include <glm/gtc/type_ptr.hpp>
+
 using namespace glm;
 
 Probe::Probe(void)
-{
-	
+{	// position in middle of clipping volume and scale to fill screen
+	this->setPosition( 0.0f, 0.0f, -1000.0f );
+	float temp = ( 560.f + 1000.f ) / 560.f;
+	this->setSize( temp, temp, temp );
+
+	generateProbe();
 }
 
 Probe::~Probe(void)
@@ -32,10 +39,11 @@ void Probe::generateProbe()
 {
 	vertices.clear();
 	indices.clear();
+	counts.clear();
 
 	int segments = 16;
 
-	std::cout << "Generating geometry for tube glyphs... ";
+	std::cout << "Generating geometry for probe... ";
 	
 	//+++++++++++++++++++++++++++++++ GEOMETRY +++++++++++++++++++++++++++++
 
@@ -130,6 +138,8 @@ void Probe::generateProbe()
 		indices.push_back(offset + (i + 1) % segments);
 	}
 
+	counts.push_back( 3 * 4 * segments );
+
 	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++
 
 	// set up VAO
@@ -154,7 +164,34 @@ void Probe::generateProbe()
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, texture)));
 		glEnableVertexAttribArray(2);
 
+		std::vector<vec3> instance_info;
+		instance_info.push_back(vec3(0.f,0.f,0.f));		
+		instance_info.push_back(vec3(0.f,0.f,1.f));
+		// Bind buffer for instance info and fill it
+		glBindBuffer(GL_ARRAY_BUFFER, UBO);
+		glBufferData(GL_ARRAY_BUFFER, instance_info.size() * sizeof(vec3), &instance_info[0], GL_STREAM_DRAW);
+
+		// Instance base location attribute
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)0);
+		glEnableVertexAttribArray(3);
+
+		// Instance w vector attribute
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)sizeof(vec3));
+		glEnableVertexAttribArray(4);
+
 	glBindVertexArray(0);
+
+	std::cout << "done." << std::endl;
+}
+
+void Probe::setOrientation(vec3 orientation)
+{
+	std::vector<vec3> instance_info;
+	instance_info.push_back(vec3(0.f,0.f,0.f));		
+	instance_info.push_back(orientation);
+	// Bind buffer for instance info and fill it
+	glBindBuffer(GL_ARRAY_BUFFER, UBO);
+	glBufferData(GL_ARRAY_BUFFER, instance_info.size() * sizeof(vec3), &instance_info[0], GL_STREAM_DRAW);
 }
 
 void Probe::redraw()
@@ -176,20 +213,14 @@ void Probe::redraw()
 	glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"),
 		1,
 		GL_FALSE,
-		glm::value_ptr(getModelMatrix())
-		);
+		value_ptr(getModelMatrix())
+	);
+
+	glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
 
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);
-		//glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], directionality ? seeds.size() * 2 : seeds.size());
-		
-		glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
-
-		glDrawElementsInstanced(GL_TRIANGLES,											// rendering triangle primitives
-								indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
-								GL_UNSIGNED_INT,										// indices array type is unsigned int
-								(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-								seeds.size());											// number of instances to render
+		glDrawElements(GL_TRIANGLES, counts[0], GL_UNSIGNED_INT, (const GLvoid *) 0 );
 	glBindVertexArray(0);
 
 	if (use_texture) tex->disable();
