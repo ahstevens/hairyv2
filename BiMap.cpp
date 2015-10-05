@@ -160,9 +160,10 @@ void BiMap::gabor(float **t, int cx, int cy, float r, float size,float contrast,
 	}
 }
 
+// Returns a random number in the range [-0.500, +0.499]
 float BiMap::MRand()
 {
-    return float (rand()%1000)/1000.0f - 0.5f;
+    return float (rand()%1001)/1000.0f - 0.5f;
 }
 
 void BiMap::getVecValues(float x, float y, float &m1, float &m2, float &m3)
