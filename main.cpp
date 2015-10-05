@@ -13,7 +13,7 @@ const GLuint   WIDTH_DELL_PX     = 1920;    // Dell U2412M screen pixel width
 const GLuint   HEIGHT_DELL_PX    = 1200;    // Dell U2412M screen pixel height
 const GLfloat  WIDTH_DELL_MM     = 518.4f;  // Dell U2412M screen physical width (mm)
 const GLfloat  HEIGHT_DELL_MM    = 324.0f;  // Dell U2412M screen physical height (mm)
-const GLfloat  DIST_EYE_MM       = 560.0f;  // Eye distance from display (mm)
+const GLfloat  DIST_EYE_MM       = 827.0f;  // Eye distance from display (mm)
 
 
 

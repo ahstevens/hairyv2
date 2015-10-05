@@ -23,7 +23,7 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_normals = draw_halos = cycle_light = draw_probe = 0;
+	draw_halos = cycle_light = draw_probe = 0;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
@@ -60,7 +60,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	glEnable(GL_CULL_FACE);
 
 
-    // Build and compile our shader program
+    // Build and compile our shader programs
 	//Shader lightingShader("materials.vert", "materials.frag");
 	Shader lightingShader("materials_new.vert", "materials_new.frag");
 	Shader haloShader("halo.vert", "halo.frag");
@@ -179,13 +179,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			glm::vec3 cameraPos = camera.getPosition();
 			glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 
-			// Set lights properties
-			//glm::vec3 lightColor;
-			//lightColor.x = 1.0f; //sin(glfwGetTime() * 2.0f);
-			//lightColor.y = 1.0f; //sin(glfwGetTime() * 0.7f);
-			//lightColor.z = 1.0f; //sin(glfwGetTime() * 1.3f);
 
-			//light.setColor( 1.0f, 1.0f, 1.0f );
 			glm::vec3 ambientColor = light.getAmbientColor();
 			glm::vec3 diffuseColor = light.getDiffuseColor();
 			glm::vec3 specularColor = light.getSpecularColor(); 
@@ -217,29 +211,21 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 				glFrontFace( GL_CCW );
 			}
 			
-			lightingShader.Use();
-			trial.setShader(&lightingShader);
-			trial.display();
-
-			if(draw_normals)
+			if (draw_probe)
 			{
-				trial.setShader(&normalShader);
-				normalShader.Use();
-				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(normalShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-				// And draw model again, this time only drawing normal vectors using the geometry shaders (on top of previous model)
+				lightingShader.Use();
+				probe.setShader(&lightingShader);
+				//probe.setOrientation(normalize(polhemus->getVector()));
+				//glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 20.f);
+				//glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 20.f);
+				probe.redraw();
+			}
+			else
+			{
+				lightingShader.Use();
+				trial.setShader(&lightingShader);
 				trial.display();
 			}
-
-		}
-
-		if(draw_probe)
-		{
-			lightingShader.Use();
-			//probe.setOrientation(normalize(polhemus->getVector()));
-			glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 50.f);
-			glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 25.f);
-			probe.redraw();
 		}
 
         // Swap the screen buffers
@@ -280,42 +266,40 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
     {
         if (action == GLFW_PRESS) {
             keys[key] = true;
-			if (keys[GLFW_KEY_P])
-				polhemus->printInfo();
-			if (keys[GLFW_KEY_M])
-				draw_halos = abs(draw_halos - 1);
-			if (keys[GLFW_KEY_L])
-				cycle_light = abs(cycle_light - 1);
-			if (keys[GLFW_KEY_N])
-				draw_normals = abs(draw_normals - 1);
-			if (keys[GLFW_KEY_INSERT])
-				draw_probe = abs(draw_probe - 1);
-			if (keys[GLFW_KEY_R])
-				generateTrial(trial.getRenderMode());
-			if (keys[GLFW_KEY_T])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
-			if (keys[GLFW_KEY_Y])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG);
-			if (keys[GLFW_KEY_U])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG);
-			if (keys[GLFW_KEY_I])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN);
 			if (keys[GLFW_KEY_F])
 				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN);
 			if (keys[GLFW_KEY_G])
 				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_RINGED);
 			if (keys[GLFW_KEY_H])
 				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS);
-			if (keys[GLFW_KEY_SPACE])
-			{
-				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
-				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
-			}
+			if (keys[GLFW_KEY_I])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN);
+			if (keys[GLFW_KEY_L])
+				cycle_light = abs(cycle_light - 1);
+			if (keys[GLFW_KEY_M])
+				draw_halos = abs(draw_halos - 1);
+			if (keys[GLFW_KEY_P])
+				polhemus->printInfo();
+			if (keys[GLFW_KEY_R])
+				generateTrial(trial.getRenderMode());
+			if (keys[GLFW_KEY_T])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
+			if (keys[GLFW_KEY_U])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG);
+			if (keys[GLFW_KEY_Y])
+				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG);
 			if (keys[GLFW_KEY_BACKSPACE])
 			{
 				thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
 				haloSize = 0.5f;
 				hedgehogOffset = 5.f;
+			}
+			if (keys[GLFW_KEY_INSERT])
+				draw_probe = abs(draw_probe - 1);
+			if (keys[GLFW_KEY_HOME])
+			{
+				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
+				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
 			}
 		}
         else if (action == GLFW_RELEASE)
@@ -341,9 +325,9 @@ void Study::do_movement()
 	if (keys[GLFW_KEY_EQUAL])
 		lengthMultiplier += 0.1f;
 	if (keys[GLFW_KEY_LEFT_BRACKET])
-		thicknessMultiplier -= (thicknessMultiplier > 0.1f) ? 0.1f : 0.f;
+		thicknessMultiplier -= (thicknessMultiplier > 0.01f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_RIGHT_BRACKET])
-		thicknessMultiplier += 0.1f;
+		thicknessMultiplier += 0.01f;
 	if (keys[GLFW_KEY_SEMICOLON])
 		directionalGeomScale -= (directionalGeomScale > 0.01f) ? 0.01f : 0.f;
 	if (keys[GLFW_KEY_APOSTROPHE])
@@ -395,7 +379,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 1.0f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.1f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;

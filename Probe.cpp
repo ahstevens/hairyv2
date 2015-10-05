@@ -11,7 +11,7 @@ using namespace glm;
 Probe::Probe(void)
 {	// position in middle of clipping volume and scale to fill screen
 	this->setPosition( 0.0f, 0.0f, -1000.0f );
-	float temp = ( 560.f + 1000.f ) / 560.f;
+	float temp = ( 827.f + 1000.f ) / 827.f;
 	this->setSize( temp, temp, temp );
 
 	generateProbe();
@@ -44,7 +44,7 @@ void Probe::generateProbe()
 	int segments = 16;
 
 	std::cout << "Generating geometry for probe... ";
-	
+	/*
 	//+++++++++++++++++++++++++++++++ GEOMETRY +++++++++++++++++++++++++++++
 
 	Vertex tV; // temp Vertex
@@ -139,6 +139,36 @@ void Probe::generateProbe()
 	}
 
 	counts.push_back( 3 * 4 * segments );
+	*/
+
+	Vertex temp;
+	temp.position = vec3(-100.f, -100.f, 0.f);
+	temp.normal = vec3(0.f, 0.f, 1.f);
+	temp.texture = vec2(0.f, 0.f);
+
+	vertices.push_back(temp);
+
+	temp.position = vec3(100.f, -100.f, 0.f);
+	temp.texture = vec2(1.f, 0.f);
+
+	vertices.push_back(temp);
+
+	temp.position = vec3(100.f, 100.f, 0.f);
+	temp.texture = vec2(1.f, 1.f);
+
+	vertices.push_back(temp);
+
+	temp.position = vec3(-100.f, 100.f, 0.f);
+	temp.texture = vec2(0.f, 1.f);
+
+	vertices.push_back(temp);
+
+	indices.push_back(0);
+	indices.push_back(1);
+	indices.push_back(2);
+	indices.push_back(0);
+	indices.push_back(2);
+	indices.push_back(3);
 
 	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++
 
@@ -167,16 +197,17 @@ void Probe::generateProbe()
 		std::vector<vec3> instance_info;
 		instance_info.push_back(vec3(0.f,0.f,0.f));		
 		instance_info.push_back(vec3(0.f,0.f,1.f));
+
 		// Bind buffer for instance info and fill it
 		glBindBuffer(GL_ARRAY_BUFFER, UBO);
-		glBufferData(GL_ARRAY_BUFFER, instance_info.size() * sizeof(vec3), &instance_info[0], GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, instance_info.size() * sizeof(vec3), &instance_info[0], GL_STATIC_DRAW);
 
 		// Instance base location attribute
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)0);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * instance_info.size(), (GLvoid*)0);
 		glEnableVertexAttribArray(3);
 
 		// Instance w vector attribute
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)sizeof(vec3));
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * instance_info.size(), (GLvoid*)sizeof(vec3));
 		glEnableVertexAttribArray(4);
 
 	glBindVertexArray(0);
@@ -215,12 +246,13 @@ void Probe::redraw()
 		GL_FALSE,
 		value_ptr(getModelMatrix())
 	);
-
-	glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
-
+	
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);
-		glDrawElements(GL_TRIANGLES, counts[0], GL_UNSIGNED_INT, (const GLvoid *) 0 );
+
+		glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
+		
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, (const GLvoid *) 0 );
 	glBindVertexArray(0);
 
 	if (use_texture) tex->disable();

@@ -46,8 +46,7 @@ public:
 	virtual void redraw();
 
 private:
-	void generateTubes( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
-	void generateTubes2( int segments = 8 );
+	void generateTubes( int segments = 8 );
 	void generateHairs( float lengthMultiplier = 1.0f );
 
 	std::vector<glm::vec2> circle( int segments );

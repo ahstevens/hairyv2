@@ -34,7 +34,7 @@ void Trial::init()
 
 	// position in middle of clipping volume and scale to fill screen
 	cp.setPosition( 0.0f, 0.0f, -1000.0f );
-	float temp = ( 560.f + 1000.f ) / 560.f;
+	float temp = ( 827.f + 1000.f ) / 827.f;
 	cp.setSize( temp, temp, temp );
 }
 
