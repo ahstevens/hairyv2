@@ -80,7 +80,7 @@ void IlluminatedLines::init()
 
 void IlluminatedLines::initGL()
 {
-	glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
+	glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
 	//glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glEnable(GL_DEPTH_TEST);
 

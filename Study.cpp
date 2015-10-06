@@ -109,7 +109,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		else if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS)
 		{
 			// Clear the colorbuffer
-			glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
+			glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
 			//glClearColor(0.f, 0.f, 0.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -157,7 +157,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		else
 		{
 			// Clear the colorbuffer
-			glClearColor(0.765f, 0.69f, 0.569f, 1.0f);
+			glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
 			//glClearColor(0.f, 0.f, 0.f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
