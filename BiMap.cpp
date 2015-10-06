@@ -160,7 +160,7 @@ void BiMap::gabor(float **t, int cx, int cy, float r, float size,float contrast,
 	}
 }
 
-// Returns a random number in the range [-0.500, +0.499]
+// Returns a random number in the range [-0.500, +0.500)
 float BiMap::MRand()
 {
     return float (rand()%1001)/1000.0f - 0.5f;
