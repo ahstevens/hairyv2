@@ -32,11 +32,12 @@ public:
 	void clearSeeds( void );                  // Clear all seeds from the Slice
 	int seedCount();                          // Returns the number of seeds in the Slice
 
+	void updateOrientation(glm::vec3 orientation);
+
 	void renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier = 1.0f );
 	void renderPL( float lengthMultiplier = 1.0f );
-	void renderPT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f );
-	void renderRT( int segments = 8, float thickness = 1.0f, float lengthMultiplier = 1.0f, 
-		float stripe_pairs_per_mm = 1.f, 
+	void renderPT( int segments = 8);
+	void renderRT( int segments = 8, float stripe_pairs_per_mm = 1.f, 
 		glm::vec3 stripe_color1 = glm::vec3(1.f, 1.f, 1.f),
 		glm::vec3 stripe_color2 = glm::vec3(0.f, 0.f, 0.f));
 	void renderSH( float lengthMultiplier = 1.0f );
@@ -54,6 +55,8 @@ private:
 	IlluminatedLines *il;
 
 	std::vector<Seed> seeds;              // the seeds to populate the Slice
+
+	std::vector<glm::vec3> instances;
 
 	GLsizei directionalIndicesCount;      // number of indices used to render the directionality geometry
 

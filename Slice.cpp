@@ -114,6 +114,23 @@ int Slice::seedCount()
 	return seeds.size();
 }
 
+void Slice::updateOrientation(glm::vec3 orientation)
+{
+	std::vector<glm::vec3>::iterator it;
+
+	for (it = instances.begin() + 1; it != instances.end() - 1; it += 2)
+	{
+		it->x = orientation.x;
+		it->y = orientation.y;
+		it->z = orientation.z;
+	}
+
+	glBindVertexArray(VAO);
+		glBindBuffer(GL_ARRAY_BUFFER, UBO);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, instances.size() * sizeof(vec3), &instances[0]);
+	glBindVertexArray(0);
+}
+
 std::vector<vec2> Slice::circle(int segments)
 {
     float angleIncrement = 2.0f * (float) M_PI / (float) segments;
@@ -259,7 +276,7 @@ void Slice::generateTubes(int segments)
 	vec3 trans(-width / 2, -height / 2, 0.f);
 
 	// store attribute info for each instance of the glyph
-	std::vector<vec3> instances;
+	instances.clear();
 	instances.reserve(seeds.size() * 2);
 
 	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
@@ -298,7 +315,7 @@ void Slice::generateTubes(int segments)
 
 		// Bind buffer for instance info and fill it
 		glBindBuffer(GL_ARRAY_BUFFER, UBO);
-		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_DYNAMIC_DRAW);
 
 		// Instance base location attribute
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)0);
@@ -378,7 +395,7 @@ void Slice::renderPL( float lengthMultiplier )
 	doIL = true;
 }
 
-void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
+void Slice::renderPT( int segments )
 {
 	if (geometryChange || !tubesGenerated)
 		generateTubes( segments );
@@ -387,7 +404,7 @@ void Slice::renderPT( int segments, float thickness, float lengthMultiplier )
 	use_texture = false;
 }
 
-void Slice::renderRT( int segments, float thickness, float lengthMultiplier, float stripe_pairs_per_mm, vec3 stripe_color1, vec3 stripe_color2 )
+void Slice::renderRT( int segments, float stripe_pairs_per_mm, vec3 stripe_color1, vec3 stripe_color2 )
 {
 	if( geometryChange || !tubesGenerated )
 		generateTubes( segments );

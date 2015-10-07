@@ -42,7 +42,7 @@ private:
 	void generateTrial(Trial::RenderMode renderMode);
 
 	Polhemus* polhemus;
-	Probe probe;
+	//Probe probe;
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;

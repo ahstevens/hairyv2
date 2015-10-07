@@ -1,5 +1,6 @@
 #include "Study.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "Slice.h"
 
 // Initialize class variables
 Study* Study::instance = NULL;
@@ -67,7 +68,21 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	Shader hogShader("hedgehogs.vert", "hedgehogs.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
+	Slice::Seed seed;
+	seed.x = seed.y = 0.f;
+	seed.dx = -1.f;
+	seed.dy = 1.f;
+	seed.dz = -1.f;
+
+	Slice probe;
 	probe.setShader(&lightingShader);
+	probe.addSeed(seed);
+	probe.renderPT(16);
+
+	// position in middle of clipping volume and scale to fill screen
+	probe.setPosition(0.0f, 0.0f, -1000.0f);
+	float temp = (dist_mm + 1000.f) / dist_mm;
+	probe.setSize(temp, temp, temp);
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
@@ -214,10 +229,17 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			if (draw_probe)
 			{
 				lightingShader.Use();
-				probe.setShader(&lightingShader);
+				/*probe.clearSeeds();
+				seed.dx = cos(glfwGetTime());
+				seed.dy = sin(glfwGetTime());
+				seed.dz = 1.f;
+				probe.addSeed(seed);
+				probe.renderPT(16);*/
 				//probe.setOrientation(normalize(polhemus->getVector()));
-				//glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 20.f);
-				//glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 20.f);
+				probe.updateOrientation(glm::vec3(cos(glfwGetTime()), sin(glfwGetTime()), 1.f));
+				glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 50.f);
+				glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 10.f);
+				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 7.5f);
 				probe.redraw();
 			}
 			else
