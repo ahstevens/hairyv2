@@ -179,18 +179,8 @@ void IlluminatedLines::redraw()
 	/* Specifiy the light position in eye coordinates. */
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
-	//gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
-	//	sceneCenter.x, sceneCenter.y, sceneCenter.z,
-	//	cameraUp.x, cameraUp.y, cameraUp.z);
 	glMultMatrixf(vM);
-
-	// translate object to middle of viewing frustum 
-	glTranslatef(0.0f, 0.0f, -500.0f);
-
-	// scale it to fill screen
-	float temp = (560.f + 500.f) / 560.f;
-	glScalef(temp, temp, temp);
-
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	displayScene();

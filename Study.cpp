@@ -79,16 +79,18 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	probe.addSeed(seed);
 	probe.renderPT(16);
 
-	// position in middle of clipping volume and scale to fill screen
-	probe.setPosition(0.0f, 0.0f, -1000.0f);
-	float temp = (dist_mm + 1000.f) / dist_mm;
-	probe.setSize(temp, temp, temp);
-
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
 	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f );
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
+
+	// Build transformation matrix to position slices in middle of clipping volume and scale to fill screen
+	float temp = (dist_mm + 1000.f) / dist_mm;
+	glm::mat4 translate_mat = glm::translate( glm::mat4( 1.f ), glm::vec3( 0.0f, 0.0f, -1000.0f ) ); // Identity matrix
+	glm::mat4 scale_mat     = glm::scale( glm::mat4( 1.f ), glm::vec3( temp, temp, temp ) ); // Identity matrix
+	glm::mat4 xform_mat     = translate_mat * scale_mat;
+
 
     // main loop
     while (!glfwWindowShouldClose(window))
@@ -106,6 +108,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 		// Create camera transformations
 		glm::mat4 view = camera.getViewMatrix();
+		view = view * xform_mat;
 		glm::mat4 projection = camera.getProjectionMatrix();
 		// Get the uniform locations
 						
@@ -229,14 +232,15 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			if (draw_probe)
 			{
 				lightingShader.Use();
-				/*probe.clearSeeds();
-				seed.dx = cos(glfwGetTime());
-				seed.dy = sin(glfwGetTime());
-				seed.dz = 1.f;
+				probe.clearSeeds();
+				glm::vec3 o = normalize(polhemus->getVector());
+				seed.dx = o.x;
+				seed.dy = o.y;
+				seed.dz = o.z;
 				probe.addSeed(seed);
-				probe.renderPT(16);*/
-				//probe.setOrientation(normalize(polhemus->getVector()));
-				probe.updateOrientation(glm::vec3(cos(glfwGetTime()), sin(glfwGetTime()), 1.f));
+				probe.renderPT(16);
+				//probe.updateOrientation(normalize(polhemus->getVector()));
+				//probe.updateOrientation(glm::vec3(cos(glfwGetTime()), sin(glfwGetTime()), 1.f));
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 50.f);
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 10.f);
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 7.5f);
