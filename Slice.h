@@ -11,6 +11,7 @@ public:
 	struct Seed {
 		GLfloat x, y;
 		GLfloat dx, dy, dz;
+		GLfloat twist;
 
 		float length() { return sqrt( dx*dx + dy*dy + dz*dz ); }
 	};

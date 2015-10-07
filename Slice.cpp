@@ -9,6 +9,8 @@
 #include <glm/gtc/type_ptr.hpp>
 // glm::translate
 #include <glm/gtc/matrix_transform.hpp>
+// glm::gtx::quaternion
+#include <glm\ext.hpp>
 
 using namespace glm;
 
@@ -149,7 +151,7 @@ void Slice::generateTubes(int segments)
 	vertices.clear();
 	indices.clear();
 
-	std::cout << "Generating geometry for tube glyphs... ";
+	//std::cout << "Generating geometry for tube glyphs... ";
 	
 	//+++++++++++++++++++++++++++++++ GEOMETRY +++++++++++++++++++++++++++++
 
@@ -277,7 +279,7 @@ void Slice::generateTubes(int segments)
 
 	// store attribute info for each instance of the glyph
 	instances.clear();
-	instances.reserve(seeds.size() * 2);
+	instances.reserve(seeds.size() * 3);
 
 	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
 	{
@@ -285,6 +287,8 @@ void Slice::generateTubes(int segments)
 		instances.push_back(basePoint);
 		vec3 w(it->dx, it->dy, it->dz);
 		instances.push_back(w);				
+		glm::quat q = glm::quat(it->twist, w);
+		instances.push_back(glm::vec3(glm::mat4_cast( q )[1]));
 	}
 
 	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++
@@ -318,20 +322,25 @@ void Slice::generateTubes(int segments)
 		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_DYNAMIC_DRAW);
 
 		// Instance base location attribute
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)0);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (GLvoid*)(sizeof(vec3) * 0));
 		glEnableVertexAttribArray(3);
 		glVertexAttribDivisor(3, 1);
 
 		// Instance w vector attribute
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)sizeof(vec3));
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (GLvoid*)(sizeof(vec3) * 1));
 		glEnableVertexAttribArray(4);
 		glVertexAttribDivisor(4, 1);
+
+		// Instance up vector attribute
+		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (GLvoid*)(sizeof(vec3) * 2));
+		glEnableVertexAttribArray(5);
+		glVertexAttribDivisor(5, 1);
 
 	glBindVertexArray(0);
 
 	geometryChange = false;
 	tubesGenerated = true;
-	std::cout << "done." << std::endl;
+	//std::cout << "done." << std::endl;
 }
 
 void Slice::generateHairs(float lengthMultiplier)

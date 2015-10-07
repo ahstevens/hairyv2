@@ -94,6 +94,8 @@ void Trial::sampleBiMap()
 								 ( seed.y / ySize ) * bimap->getYSize(),
 								 seed.dx, seed.dy, seed.dz);
 
+			seed.twist = 0.f;
+
 			cp.addSeed( seed );
 
 			if(seed.dz < shadowOffset) shadowOffset = seed.dz;

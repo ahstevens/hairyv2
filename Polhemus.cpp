@@ -58,3 +58,8 @@ glm::vec3 Polhemus::getVector()
 {
 	return glm::vec3(quat.getVectorX(), quat.getVectorY(), quat.getVectorZ());
 }
+
+float Polhemus::getRotation()
+{
+	return quat.getDegreeAngle();
+}

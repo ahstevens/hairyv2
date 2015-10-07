@@ -73,6 +73,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	seed.dx = -1.f;
 	seed.dy = 1.f;
 	seed.dz = -1.f;
+	seed.twist = 0.f;
 
 	Slice probe;
 	probe.setShader(&lightingShader);
@@ -236,6 +237,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 				seed.dx = o.x;
 				seed.dy = o.y;
 				seed.dz = o.z;
+				seed.twist = polhemus->getRotation();
 				probe.addSeed(seed);
 				probe.renderPT(16);
 				//probe.updateOrientation(normalize(polhemus->getVector()));
