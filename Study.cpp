@@ -85,12 +85,11 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
 
-	// Build transformation matrix to position slices in middle of clipping volume and scale to fill screen
-	float temp = (dist_mm + 1000.f) / dist_mm;
+	// Build transformation matrix to position slices in middle of 2000-unit-deep clipping volume and scale to fill screen
+	float scaleRatio = (dist_mm + 1000.f) / dist_mm;
 	glm::mat4 translate_mat = glm::translate( glm::mat4( 1.f ), glm::vec3( 0.0f, 0.0f, -1000.0f ) ); // Identity matrix
-	glm::mat4 scale_mat     = glm::scale( glm::mat4( 1.f ), glm::vec3( temp, temp, temp ) ); // Identity matrix
+	glm::mat4 scale_mat     = glm::scale( glm::mat4( 1.f ), glm::vec3( scaleRatio ) ); // Identity matrix
 	glm::mat4 xform_mat     = translate_mat * scale_mat;
-
 
     // main loop
     while (!glfwWindowShouldClose(window))
