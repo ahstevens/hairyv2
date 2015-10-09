@@ -285,15 +285,17 @@ void Slice::generateTubes(int segments)
 	// centered at the origin with the slice front face normal = (0,0,1)
 	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
 	{
-		// 1 - Seed location on slice
+		// 1 - Seed location on slice.
 		vec3 basePoint = vec3( it->x, it->y, 0.f ) + trans;
 		instances.push_back( basePoint );
 		
-		// 2 - Flow vector
+		// 2 - Flow quaternion. Will be used as an analog to the forward vector
+		//                      of a per-seed flow-aligned coordinate frame.
 		glm::quat w = glm::quat( it->twist, glm::vec3( it->dx, it->dy, it->dz ) );
 		instances.push_back( glm::axis( w ) );				
 
-		// 3 - Up vector
+		// 3 - Up vector. Convert quaternion to an orientation matrix and
+		//	              transform the +y-axis vector by it.
 		glm::vec3 up = glm::toMat3( w ) * glm::vec3( 0.f, 1.f, 0.f );
 		instances.push_back( up );
 	}
