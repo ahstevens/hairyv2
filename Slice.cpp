@@ -283,12 +283,14 @@ void Slice::generateTubes(int segments)
 
 	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
 	{
-		vec3 basePoint = vec3(it->x, it->y, 0.f) + trans;
-		instances.push_back(basePoint);
-		vec3 w(it->dx, it->dy, it->dz);
-		instances.push_back(w);				
-		glm::quat q = glm::quat(it->twist, w);
-		instances.push_back(glm::vec3(glm::mat4_cast( q )[1]));
+		vec3 basePoint = vec3( it->x, it->y, 0.f ) + trans;
+		instances.push_back( basePoint );
+		
+		glm::quat w = glm::quat( it->twist, glm::vec3( it->dx, it->dy, it->dz ) );
+		instances.push_back( glm::axis( w ) );				
+
+		glm::vec3 up = glm::toMat3( w ) * glm::vec3( 0.f, 1.f, 0.f );
+		instances.push_back( up );
 	}
 
 	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++

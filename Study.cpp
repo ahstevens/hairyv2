@@ -70,9 +70,9 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 	Slice::Seed seed;
 	seed.x = seed.y = 0.f;
-	seed.dx = -1.f;
-	seed.dy = 1.f;
-	seed.dz = -1.f;
+	seed.dx = 1.f;
+	seed.dy = 0.f;
+	seed.dz = 0.f;
 	seed.twist = 0.f;
 
 	Slice probe;
@@ -232,16 +232,18 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			if (draw_probe)
 			{
 				lightingShader.Use();
-				probe.clearSeeds();
-				glm::vec3 o = normalize(polhemus->getVector());
-				seed.dx = o.x;
-				seed.dy = o.y;
-				seed.dz = o.z;
-				seed.twist = polhemus->getRotation();
-				probe.addSeed(seed);
-				probe.renderPT(16);
+				//probe.clearSeeds();
+				//glm::vec3 o = normalize(polhemus->getVector());
+				//seed.dx = o.x;
+				//seed.dy = o.y;
+				//seed.dz = o.z;
+				//seed.twist = polhemus->getRotation();
+				//probe.addSeed(seed);
+				//probe.renderPT(16);
 				//probe.updateOrientation(normalize(polhemus->getVector()));
 				//probe.updateOrientation(glm::vec3(cos(glfwGetTime()), sin(glfwGetTime()), 1.f));
+				view = view * polhemus->getOrientationMatrix();
+				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program,  "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 50.f);
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 10.f);
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 7.5f);

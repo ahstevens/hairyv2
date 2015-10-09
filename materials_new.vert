@@ -27,7 +27,7 @@ void main()
 	//vec3 v = normalize(cross(w, u));
 
 	vec3 v = normalize( up );
-	vec3 u = normalize( cross( up, w ) );
+	vec3 u = normalize( cross( v, w ) );
 		
 	// build CFTM for scaling the tubes
 	mat4 coordFrameTrans = mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
