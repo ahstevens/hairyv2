@@ -23,9 +23,6 @@ uniform float directionalGeomScale;
 
 void main()
 {
-	//vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
-	//vec3 v = normalize(cross(w, u));
-
 	vec3 v = normalize( up );
 	vec3 u = normalize( cross( v, w ) );
 		
