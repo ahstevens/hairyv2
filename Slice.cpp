@@ -291,12 +291,13 @@ void Slice::generateTubes(int segments)
 		
 		// 2 - Flow quaternion. Will be used as an analog to the forward vector
 		//                      of a per-seed flow-aligned coordinate frame.
-		glm::quat w = glm::quat( it->twist, glm::vec3( it->dx, it->dy, it->dz ) );
+		glm::quat w = glm::quat( 0.f, glm::vec3( it->dx, it->dy, it->dz ) );
 		instances.push_back( glm::axis( w ) );				
 
 		// 3 - Up vector. Convert quaternion to an orientation matrix and
 		//	              transform the +y-axis vector by it.
 		glm::vec3 up = glm::toMat3( w ) * glm::vec3( 0.f, 1.f, 0.f );
+		//glm::vec3 up = glm::axis( w * glm::quat( 0.f, 0.f, 1.f, 0.f ) * glm::conjugate( w ) );
 		instances.push_back( up );
 	}
 
@@ -354,13 +355,17 @@ void Slice::generateTubes(int segments)
 
 void Slice::generateHairs(float lengthMultiplier)
 {
-	std::vector<float> verts;
-	std::vector<int> first;
+
+	vertices.clear();
+	vertices_flat.clear();
 	indices.clear();
 	indices_offsets.clear();
+	first.clear();
 	counts.clear();
 
 	GLint offset = 0;
+
+	GLsizei nVerts = 2;
 
 	mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
 
@@ -369,30 +374,29 @@ void Slice::generateHairs(float lengthMultiplier)
 	for (it = seeds.begin(); it != seeds.end(); ++it)
 	{
 		vec4 base = trans * vec4( it->x, it->y, 0.0f, 1.0f );
-		verts.push_back( base.x );
-		verts.push_back( base.y );
-		verts.push_back( base.z );
+		vertices_flat.push_back( base.x );
+		vertices_flat.push_back( base.y );
+		vertices_flat.push_back( base.z );
 
 		vec4 tip = trans * vec4( it->x + ( it->dx * lengthMultiplier ),
 								 it->y + ( it->dy * lengthMultiplier ),
 								 it->dz * lengthMultiplier,
 								 1.0f );
 
-		verts.push_back( tip.x );
-		verts.push_back( tip.y );
-		verts.push_back( tip.z );
-		
-		first.push_back(offset);
-		offset += 2;
-		counts.push_back(2);
+		vertices_flat.push_back( tip.x );
+		vertices_flat.push_back( tip.y );
+		vertices_flat.push_back( tip.z );
+
+		first.push_back( offset );
+		offset += nVerts;
+		counts.push_back( nVerts );
 	}
 	
 	geometryChange = false;
 	linesGenerated = true;
-	std::cout << "done (" << verts.size() / 3 << " vertices generated)" << std::endl;
-
-	this->il = new IlluminatedLines(seeds.size(), verts.size() / 3, first, counts, verts, NULL, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 	ilInit = false;
+	std::cout << "done (" << vertices_flat.size() / 3 << " vertices generated)" << std::endl;
+
 }
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )
@@ -400,7 +404,10 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 	if( geometryChange || !linesGenerated ) 
 		generateHairs( lengthMultiplier );	
 		
-	il->setLightingModel(lightModel);
+	if( !ilInit )
+		this->il = new IlluminatedLines(seeds.size(), vertices_flat.size() / 3, first, counts, vertices_flat, NULL, lightModel);
+	else
+		il->setLightingModel(lightModel);
 
 	doIL = true;
 }
@@ -456,12 +463,12 @@ void Slice::redraw()
 {
 	if (doIL)
 	{
-		if (!ilInit)
+		if( !ilInit )
 		{
-			std::cout << "Initializing Illuminated Streamlines..." << std::endl;
-			ilInit = true;
 			il->init();
+			ilInit = true;
 		}
+
 		il->redraw();
 	}
 	else {
