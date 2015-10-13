@@ -86,6 +86,7 @@
     <ClCompile Include="Material.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Polhemus.cpp" />
+    <ClCompile Include="Probe.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Slice.cpp" />
     <ClCompile Include="Study.cpp" />
@@ -107,6 +108,7 @@
     <ClInclude Include="Material.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Polhemus.h" />
+    <ClInclude Include="Probe.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Slice.h" />

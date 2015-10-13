@@ -10,6 +10,7 @@
 #include "Light.h"
 #include "Trial.h"
 #include "Polhemus.h"
+#include "Probe.h"
 
 class Study
 {
@@ -62,7 +63,7 @@ private:
 	Camera camera;
 	Light light;
 	
-	Slice probe;
+	Probe probe;
 
 	std::string participant;
 	Trial trial;

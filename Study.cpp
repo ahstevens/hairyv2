@@ -72,7 +72,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	Shader hogShader("hedgehogs.vert", "hedgehogs.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
-	Slice::Seed seed;
+	Probe::Seed seed;
 	seed.x = seed.y = 0.f;
 	seed.dx = 1.f;
 	seed.dy = 0.f;
