@@ -10,6 +10,9 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
+#define _USE_MATH_DEFINES
+#include <math.h> // M_PI
+
 using namespace glm;
 
 //------------------ Constructors ------------------------------------
@@ -25,7 +28,7 @@ Object::Object()
 
     setPosition( 0.0f, 0.0f, 0.0f );
     setSize( 1.0f, 1.0f, 1.0f );
-    setRotate( 0.0f, 0.0f, 0.0f, 1.0f);
+    orientation = glm::quat();
 
 	use_texture = false;
 	tex = NULL;
@@ -89,32 +92,59 @@ vec3 Object::getSize() { return size; }
 
 //------------------ setRotate ---------------------------------------
 /**
- * set the rotation parameters: angle, and axis specification
+ * set the rotation parameters via quaternions
  */
-void Object::setRotate( float angle, float dx, float dy, float dz )
+void Object::rotate( float degrees, float x, float y, float z )
+{   
+    glm::vec3 axis = vec3( x, y, z );
+	this->rotate( degrees, axis );
+}
+
+void Object::rotate( float degrees, vec3 axis )
 {
-    this->angle = angle;
-    axis = vec3( dx, dy, dz );
+	float angle = degrees * (float) M_PI / 180.f;
+	glm::quat rotQuat = glm::angleAxis( angle, normalize( axis ) );
+	orientation = orientation * rotQuat;
+
 	update_model_matrix = true;
 }
 
-void Object::setRotate( float angle, vec3 axis )
+void Object::setRotation( float degrees, float x, float y, float z )
 {
-    this->angle = angle;
-    this->axis = axis;
+	glm::vec3 axis = vec3( x, y, z );
+	this->setRotation( degrees, axis );
+}
+
+void Object::setRotation( float degrees, glm::vec3 axis )
+{
+	float angle = degrees * (float) M_PI / 180.f;
+	glm::quat rotQuat = glm::angleAxis( angle, normalize( axis ) );
+	orientation = rotQuat;
+
 	update_model_matrix = true;
 }
 
-float Object::getRotationAngle() { return angle; }
+float Object::getRotationAngle() { return glm::angle( orientation ); }
 
-vec3 Object::getRotationAxis() { return axis; }
+vec3 Object::getRotationAxis() { return glm::axis( orientation ); }
+
+void Object::setOrientation( glm::quat &q )
+{
+	orientation = q;
+}
+
+void Object::setOrientation( glm::mat4 &m )
+{
+	orientation = glm::toQuat( m );
+}
 
 void Object::computeModelMatrix()
 {
-	model = glm::mat4();
-	model = glm::translate(model, position); 
-	if(angle < -0.0000001 || angle > 0.0000001) model = glm::rotate(model, angle, axis);
-    model = glm::scale(model, size);	
+	glm::mat4 trans = glm::translate(glm::mat4(), position); 
+	glm::mat4 rot = glm::toMat4( orientation );
+    glm::mat4 scl = glm::scale(glm::mat4(), size);
+
+	model = trans * rot * scl;
 }
 
 void Object::setColor( glm::vec3 color )

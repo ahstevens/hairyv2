@@ -7,6 +7,8 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include <vector>
 
@@ -35,10 +37,15 @@ public:
 	void setSize( glm::vec3 size );
 	glm::vec3 getSize();
 
-    void setRotate( float angle, float dx, float dy, float dz ); // set rotate
-	void setRotate( float angle, glm::vec3 axis );
+    void rotate( float degrees, float x, float y, float z ); // additive rotation
+	void rotate( float degrees, glm::vec3 axis );            // additive rotation
+	void setRotation( float degrees, float x, float y, float z ); // absolute rotation
+	void setRotation( float degrees, glm::vec3 axis );            // absolute rotation
 	float getRotationAngle();
 	glm::vec3 getRotationAxis();	
+	
+	void setOrientation( glm::quat &q );
+	void setOrientation( glm::mat4 &m );
 
 	void setColor( glm::vec3 color );
 	void setColor( float r, float g, float b);
@@ -56,11 +63,9 @@ protected:
 
     glm::vec3 position;					   // location (origin) of the object
 	glm::vec3 size;						   // size of the object
+	glm::quat orientation;                 // orientation of the object
 
 	glm::mat4 model;
-
-    float angle;						   // rotation angle and axis
-	glm::vec3 axis;
 
 	GLuint VAO, VBO, EBO, UBO;
 

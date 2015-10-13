@@ -72,19 +72,19 @@ void Trial::sampleBiMap()
         {
 			float x_jitter;
             if( i < EPSILON )
-                x_jitter = ( rand() % 2 ) * jitter;
+                x_jitter = ( rand() / (float) RAND_MAX ) * jitter;                  // +jitter
             else if( abs( i - ( xSize - xStep ) ) < EPSILON )
-                x_jitter = ( rand() % 2 - 1 ) * jitter;
+                x_jitter = ( rand() / (float) RAND_MAX ) * -jitter;                 // -jitter
             else
-                x_jitter = ( rand() % 3 - 1 ) * jitter;
+                x_jitter = ( rand() / (float) RAND_MAX ) * ( 2 * jitter ) - jitter; // +/- jitter
 
 			float y_jitter;
             if( j < EPSILON )
-                y_jitter = ( rand() % 2 ) * jitter;
+                y_jitter = ( rand() / (float) RAND_MAX ) * jitter;                  // +jitter
             else if( abs( j - ( ySize - yStep ) ) < EPSILON )
-                y_jitter = ( rand() % 2 - 1 ) * jitter;
+                y_jitter = ( rand() / (float) RAND_MAX ) * -jitter;                 // -jitter
             else
-                y_jitter = ( rand() % 3 - 1 ) * jitter;
+                y_jitter = ( rand() / (float) RAND_MAX ) * ( 2 * jitter ) - jitter; // +/- jitter
 
 			Slice::Seed seed;
             seed.x = (float) i + ( x_jitter * xStep );

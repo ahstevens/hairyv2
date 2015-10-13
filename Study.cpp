@@ -1,6 +1,10 @@
 #include "Study.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "Slice.h"
+#include <time.h> // time() for srand()
+
+#define _USE_MATH_DEFINES
+#include <math.h> // M_PI
 
 // Initialize class variables
 Study* Study::instance = NULL;
@@ -75,7 +79,6 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	seed.dz = 0.f;
 	seed.twist = 0.f;
 
-	Slice probe;
 	probe.setShader(&lightingShader);
 	probe.addSeed(seed);
 	probe.renderPT(16);
@@ -232,27 +235,16 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			if (draw_probe)
 			{
 				lightingShader.Use();
-				//probe.clearSeeds();
-				//glm::vec3 o = normalize(polhemus->getVector());
-				//seed.dx = o.x;
-				//seed.dy = o.y;
-				//seed.dz = o.z;
-				//seed.twist = polhemus->getRotation();
-				//probe.addSeed(seed);
-				//probe.renderPT(16);
-				//probe.updateOrientation(normalize(polhemus->getVector()));
-				//probe.updateOrientation(glm::vec3(cos(glfwGetTime()), sin(glfwGetTime()), 1.f));
-				view = view * polhemus->getOrientationMatrix();
-				glUniformMatrix4fv(glGetUniformLocation(lightingShader.Program,  "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 50.f);
-				glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 10.f);
-				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 7.5f);
+				glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 115.f);
+				glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 20.f);
+				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 15.f);
+				probe.setOrientation( polhemus->getQuaternion() );
 				probe.redraw();
 			}
 			else
 			{
 				lightingShader.Use();
-				trial.setShader(&lightingShader);
+				trial.setShader(&lightingShader);				
 				trial.display();
 			}
 		}
@@ -263,6 +255,11 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
     // Terminate GLFW, clearing any resources allocated by GLFW.
     glfwTerminate();
+}
+
+void Study::training()
+{
+
 }
 
 void Study::begin()
@@ -408,8 +405,25 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.1f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;
+}
+
+glm::vec3 Study::getRandomOrientation()
+{
+	srand( (unsigned) time( NULL ) );
+
+	float angle = ( (float) rand() / (float) RAND_MAX ) * 2 * M_PI; // 0 to 2pi 
+
+	float z = ( (float) rand() / (float) RAND_MAX ) * 2 - 1; // -1 to 1
+
+	glm::vec3 ret;
+
+	ret.x = sqrtf( 1.f - z * z ) * cos( angle );
+	ret.y = sqrtf( 1.f - z * z ) * sin( angle );
+	ret.z = z;
+
+	return ret;
 }

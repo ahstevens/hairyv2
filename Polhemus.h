@@ -20,9 +20,10 @@ public:
 	void printInfo();
 
 	glm::vec3 getPosition();
-	glm::vec3 getVector();
+	glm::vec3 getAxis();
 	float getRotation();
 	float getRotationDegrees();
+	glm::quat getQuaternion();
 	glm::mat4 getOrientationMatrix();
 
 private:

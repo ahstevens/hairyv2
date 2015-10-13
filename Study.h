@@ -10,7 +10,6 @@
 #include "Light.h"
 #include "Trial.h"
 #include "Polhemus.h"
-#include "Probe.h"
 
 class Study
 {
@@ -18,6 +17,7 @@ public:
 	static Study* getInstance( GLFWwindow* window );
 
 	void init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm);
+	void training();
 	void begin();
 	void next();
 	void end();
@@ -41,6 +41,8 @@ private:
 
 	void generateTrial(Trial::RenderMode renderMode);
 
+	glm::vec3 getRandomOrientation();
+
 	Polhemus* polhemus;
 	//Probe probe;
 
@@ -59,6 +61,8 @@ private:
 	
 	Camera camera;
 	Light light;
+	
+	Slice probe;
 
 	std::string participant;
 	Trial trial;

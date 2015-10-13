@@ -4,7 +4,6 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 texCoord;
 layout (location = 3) in vec3 instanceLocation;
 layout (location = 4) in vec3 w;
-layout (location = 5) in vec3 up;
 
 
 out vec3 Normal;
@@ -23,8 +22,15 @@ uniform float directionalGeomScale;
 
 void main()
 {
-	vec3 v = normalize( up );
-	vec3 u = normalize( cross( v, w ) );
+	
+	vec3 up = vec3( 0.f, 1.f, 0.f );
+
+	if( length( cross( up, w ) ) < 0.001 )
+		up = vec3( 0.f, 0.f, -1.f );
+
+	vec3 u = normalize( cross( up, w ) );
+
+	vec3 v = normalize( cross( w, u ) );
 		
 	// build CFTM for scaling the tubes
 	mat4 coordFrameTrans = mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),

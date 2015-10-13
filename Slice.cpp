@@ -279,7 +279,7 @@ void Slice::generateTubes(int segments)
 
 	// store attribute info for each instance of the glyph
 	instances.clear();
-	instances.reserve(seeds.size() * 3);
+	instances.reserve(seeds.size() * 2);
 
 	// In model space, the 2D slice is aligned with xy-plane and the slice is
 	// centered at the origin with the slice front face normal = (0,0,1)
@@ -291,14 +291,8 @@ void Slice::generateTubes(int segments)
 		
 		// 2 - Flow quaternion. Will be used as an analog to the forward vector
 		//                      of a per-seed flow-aligned coordinate frame.
-		glm::quat w = glm::quat( 0.f, glm::vec3( it->dx, it->dy, it->dz ) );
-		instances.push_back( glm::axis( w ) );				
-
-		// 3 - Up vector. Convert quaternion to an orientation matrix and
-		//	              transform the +y-axis vector by it.
-		glm::vec3 up = glm::toMat3( w ) * glm::vec3( 0.f, 1.f, 0.f );
-		//glm::vec3 up = glm::axis( w * glm::quat( 0.f, 0.f, 1.f, 0.f ) * glm::conjugate( w ) );
-		instances.push_back( up );
+		glm::vec3 w = glm::vec3( it->dx, it->dy, it->dz );
+		instances.push_back( w );
 	}
 
 	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++
@@ -332,19 +326,14 @@ void Slice::generateTubes(int segments)
 		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_DYNAMIC_DRAW);
 
 		// Instance base location attribute
-		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (GLvoid*)(sizeof(vec3) * 0));
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)(sizeof(vec3) * 0));
 		glEnableVertexAttribArray(3);
 		glVertexAttribDivisor(3, 1);
 
 		// Instance w vector attribute
-		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (GLvoid*)(sizeof(vec3) * 1));
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)(sizeof(vec3) * 1));
 		glEnableVertexAttribArray(4);
 		glVertexAttribDivisor(4, 1);
-
-		// Instance up vector attribute
-		glVertexAttribPointer(5, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 3, (GLvoid*)(sizeof(vec3) * 2));
-		glEnableVertexAttribArray(5);
-		glVertexAttribDivisor(5, 1);
 
 	glBindVertexArray(0);
 

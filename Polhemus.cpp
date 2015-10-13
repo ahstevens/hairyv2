@@ -53,11 +53,12 @@ void Polhemus::update()
 
 void Polhemus::printInfo()
 {
-	glm::vec3 axis = getVector();
+	glm::vec3 axis = getAxis();
 	std::cout << "Position = (" << pos.x << ", " <<  pos.y << ", " << pos.z << ")" << std::endl;
 	std::cout << "Quaternion = (" << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w << ")" << std::endl;
 	std::cout << "Vector = (" << axis.x << ", " << axis.y << ", " << axis.z << ")" << std::endl;	
 	std::cout << "Rotation = "<< getRotationDegrees() << " degrees, " << getRotation() << " radians" << std::endl;
+	std::cout << std::endl;
 }
 
 glm::vec3 Polhemus::getPosition()
@@ -65,7 +66,7 @@ glm::vec3 Polhemus::getPosition()
 	return pos;
 }
 
-glm::vec3 Polhemus::getVector()
+glm::vec3 Polhemus::getAxis()
 {
 	return glm::axis( quat );
 }
@@ -78,6 +79,11 @@ float Polhemus::getRotation()
 float Polhemus::getRotationDegrees()
 {
 	return glm::angle( quat ) * 180.f / M_PI;
+}
+
+glm::quat Polhemus::getQuaternion()
+{
+	return quat;
 }
 
 glm::mat4 Polhemus::getOrientationMatrix()
