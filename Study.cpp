@@ -42,10 +42,20 @@ Study::Study( GLFWwindow* window )
 	// initialize key array
 	for (int i = 0; i < 1024; ++i)
 		keys[i] = 0;
+	
+    // Build and compile our shader programs
+	lightingShader = new Shader("materials.vert", "materials.frag");
+	haloShader = new Shader("halo.vert", "halo.frag");
+	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
+    normalShader = new Shader("normals.vert", "normals.frag", "normals.geom");
 }
 
 Study::~Study()
 {
+	delete lightingShader;
+	delete haloShader;
+	delete hogShader;
+	delete normalShader;
 }
 
 void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
@@ -58,24 +68,15 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetScrollCallback(window, scroll_callback);
-
-
+	
     // OpenGL options
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
+	probe.setShader(lightingShader);
+	probe.renderRT(16, 0.1f);
 
-    // Build and compile our shader programs
-	//Shader lightingShader("materials.vert", "materials.frag");
-	Shader lightingShader("materials_new.vert", "materials_new.frag");
-	Shader haloShader("halo.vert", "halo.frag");
-	Shader hogShader("hedgehogs.vert", "hedgehogs.frag");
-    Shader normalShader("normals.vert", "normals.frag", "normals.geom");
-
-	probe.setShader(&lightingShader);
-	probe.renderRT(16);
-
-	trainingTarget.setShader(&lightingShader);
+	trainingTarget.setShader(lightingShader);
 	trainingTarget.renderPT(16);
 	trainingTarget.setOrientation(getRandomOrientation());
 
@@ -118,7 +119,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG)
 		{
-			lightingShader.Off();
+			lightingShader->Off();
 			trial.passThroughPVMatrix((float*)glm::value_ptr(projection), 
 									  (float*)glm::value_ptr(view));
 			trial.display();
@@ -132,42 +133,42 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 
 			// Use cooresponding shader when setting uniforms/drawing objects
-			hogShader.Use();
-			trial.setShader(&hogShader);
+			hogShader->Use();
+			trial.setShader(hogShader);
 
 			// Get uniform matrix locations in shader
-			GLint viewLoc = glGetUniformLocation(hogShader.Program, "view");
-			GLint projLoc = glGetUniformLocation(hogShader.Program, "projection");
+			GLint viewLoc = glGetUniformLocation(hogShader->Program, "view");
+			GLint projLoc = glGetUniformLocation(hogShader->Program, "projection");
 			// Pass the matrices to the shader
 			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 			// Pass light and camera positions to shader
 			glm::vec4 lightPos = light.getPosition();
-			glUniform4f(glGetUniformLocation(hogShader.Program, "lightPos"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
+			glUniform4f(glGetUniformLocation(hogShader->Program, "lightPos"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
 			glm::vec3 cameraPos = camera.getPosition();
-			glUniform3f(glGetUniformLocation(hogShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniform3f(glGetUniformLocation(hogShader->Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 
 			glm::vec3 ambientColor = light.getAmbientColor();
 			glm::vec3 diffuseColor = light.getDiffuseColor();
 			glm::vec3 specularColor = light.getSpecularColor();
-			glUniform3f(glGetUniformLocation(hogShader.Program, "light.ambient"), ambientColor.r, ambientColor.g, ambientColor.b);
-			glUniform3f(glGetUniformLocation(hogShader.Program, "light.diffuse"), diffuseColor.r, diffuseColor.g, diffuseColor.b);
-			glUniform3f(glGetUniformLocation(hogShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
+			glUniform3f(glGetUniformLocation(hogShader->Program, "light.ambient"), ambientColor.r, ambientColor.g, ambientColor.b);
+			glUniform3f(glGetUniformLocation(hogShader->Program, "light.diffuse"), diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(glGetUniformLocation(hogShader->Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
 
 
 
-			glUniform1f(glGetUniformLocation(hogShader.Program, "lengthMult"), lengthMultiplier);
-			glUniform1f(glGetUniformLocation(hogShader.Program, "thicknessMult"), thicknessMultiplier);
-			glUniform1f(glGetUniformLocation(hogShader.Program, "directionalGeomScale"), directionalGeomScale);
+			glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), lengthMultiplier);
+			glUniform1f(glGetUniformLocation(hogShader->Program, "thicknessMult"), thicknessMultiplier);
+			glUniform1f(glGetUniformLocation(hogShader->Program, "directionalGeomScale"), directionalGeomScale);
 			
-			glUniform1f(glGetUniformLocation(hogShader.Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
+			glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
 
-			glUniform1i(glGetUniformLocation(hogShader.Program, "doShadows"), true);
+			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
 
 			trial.display();
 
-			glUniform1i(glGetUniformLocation(hogShader.Program, "doShadows"), false);
+			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
 
 			trial.display();
 		}
@@ -180,48 +181,48 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 
 			// Use cooresponding shader when setting uniforms/drawing objects
-			lightingShader.Use();
+			lightingShader->Use();
 
 			
 			// Get uniform matrix locations in shader
-			GLint viewLoc  = glGetUniformLocation(lightingShader.Program,  "view");
-			GLint projLoc  = glGetUniformLocation(lightingShader.Program,  "projection");
+			GLint viewLoc  = glGetUniformLocation(lightingShader->Program,  "view");
+			GLint projLoc  = glGetUniformLocation(lightingShader->Program,  "projection");
 			// Pass the matrices to the shader
 			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 			// Pass light and camera positions to shader
 			glm::vec4 lightPos = light.getPosition();
-			glUniform4f(glGetUniformLocation(lightingShader.Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
+			glUniform4f(glGetUniformLocation(lightingShader->Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
 			glm::vec3 cameraPos = camera.getPosition();
-			glUniform3f(glGetUniformLocation(lightingShader.Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+			glUniform3f(glGetUniformLocation(lightingShader->Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
 
 
 			glm::vec3 ambientColor = light.getAmbientColor();
 			glm::vec3 diffuseColor = light.getDiffuseColor();
 			glm::vec3 specularColor = light.getSpecularColor(); 
-			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
-			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
-			glUniform3f(glGetUniformLocation(lightingShader.Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
+			glUniform3f(glGetUniformLocation(lightingShader->Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
+			glUniform3f(glGetUniformLocation(lightingShader->Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
+			glUniform3f(glGetUniformLocation(lightingShader->Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
 
 
 		
-			glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), lengthMultiplier);
-			glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), thicknessMultiplier);
-			glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), directionalGeomScale);
+			glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), lengthMultiplier);
+			glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), thicknessMultiplier);
+			glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), directionalGeomScale);
 
 			if(draw_halos)
 			{
 				// reverse the vertex winding order
 				glFrontFace( GL_CW );
-				trial.setShader(&haloShader);
-				haloShader.Use();
-				glUniform1f(glGetUniformLocation(haloShader.Program, "lengthMult"), lengthMultiplier);
-				glUniform1f(glGetUniformLocation(haloShader.Program, "thicknessMult"), thicknessMultiplier);
-				glUniform1f(glGetUniformLocation(haloShader.Program, "directionalGeomScale"), directionalGeomScale);
-				glUniform1f(glGetUniformLocation(haloShader.Program, "haloSize"), haloSize);
-				glUniformMatrix4fv(glGetUniformLocation(haloShader.Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-				glUniformMatrix4fv(glGetUniformLocation(haloShader.Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+				trial.setShader(haloShader);
+				haloShader->Use();
+				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), lengthMultiplier);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), thicknessMultiplier);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), directionalGeomScale);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+				glUniformMatrix4fv(glGetUniformLocation(haloShader->Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+				glUniformMatrix4fv(glGetUniformLocation(haloShader->Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 				// Draw model using the halo shader (regular model will be drawn on top)
 				trial.display();
 				// reset vertex winding order
@@ -230,18 +231,30 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 			
 			if (draw_probe)
 			{
-				lightingShader.Use();
-				glUniform1f(glGetUniformLocation(lightingShader.Program, "lengthMult"), 115.f);
-				glUniform1f(glGetUniformLocation(lightingShader.Program, "thicknessMult"), 20.f);
-				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 15.f);
-				probe.setOrientation( polhemus->getQuaternion() );
+				lightingShader->Use();
+				glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 60.f);
+				glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 10.f);
+				glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 7.5f);
+				probe.setOrientation( normalize( polhemus->getQuaternion() ) );
+								
+				glm::quat p = glm::normalize( probe.getOrientation() );
+				glm::quat t = glm::normalize( trainingTarget.getOrientation() );
+				glm::vec3 vecXp = glm::rotate( p, glm::vec3( 1.f, 0.f, 0.f ) );
+				glm::vec3 vecXt = glm::rotate( t, glm::vec3( 1.f, 0.f, 0.f ) );
+				float cosTheta = dot( vecXp, vecXt );
+
+				if( cosTheta > 0.9962f )
+					trainingTarget.setColor( 0.f, 1.f, 0.f );
+				else
+					trainingTarget.setColor( 1.f, 1.f, 1.f );
+
 				probe.redraw();
 				trainingTarget.redraw();
 			}
 			else
 			{
-				lightingShader.Use();
-				trial.setShader(&lightingShader);				
+				lightingShader->Use();
+				trial.setShader(lightingShader);				
 				trial.display();
 			}
 		}
@@ -256,8 +269,13 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 void Study::training()
 {	
-	float angleRad = glm::angle(probe.getOrientation() * trainingTarget.getOrientation() * glm::conjugate(probe.getOrientation()));
-	std::cout << "Angular error: " << angleRad * 180.f / M_PI << "° (" << angleRad << " rad)" << std::endl;
+	glm::quat p = glm::normalize( probe.getOrientation() );
+	glm::quat t = glm::normalize( trainingTarget.getOrientation() );
+	glm::vec3 vecXp = glm::rotate( p, glm::vec3( 1.f, 0.f, 0.f ) );
+	glm::vec3 vecXt = glm::rotate( t, glm::vec3( 1.f, 0.f, 0.f ) );
+	float cosTheta = dot( vecXp, vecXt );
+	float angleRad = ( cosTheta > 0.999999f ) ? 0.f : acos( cosTheta );
+	std::cout << "Angular error: " << glm::degrees( angleRad ) << " deg (" << angleRad << " rad)" << std::endl;
 	trainingTarget.setOrientation(getRandomOrientation());
 }
 
@@ -416,7 +434,7 @@ glm::quat Study::getRandomOrientation()
 {
 	srand( (unsigned) time( NULL ) );
 
-	float angle = ( (float) rand() / (float) RAND_MAX ) * 2 * M_PI; // 0 to 2pi 
+	float angle = ( (float) rand() / (float) RAND_MAX ) * 360; // 0 to 360 
 
 	float z = ( (float) rand() / (float) RAND_MAX ) * 2 - 1; // -1 to 1
 
@@ -428,7 +446,7 @@ glm::quat Study::getRandomOrientation()
 	
 	angle = ((float)rand() / (float)RAND_MAX) * 2 * M_PI; // 0 to 2pi 
 
-	glm::quat ret = glm::angleAxis( angle, axis );
+	glm::quat ret = glm::normalize( glm::angleAxis( angle, axis ) );
 
 	return ret;
 }

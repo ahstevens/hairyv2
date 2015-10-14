@@ -58,6 +58,8 @@ private:
 
 	int draw_halos, cycle_light, draw_probe;
 
+	Shader *lightingShader, *haloShader, *hogShader, *normalShader;
+
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
 	Camera camera;

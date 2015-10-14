@@ -163,12 +163,6 @@
     <None Include="normals.vert">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="materials.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="materials.vert">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="normals.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -184,12 +178,6 @@
     <None Include="IL_cylinder_blinn_tangent.vert">
       <Filter>Shaders\ILines</Filter>
     </None>
-    <None Include="materials_new.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="materials_new.frag">
-      <Filter>Shaders</Filter>
-    </None>
     <None Include="halo.frag">
       <Filter>Shaders</Filter>
     </None>
@@ -200,6 +188,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="hedgehogs.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="materials.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="materials.vert">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>
