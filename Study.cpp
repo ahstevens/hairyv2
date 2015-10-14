@@ -28,7 +28,7 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = draw_probe = 0;
+	draw_halos = cycle_light = orient_probe = draw_probe = 0;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
@@ -75,10 +75,11 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 	probe.setShader(lightingShader);
 	probe.renderRT(16, 0.1f);
-
+	
 	trainingTarget.setShader(lightingShader);
 	trainingTarget.renderPT(16);
 	trainingTarget.setOrientation(getRandomOrientation());
+	trainingTarget.setSize( 1.f, 1.01f, 1.01f );
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
@@ -229,7 +230,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 				glFrontFace( GL_CCW );
 			}
 			
-			if (draw_probe)
+			if (orient_probe)
 			{
 				lightingShader->Use();
 				glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 60.f);
@@ -248,7 +249,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 				else
 					trainingTarget.setColor( 1.f, 1.f, 1.f );
 
-				probe.redraw();
+				if( draw_probe ) probe.redraw();
 				trainingTarget.redraw();
 			}
 			else
@@ -340,6 +341,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				hedgehogOffset = 5.f;
 			}
 			if (keys[GLFW_KEY_INSERT])
+				orient_probe = abs(orient_probe - 1);
+			if (keys[GLFW_KEY_DELETE])
 				draw_probe = abs(draw_probe - 1);
 			if (keys[GLFW_KEY_HOME])
 			{

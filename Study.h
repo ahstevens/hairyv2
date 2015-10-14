@@ -56,7 +56,7 @@ private:
 	GLfloat deltaTime;		// Time between current frame and last frame
 	GLfloat lastFrame;		// Time of last frame
 
-	int draw_halos, cycle_light, draw_probe;
+	int draw_halos, cycle_light, orient_probe, draw_probe;
 
 	Shader *lightingShader, *haloShader, *hogShader, *normalShader;
 
