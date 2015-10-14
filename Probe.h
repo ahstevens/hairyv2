@@ -7,32 +7,9 @@
 class Probe : public Object
 {
 public:
-	struct Seed {
-		GLfloat x, y;
-		GLfloat dx, dy, dz;
-		GLfloat twist;
-
-		float length() { return sqrt( dx*dx + dy*dy + dz*dz ); }
-	};
 
 	Probe( void );
-	Probe( float width, float height );
-	Probe( float width, float height, std::vector<Seed> seeds );
 	~Probe( void );
-
-	void setWidth( float width );
-	float getWidth( void );
-	void setHeight( float height );
-	float getHeight( void );
-
-	void addSeed( Seed s );                   // Add a seed to the Slice
-	void addSeeds( std::vector<Seed> seeds ); // Add seeds to the Slice
-	void removeSeed( void );                  // Removes last seed added to the Slice
-	void removeSeeds( int n );                // Removes last n seeds added to the Slice
-	void clearSeeds( void );                  // Clear all seeds from the Slice
-	int seedCount();                          // Returns the number of seeds in the Slice
-
-	void updateOrientation(glm::vec3 orientation);
 
 	void renderPT( int segments = 8);
 	void renderRT( int segments = 8, float stripe_pairs_per_mm = 1.f, 
@@ -46,15 +23,11 @@ private:
 
 	std::vector<glm::vec2> circle( int segments );
 	
-	std::vector<Seed> seeds;              // the seeds to populate the Slice
-
 	std::vector<GLfloat> vertices_flat;     // a float array of vertices for Illumnated Lines
 	std::vector<GLsizei> first;               // the array of starting indices for Illuminated Lines
 	std::vector<glm::vec3> instances;
 
 	GLsizei directionalIndicesCount;      // number of indices used to render the directionality geometry
-
-	float width, height;                  // dimensions of the slice
-
+	
 	bool geometryChange, tubesGenerated;
 };

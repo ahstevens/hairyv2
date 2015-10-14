@@ -72,16 +72,12 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	Shader hogShader("hedgehogs.vert", "hedgehogs.frag");
     Shader normalShader("normals.vert", "normals.frag", "normals.geom");
 
-	Probe::Seed seed;
-	seed.x = seed.y = 0.f;
-	seed.dx = 1.f;
-	seed.dy = 0.f;
-	seed.dz = 0.f;
-	seed.twist = 0.f;
-
 	probe.setShader(&lightingShader);
-	probe.addSeed(seed);
-	probe.renderPT(16);
+	probe.renderRT(16);
+
+	trainingTarget.setShader(&lightingShader);
+	trainingTarget.renderPT(16);
+	trainingTarget.setOrientation(getRandomOrientation());
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
@@ -240,6 +236,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 				glUniform1f(glGetUniformLocation(lightingShader.Program, "directionalGeomScale"), 15.f);
 				probe.setOrientation( polhemus->getQuaternion() );
 				probe.redraw();
+				trainingTarget.redraw();
 			}
 			else
 			{
@@ -258,8 +255,10 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 }
 
 void Study::training()
-{
-
+{	
+	float angleRad = glm::angle(probe.getOrientation() * trainingTarget.getOrientation() * glm::conjugate(probe.getOrientation()));
+	std::cout << "Angular error: " << angleRad * 180.f / M_PI << "° (" << angleRad << " rad)" << std::endl;
+	trainingTarget.setOrientation(getRandomOrientation());
 }
 
 void Study::begin()
@@ -306,6 +305,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				draw_halos = abs(draw_halos - 1);
 			if (keys[GLFW_KEY_P])
 				polhemus->printInfo();
+			if (keys[GLFW_KEY_Q])
+				training();
 			if (keys[GLFW_KEY_R])
 				generateTrial(trial.getRenderMode());
 			if (keys[GLFW_KEY_T])
@@ -411,7 +412,7 @@ void Study::generateTrial(Trial::RenderMode renderMode)
 	std::cout << "Trial generated" << std::endl;
 }
 
-glm::vec3 Study::getRandomOrientation()
+glm::quat Study::getRandomOrientation()
 {
 	srand( (unsigned) time( NULL ) );
 
@@ -419,11 +420,15 @@ glm::vec3 Study::getRandomOrientation()
 
 	float z = ( (float) rand() / (float) RAND_MAX ) * 2 - 1; // -1 to 1
 
-	glm::vec3 ret;
+	glm::vec3 axis;
 
-	ret.x = sqrtf( 1.f - z * z ) * cos( angle );
-	ret.y = sqrtf( 1.f - z * z ) * sin( angle );
-	ret.z = z;
+	axis.x = sqrtf(1.f - z * z) * cos(angle);
+	axis.y = sqrtf(1.f - z * z) * sin(angle);
+	axis.z = z;
+	
+	angle = ((float)rand() / (float)RAND_MAX) * 2 * M_PI; // 0 to 2pi 
+
+	glm::quat ret = glm::angleAxis( angle, axis );
 
 	return ret;
 }

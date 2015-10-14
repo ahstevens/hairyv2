@@ -138,6 +138,11 @@ void Object::setOrientation( glm::mat4 &m )
 	orientation = glm::toQuat( m );
 }
 
+glm::quat Object::getOrientation()
+{
+	return orientation;
+}
+
 void Object::computeModelMatrix()
 {
 	glm::mat4 trans = glm::translate(glm::mat4(), position); 

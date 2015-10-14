@@ -42,7 +42,7 @@ private:
 
 	void generateTrial(Trial::RenderMode renderMode);
 
-	glm::vec3 getRandomOrientation();
+	glm::quat getRandomOrientation();
 
 	Polhemus* polhemus;
 	//Probe probe;
@@ -63,7 +63,7 @@ private:
 	Camera camera;
 	Light light;
 	
-	Probe probe;
+	Probe probe, trainingTarget;
 
 	std::string participant;
 	Trial trial;

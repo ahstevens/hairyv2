@@ -46,6 +46,7 @@ public:
 	
 	void setOrientation( glm::quat &q );
 	void setOrientation( glm::mat4 &m );
+	glm::quat getOrientation();
 
 	void setColor( glm::vec3 color );
 	void setColor( float r, float g, float b);

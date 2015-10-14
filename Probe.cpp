@@ -15,111 +15,12 @@ using namespace glm;
 
 Probe::Probe(void) 
 {
-	width = height = 1.0f;
-	geometryChange = true;
-	tubesGenerated = false;
-}
-
-Probe::Probe( float width, float height )
-{
-	this->width = width;
-	this->height = height;
-	geometryChange = true;
-	tubesGenerated = false;
-}
-
-Probe::Probe( float width, float height, std::vector<Seed> seeds )
-{
-	this->width = width;
-	this->height = height;
-	this->seeds = seeds;
 	geometryChange = true;
 	tubesGenerated = false;
 }
 
 Probe::~Probe(void)
 {
-}
-
-void Probe::setWidth( float width )
-{
-	this->width = width;
-}
-
-float Probe::getWidth( void )
-{
-	return width;
-}
-
-void Probe::setHeight( float height )
-{
-	this->height = height;
-}
-
-float Probe::getHeight( void )
-{
-	return height;
-}
-
-void Probe::addSeed( Seed s )
-{
-	seeds.push_back( s );
-
-	geometryChange = true;
-}
-
-void Probe::addSeeds( std::vector<Seed> seeds )
-{
-	std::vector<Seed> newSeeds;
-	newSeeds.reserve( this->seeds.size() + seeds.size() );
-	newSeeds.insert( newSeeds.end(), this->seeds.begin(), this->seeds.end() );
-	newSeeds.insert( newSeeds.end(), seeds.begin(), seeds.end() );
-	this->seeds = newSeeds;
-
-	geometryChange = true;
-}
-
-void Probe::removeSeed( void )
-{
-	seeds.pop_back();
-	
-	geometryChange = true;
-}
-
-void Probe::removeSeeds( int n )
-{
-	for( int i = 0; i < n; ++i ) seeds.pop_back();
-	
-	geometryChange = true;
-}
-
-void Probe::clearSeeds( void )
-{
-	seeds.clear();
-	
-	geometryChange = true;
-}
-
-int Probe::seedCount()
-{
-	return seeds.size();
-}
-
-void Probe::updateOrientation(glm::vec3 orientation)
-{
-	std::vector<glm::vec3>::iterator it;
-
-	for (it = instances.begin() + 1; it != instances.end() - 1; it += 2)
-	{
-		it->x = orientation.x;
-		it->y = orientation.y;
-		it->z = orientation.z;
-	}
-
-	glBindVertexArray(VAO);
-		glBindBuffer(GL_ARRAY_BUFFER, UBO);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, instances.size() * sizeof(vec3), &instances[0]);
-	glBindVertexArray(0);
 }
 
 std::vector<vec2> Probe::circle(int segments)
@@ -260,27 +161,17 @@ void Probe::generateProbe(int segments)
 	}
 
 	//+++++++++++++++++++++++++++++++ INSTANCE ATTRIBS +++++++++++++++++++++++++++++
-
-	// a translation to center the slice at the origin
-	vec3 trans(-width / 2, -height / 2, 0.f);
-
+	
 	// store attribute info for each instance of the glyph
 	instances.clear();
-	instances.reserve(seeds.size() * 2);
 
-	// In model space, the 2D slice is aligned with xy-plane and the slice is
-	// centered at the origin with the slice front face normal = (0,0,1)
-	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
-	{
-		// 1 - Seed location on slice.
-		vec3 basePoint = vec3( it->x, it->y, 0.f ) + trans;
-		instances.push_back( basePoint );
+	vec3 basePoint = vec3( 0.f, 0.f, 0.f );
+	instances.push_back( basePoint );
 		
-		// 2 - Flow quaternion. Will be used as an analog to the forward vector
-		//                      of a per-seed flow-aligned coordinate frame.
-		glm::vec3 w = glm::vec3( it->dx, it->dy, it->dz );
-		instances.push_back( w );
-	}
+	// 2 - Flow quaternion. Will be used as an analog to the forward vector
+	//                      of a per-seed flow-aligned coordinate frame.
+	glm::vec3 w = glm::vec3( 1.f, 0.f, 0.f );
+	instances.push_back( w );
 
 	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++++
 
@@ -383,7 +274,7 @@ void Probe::redraw()
 							directionalIndicesCount, // number of indices to be used in rendering
 							GL_UNSIGNED_INT,		 // indices array type is unsigned int
 							0,						 // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-							seeds.size());			 // number of instances to render
+							1);			 // number of instances to render
 
 		
 	glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
@@ -392,7 +283,7 @@ void Probe::redraw()
 							indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
 							GL_UNSIGNED_INT,										// indices array type is unsigned int
 							(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-							seeds.size());											// number of instances to render
+							1);											// number of instances to render
 	glBindVertexArray(0);
 
 	if (use_texture) tex->disable();	
