@@ -110,22 +110,19 @@ void Study::mainLoop()
 		if (cycle_light) light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
 		else light.setPosition(1.f, 1.f, 1.f);
 
-		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN ||
-			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
-			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG)
+		switch (trial.getRenderMode())
 		{
+		case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN:
+		case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG:
+		case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG:
 			lightingShader->Off();
-			
-			// Create camera transformations
-			glm::mat4 view = camera.getViewMatrix();
-			glm::mat4 projection = camera.getProjectionMatrix();
 
-			trial.passThroughPVMatrix((float*)glm::value_ptr(projection),
-				(float*)glm::value_ptr(view));
+			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
+				(float*)glm::value_ptr(camera.getViewMatrix()));
 			trial.display();
-		}
-		else if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS)
-		{
+
+			break;
+		case Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
 			initGL(hogShader);
 
 			glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
@@ -139,9 +136,10 @@ void Study::mainLoop()
 			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
 
 			trial.display();
-		}
-		else
-		{
+
+			break;
+		case Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN:
+		case Trial::RenderMode::TRIAL_RENDER_TUBES_RINGED:
 			this->initGL(lightingShader);
 
 			if (draw_halos)
@@ -195,6 +193,10 @@ void Study::mainLoop()
 				trial.setShader(lightingShader);
 				trial.display();
 			}
+
+			break;
+		case Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN:
+			break;
 		}
 
 		// Swap the screen buffers
