@@ -196,5 +196,11 @@
     <None Include="materials.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="lines.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="lines.vert">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -45,6 +45,7 @@ Study::Study( GLFWwindow* window )
 	
     // Build and compile our shader programs
 	lightingShader = new Shader("materials.vert", "materials.frag");
+	lightingShader = new Shader("lines.vert", "lines.frag");
 	haloShader = new Shader("halo.vert", "halo.frag");
 	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
     normalShader = new Shader("normals.vert", "normals.frag", "normals.geom");

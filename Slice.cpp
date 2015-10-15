@@ -17,7 +17,7 @@ using namespace glm;
 Slice::Slice(void) 
 {
 	width = height = 1.0f;
-	doIL = ilInit = false;
+	doIL = ilInit = doLines = false;
 	geometryChange = directionality = true;
 	linesGenerated = tubesGenerated = false;
 
@@ -28,7 +28,7 @@ Slice::Slice( float width, float height )
 {
 	this->width = width;
 	this->height = height;
-	doIL = ilInit = false;
+	doIL = ilInit = doLines = false;
 	geometryChange = directionality = true;
 	linesGenerated = tubesGenerated = false;
 
@@ -41,7 +41,7 @@ Slice::Slice( float width, float height, std::vector<Seed> seeds )
 	this->width = width;
 	this->height = height;
 	this->seeds = seeds;
-	doIL = ilInit = false;
+	doIL = ilInit = doLines = false;
 	geometryChange = directionality = true;
 	linesGenerated = tubesGenerated = false;
 
@@ -161,27 +161,7 @@ void Slice::generateTubes(int segments)
 	// create directionality geometry
 	if (directionality)
 	{
-		Icosphere sphere;
 
-		sphere.create(3);
-
-		for (auto &vert : sphere.getVertices())
-		{
-			tV.position = vert;
-			tV.normal = normalize(vert); // normal for a vertex on a unit sphere is just the vertex position
-			tV.texture = vec2(0.f, 0.f);
-			vertices.push_back(tV);
-		}
-
-		directionalIndicesCount = 0;
-
-		for (auto &i : sphere.getIndices())
-		{
-			indices.push_back(offset + i);
-			directionalIndicesCount++;
-		}
-
-		offset += sphere.getVertices().size();
 	}
 
 	// make a 2D circle to generate the "ribs" of the tube
@@ -289,8 +269,8 @@ void Slice::generateTubes(int segments)
 		vec3 basePoint = vec3( it->x, it->y, 0.f ) + trans;
 		instances.push_back( basePoint );
 		
-		// 2 - Flow quaternion. Will be used as an analog to the forward vector
-		//                      of a per-seed flow-aligned coordinate frame.
+		// 2 - Flow vector. Will be used as an analog to the forward vector
+		//                  of a per-seed flow-aligned coordinate frame.
 		glm::vec3 w = glm::vec3( it->dx, it->dy, it->dz );
 		instances.push_back( w );
 	}
@@ -342,71 +322,197 @@ void Slice::generateTubes(int segments)
 	//std::cout << "done." << std::endl;
 }
 
-void Slice::generateHairs(float lengthMultiplier)
+void Slice::generateHairs()
 {
 
 	vertices.clear();
-	vertices_flat.clear();
 	indices.clear();
 	indices_offsets.clear();
-	first.clear();
 	counts.clear();
 
 	GLint offset = 0;
 
 	GLsizei nVerts = 2;
 
-	mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
-
+	Vertex tV; // temp Vertex
+	
 	std::cout << "Generating geometry for " << seedCount() << " line glyphs... ";
-	std::vector<Seed>::iterator it;
-	for (it = seeds.begin(); it != seeds.end(); ++it)
+
+	tV.position = vec3( 0.f, 0.f, 0.f );
+	tV.normal = vec3( 0.f, 0.f, 0.f );
+	tV.texture = vec2( 0.f, 0.f );
+
+	vertices.push_back( tV );
+
+	tV.position = vec3( 0.f, 0.f, 1.f );
+	tV.texture = vec2( 1.f, 0.f );
+
+	vertices.push_back( tV );
+
+	indices.push_back( 0 );
+	indices.push_back( 1 );
+
+	//+++++++++++++++++++++++++++++++ INSTANCE ATTRIBS +++++++++++++++++++++++++++++
+
+	// a translation to center the slice at the origin
+	vec3 trans(-width / 2, -height / 2, 0.f);
+
+	// store attribute info for each instance of the glyph
+	instances.clear();
+	instances.reserve(seeds.size() * 2);
+
+	// In model space, the 2D slice is aligned with xy-plane and the slice is
+	// centered at the origin with the slice front face normal = (0,0,1)
+	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
 	{
-		vec4 base = trans * vec4( it->x, it->y, 0.0f, 1.0f );
-		vertices_flat.push_back( base.x );
-		vertices_flat.push_back( base.y );
-		vertices_flat.push_back( base.z );
-
-		vec4 tip = trans * vec4( it->x + ( it->dx * lengthMultiplier ),
-								 it->y + ( it->dy * lengthMultiplier ),
-								 it->dz * lengthMultiplier,
-								 1.0f );
-
-		vertices_flat.push_back( tip.x );
-		vertices_flat.push_back( tip.y );
-		vertices_flat.push_back( tip.z );
-
-		first.push_back( offset );
-		offset += nVerts;
-		counts.push_back( nVerts );
+		// 1 - Seed location on slice.
+		vec3 basePoint = vec3( it->x, it->y, 0.f ) + trans;
+		instances.push_back( basePoint );
+		
+		// 2 - Flow vector. Will be used as an analog to the forward vector
+		//                  of a per-seed flow-aligned coordinate frame.
+		glm::vec3 w = glm::vec3( it->dx, it->dy, it->dz );
+		instances.push_back( w );
 	}
+
+	// set up VAO
+	glBindVertexArray(VAO);
+
+		// Bind buffer for vertex info and fill it
+		glBindBuffer(GL_ARRAY_BUFFER, VBO);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW);
+
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
+
+		// Position attribute
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)offsetof(Vertex, position));
+		glEnableVertexAttribArray(0);
+		glVertexAttribDivisor(0, 0);
+		// Normal attribute
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, normal)));
+		glEnableVertexAttribArray(1);
+		glVertexAttribDivisor(1, 0);
+		// Texture coordinate attribute
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (GLvoid*)(offsetof(Vertex, texture)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribDivisor(2, 0);
+
+
+		// Bind buffer for instance info and fill it
+		glBindBuffer(GL_ARRAY_BUFFER, UBO);
+		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_DYNAMIC_DRAW);
+
+		// Instance base location attribute
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)(sizeof(vec3) * 0));
+		glEnableVertexAttribArray(3);
+		glVertexAttribDivisor(3, 1);
+
+		// Instance w vector attribute
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)(sizeof(vec3) * 1));
+		glEnableVertexAttribArray(4);
+		glVertexAttribDivisor(4, 1);
+
+	glBindVertexArray(0);
 	
 	geometryChange = false;
 	linesGenerated = true;
-	ilInit = false;
-	std::cout << "done (" << vertices_flat.size() / 3 << " vertices generated)" << std::endl;
 
+	std::cout << "done (" << vertices.size() << " vertices generated)" << std::endl;
+
+}
+
+void Slice::insertDirectionalGeometry()
+{
+		Icosphere sphere;
+		sphere.create(3);
+
+		Vertex v;
+
+		for (auto &vert : sphere.getVertices())
+		{
+			v.position = vert;
+			v.normal = normalize(vert); // normal for a vertex on a unit sphere is just the vertex position
+			v.texture = vec2(0.f, 0.f);
+			vertices.push_back(v);
+		}
+
+		GLsizei indexCount = 0;
+
+		for (auto &i : sphere.getIndices())
+		{
+			indices.push_back(offset + i);
+			indexCount++;
+		}
+
+		offset += sphere.getVertices().size();
+
+		return indexCount;
 }
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )
 {	
 	if( geometryChange || !linesGenerated ) 
-		generateHairs( lengthMultiplier );	
+	{
+		vertices.clear();		
+		indices.clear();
+		indices_offsets.clear();		
+		counts.clear();
+
+		std::vector<GLfloat> vertices_flat;
+		std::vector<GLsizei> first;
+
+		GLint offset = 0;
+
+		GLsizei nVerts = 2;
+
+		mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
+
+		std::cout << "Generating geometry for " << seedCount() << " line glyphs... ";
+		std::vector<Seed>::iterator it;
+		for (it = seeds.begin(); it != seeds.end(); ++it)
+		{
+			vec4 base = trans * vec4( it->x, it->y, 0.0f, 1.0f );
+			vertices_flat.push_back( base.x );
+			vertices_flat.push_back( base.y );
+			vertices_flat.push_back( base.z );
+
+			vec4 tip = trans * vec4( it->x + ( it->dx * lengthMultiplier ),
+									 it->y + ( it->dy * lengthMultiplier ),
+									 it->dz * lengthMultiplier,
+									 1.0f );
+
+			vertices_flat.push_back( tip.x );
+			vertices_flat.push_back( tip.y );
+			vertices_flat.push_back( tip.z );
+
+			first.push_back( offset );
+			offset += nVerts;
+			counts.push_back( nVerts );
+		}
 		
-	if( !ilInit )
+		geometryChange = false;
+		linesGenerated = true;
+
 		this->il = new IlluminatedLines(seeds.size(), vertices_flat.size() / 3, first, counts, vertices_flat, NULL, lightModel);
-	else
+
+		ilInit = false;
+	}
+
+	if( ilInit )
 		il->setLightingModel(lightModel);
 
 	doIL = true;
 }
 
-void Slice::renderPL( float lengthMultiplier )
+void Slice::renderPL()
 {
 	if( geometryChange || !linesGenerated ) 
-		generateHairs( lengthMultiplier );	
+		generateHairs();	
 
-	doIL = true;
+	doIL = false;
+	doLines = true;
+	use_texture = false;
 }
 
 void Slice::renderPT( int segments )
@@ -414,7 +520,7 @@ void Slice::renderPT( int segments )
 	if (geometryChange || !tubesGenerated)
 		generateTubes( segments );
 
-	doIL = false;
+	doIL = doLines = false;
 	use_texture = false;
 }
 
@@ -423,7 +529,7 @@ void Slice::renderRT( int segments, float stripe_pairs_per_mm, vec3 stripe_color
 	if( geometryChange || !tubesGenerated )
 		generateTubes( segments );
 
-	doIL = false;
+	doIL = doLines = false;
 	use_texture = true;
 
 	tex = new Texture();
@@ -434,12 +540,12 @@ void Slice::renderRT( int segments, float stripe_pairs_per_mm, vec3 stripe_color
 	tex->setMagFilter(GL_NEAREST);
 }
 
-void Slice::renderSH( float lengthMultiplier )
+void Slice::renderSH()
 {
 	if (geometryChange || !tubesGenerated)
 		generateTubes(8);
 
-	doIL = false;
+	doIL = doLines = false;
 	use_texture = false;
 }
 
@@ -496,7 +602,7 @@ void Slice::redraw()
 		
 		glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
 
-		glDrawElementsInstanced(GL_TRIANGLES,											// rendering triangle primitives
+		glDrawElementsInstanced(doLines ? GL_LINES : GL_TRIANGLES,											// rendering triangle primitives
 								indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
 								GL_UNSIGNED_INT,										// indices array type is unsigned int
 								(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER

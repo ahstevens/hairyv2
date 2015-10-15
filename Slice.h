@@ -36,12 +36,12 @@ public:
 	void updateOrientation(glm::vec3 orientation);
 
 	void renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier = 1.0f );
-	void renderPL( float lengthMultiplier = 1.0f );
+	void renderPL();
 	void renderPT( int segments = 8);
 	void renderRT( int segments = 8, float stripe_pairs_per_mm = 1.f, 
 		glm::vec3 stripe_color1 = glm::vec3(1.f, 1.f, 1.f),
 		glm::vec3 stripe_color2 = glm::vec3(0.f, 0.f, 0.f));
-	void renderSH( float lengthMultiplier = 1.0f );
+	void renderSH();
 
 	void setILPVMatrix(float * pM, float *vM);
 
@@ -49,7 +49,8 @@ public:
 
 private:
 	void generateTubes( int segments = 8 );
-	void generateHairs( float lengthMultiplier = 1.0f );
+	void generateHairs();
+	void insertDirectionalGeometry(std::vector<Vertex> &v, std::vector<GLuint> i, );
 
 	std::vector<glm::vec2> circle( int segments );
 
@@ -57,13 +58,11 @@ private:
 
 	std::vector<Seed> seeds;              // the seeds to populate the Slice
 
-	std::vector<GLfloat> vertices_flat;     // a float array of vertices for Illumnated Lines
-	std::vector<GLsizei> first;               // the array of starting indices for Illuminated Lines
 	std::vector<glm::vec3> instances;
 
 	GLsizei directionalIndicesCount;      // number of indices used to render the directionality geometry
 
 	float width, height;                  // dimensions of the slice
 
-	bool doIL, ilInit, geometryChange, tubesGenerated, linesGenerated, directionality;
+	bool doIL, ilInit, doLines, geometryChange, tubesGenerated, linesGenerated, directionality;
 };

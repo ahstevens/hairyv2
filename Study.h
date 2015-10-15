@@ -62,7 +62,7 @@ private:
 
 	int draw_halos, cycle_light, orient_probe, draw_probe;
 
-	Shader *lightingShader, *haloShader, *hogShader, *normalShader;
+	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader;
 
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
