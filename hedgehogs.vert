@@ -15,7 +15,15 @@ uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-uniform vec4 lightPos;
+struct Light {
+	vec4 position;
+
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+};
+
+uniform Light light;
 
 uniform float lengthMult;
 uniform float thicknessMult;
@@ -28,7 +36,7 @@ uniform float offset;
 uniform bool doShadows;
 
 // Adapted from OpenGL Red Book Ch. 14, pg. 583-584
-mat4 makeShadowMatrix(vec4 plane, vec4 light)
+mat4 makeShadowMatrix(vec4 plane, vec4 L)
 {
     float  dist;
     mat4  shadowMat;
@@ -39,7 +47,7 @@ mat4 makeShadowMatrix(vec4 plane, vec4 light)
 	//            ( light.y * plane.normal.y ) + 
 	//            ( light.z * plane.normal.z ) + 
 	//            ( light.w * plane.distance )
-    dist = dot( light, plane );
+    dist = dot( L, plane );
 
 	float plane_normal_x = plane[ 0 ];
 	float plane_normal_y = plane[ 1 ];
@@ -50,36 +58,36 @@ mat4 makeShadowMatrix(vec4 plane, vec4 light)
 	// of the OpenGL Red Book, 3rd Ed.
 
 	// Column 1
-    shadowMat[ 0 ].x = dist - light.x * plane_normal_x;
-    shadowMat[ 0 ].y =      - light.y * plane_normal_x;
-    shadowMat[ 0 ].z =      - light.z * plane_normal_x;
-    shadowMat[ 0 ].w =      - light.w * plane_normal_x;
+    shadowMat[ 0 ].x = dist - L.x * plane_normal_x;
+    shadowMat[ 0 ].y =      - L.y * plane_normal_x;
+    shadowMat[ 0 ].z =      - L.z * plane_normal_x;
+    shadowMat[ 0 ].w =      - L.w * plane_normal_x;
 
 	// Column 2
-    shadowMat[ 1 ].x =      - light.x * plane_normal_y;
-    shadowMat[ 1 ].y = dist - light.y * plane_normal_y;
-    shadowMat[ 1 ].z =      - light.z * plane_normal_y;
-    shadowMat[ 1 ].w =      - light.w * plane_normal_y;
+    shadowMat[ 1 ].x =      - L.x * plane_normal_y;
+    shadowMat[ 1 ].y = dist - L.y * plane_normal_y;
+    shadowMat[ 1 ].z =      - L.z * plane_normal_y;
+    shadowMat[ 1 ].w =      - L.w * plane_normal_y;
 
 	// Column 3
-    shadowMat[ 2 ].x =      - light.x * plane_normal_z;
-    shadowMat[ 2 ].y =      - light.y * plane_normal_z;
-    shadowMat[ 2 ].z = dist - light.z * plane_normal_z;
-    shadowMat[ 2 ].w =      - light.w * plane_normal_z;
+    shadowMat[ 2 ].x =      - L.x * plane_normal_z;
+    shadowMat[ 2 ].y =      - L.y * plane_normal_z;
+    shadowMat[ 2 ].z = dist - L.z * plane_normal_z;
+    shadowMat[ 2 ].w =      - L.w * plane_normal_z;
 
 	// Column 4
-    shadowMat[ 3 ].x =      - light.x * plane_distance;    
-    shadowMat[ 3 ].y =      - light.y * plane_distance;    
-    shadowMat[ 3 ].z =      - light.z * plane_distance;    
-    shadowMat[ 3 ].w = dist - light.w * plane_distance;
+    shadowMat[ 3 ].x =      - L.x * plane_distance;    
+    shadowMat[ 3 ].y =      - L.y * plane_distance;    
+    shadowMat[ 3 ].z =      - L.z * plane_distance;    
+    shadowMat[ 3 ].w = dist - L.w * plane_distance;
 
     return shadowMat;
 }
 
 void main()
 {
-	vec3 lightU = normalize(cross(vec3(0.f, 1.f, 0.f), lightPos.xyz));
-	vec3 lightV = normalize(cross(lightPos.xyz, lightU));
+	vec3 lightU = normalize(cross(vec3(0.f, 1.f, 0.f), light.position.xyz));
+	vec3 lightV = normalize(cross(light.position.xyz, lightU));
 			
 
 	vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
@@ -98,7 +106,7 @@ void main()
 
 	if(doShadows)
 	{
-		mat4 shadow = makeShadowMatrix( vec4(0.f, 0.f, 1.f, offset), lightPos);
+		mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset), light.position);
 		
 		coordFrameTrans = trans * shadow * coordFrameTrans;
 

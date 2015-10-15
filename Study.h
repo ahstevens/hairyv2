@@ -29,6 +29,10 @@ private:
 
 	~Study();
 
+	void mainLoop();
+
+	void initGL(Shader *s);
+
 	static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 	void key_process(GLFWwindow* window, int key, int scancode, int action, int mode);
 

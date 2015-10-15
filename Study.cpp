@@ -87,85 +87,52 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 
 	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
 
-	// Build transformation matrix to position slices in middle of 2000-unit-deep clipping volume and scale to fill screen
-	float scaleRatio = (dist_mm + 1000.f) / dist_mm;
-	glm::mat4 translate_mat = glm::translate( glm::mat4( 1.f ), glm::vec3( 0.0f, 0.0f, -1000.0f ) ); // Identity matrix
-	glm::mat4 scale_mat     = glm::scale( glm::mat4( 1.f ), glm::vec3( scaleRatio ) ); // Identity matrix
-	glm::mat4 xform_mat     = translate_mat * scale_mat;
+	this->mainLoop();
+}
 
-    // main loop
-    while (!glfwWindowShouldClose(window))
-    {
-        // Calculate deltatime of current frame
-        GLfloat currentFrame = (GLfloat) glfwGetTime();
-        deltaTime = currentFrame - lastFrame;
-        lastFrame = currentFrame;
+void Study::mainLoop()
+{
+	// main loop
+	while (!glfwWindowShouldClose(window))
+	{
+		// Calculate deltatime of current frame
+		GLfloat currentFrame = (GLfloat)glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
 
 		polhemus->update();
 
-        // Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
-        glfwPollEvents();
-        do_movement();
+		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
+		glfwPollEvents();
+		do_movement();
 
-		// Create camera transformations
-		glm::mat4 view = camera.getViewMatrix();
-		view = view * xform_mat;
-		glm::mat4 projection = camera.getProjectionMatrix();
-		// Get the uniform locations
-						
-		if(cycle_light) light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
-		else light.setPosition( 1.f, 1.f, 1.f );
+
+		if (cycle_light) light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
+		else light.setPosition(1.f, 1.f, 1.f);
 
 		if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN ||
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG ||
 			trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG)
 		{
 			lightingShader->Off();
-			trial.passThroughPVMatrix((float*)glm::value_ptr(projection), 
-									  (float*)glm::value_ptr(view));
+			
+			// Create camera transformations
+			glm::mat4 view = camera.getViewMatrix();
+			glm::mat4 projection = camera.getProjectionMatrix();
+
+			trial.passThroughPVMatrix((float*)glm::value_ptr(projection),
+				(float*)glm::value_ptr(view));
 			trial.display();
 		}
 		else if (trial.getRenderMode() == Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS)
 		{
-			// Clear the colorbuffer
-			glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
-			//glClearColor(0.f, 0.f, 0.f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			initGL(hogShader);
 
-
-			// Use cooresponding shader when setting uniforms/drawing objects
-			hogShader->Use();
-			trial.setShader(hogShader);
-
-			// Get uniform matrix locations in shader
-			GLint viewLoc = glGetUniformLocation(hogShader->Program, "view");
-			GLint projLoc = glGetUniformLocation(hogShader->Program, "projection");
-			// Pass the matrices to the shader
-			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-			// Pass light and camera positions to shader
-			glm::vec4 lightPos = light.getPosition();
-			glUniform4f(glGetUniformLocation(hogShader->Program, "lightPos"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
-			glm::vec3 cameraPos = camera.getPosition();
-			glUniform3f(glGetUniformLocation(hogShader->Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-
-			glm::vec3 ambientColor = light.getAmbientColor();
-			glm::vec3 diffuseColor = light.getDiffuseColor();
-			glm::vec3 specularColor = light.getSpecularColor();
-			glUniform3f(glGetUniformLocation(hogShader->Program, "light.ambient"), ambientColor.r, ambientColor.g, ambientColor.b);
-			glUniform3f(glGetUniformLocation(hogShader->Program, "light.diffuse"), diffuseColor.r, diffuseColor.g, diffuseColor.b);
-			glUniform3f(glGetUniformLocation(hogShader->Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
-
-
-
-			glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), lengthMultiplier);
-			glUniform1f(glGetUniformLocation(hogShader->Program, "thicknessMult"), thicknessMultiplier);
-			glUniform1f(glGetUniformLocation(hogShader->Program, "directionalGeomScale"), directionalGeomScale);
-			
 			glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
 
 			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
+
+			trial.setShader(hogShader);
 
 			trial.display();
 
@@ -175,97 +142,102 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 		}
 		else
 		{
-			// Clear the colorbuffer
-			glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
-			//glClearColor(0.f, 0.f, 0.f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			this->initGL(lightingShader);
 
-
-			// Use cooresponding shader when setting uniforms/drawing objects
-			lightingShader->Use();
-
-			
-			// Get uniform matrix locations in shader
-			GLint viewLoc  = glGetUniformLocation(lightingShader->Program,  "view");
-			GLint projLoc  = glGetUniformLocation(lightingShader->Program,  "projection");
-			// Pass the matrices to the shader
-			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-			// Pass light and camera positions to shader
-			glm::vec4 lightPos = light.getPosition();
-			glUniform4f(glGetUniformLocation(lightingShader->Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
-			glm::vec3 cameraPos = camera.getPosition();
-			glUniform3f(glGetUniformLocation(lightingShader->Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
-
-
-			glm::vec3 ambientColor = light.getAmbientColor();
-			glm::vec3 diffuseColor = light.getDiffuseColor();
-			glm::vec3 specularColor = light.getSpecularColor(); 
-			glUniform3f(glGetUniformLocation(lightingShader->Program, "light.ambient"),  ambientColor.r, ambientColor.g, ambientColor.b);
-			glUniform3f(glGetUniformLocation(lightingShader->Program, "light.diffuse"),  diffuseColor.r, diffuseColor.g, diffuseColor.b);
-			glUniform3f(glGetUniformLocation(lightingShader->Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
-
-
-		
-			glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), lengthMultiplier);
-			glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), thicknessMultiplier);
-			glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), directionalGeomScale);
-
-			if(draw_halos)
+			if (draw_halos)
 			{
 				// reverse the vertex winding order
-				glFrontFace( GL_CW );
+				glFrontFace(GL_CW);
 				trial.setShader(haloShader);
 				haloShader->Use();
 				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), lengthMultiplier);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), thicknessMultiplier);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), directionalGeomScale);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+
+				// Create camera transformations
+				glm::mat4 view = camera.getViewMatrix();
+				glm::mat4 projection = camera.getProjectionMatrix();
+
 				glUniformMatrix4fv(glGetUniformLocation(haloShader->Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
 				glUniformMatrix4fv(glGetUniformLocation(haloShader->Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 				// Draw model using the halo shader (regular model will be drawn on top)
 				trial.display();
 				// reset vertex winding order
-				glFrontFace( GL_CCW );
+				glFrontFace(GL_CCW);
 			}
-			
+
 			if (orient_probe)
 			{
 				lightingShader->Use();
 				glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 60.f);
 				glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 10.f);
 				glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 7.5f);
-				probe.setOrientation( normalize( polhemus->getQuaternion() ) );
-								
-				glm::quat p = glm::normalize( probe.getOrientation() );
-				glm::quat t = glm::normalize( trainingTarget.getOrientation() );
-				glm::vec3 vecXp = glm::rotate( p, glm::vec3( 1.f, 0.f, 0.f ) );
-				glm::vec3 vecXt = glm::rotate( t, glm::vec3( 1.f, 0.f, 0.f ) );
-				float cosTheta = dot( vecXp, vecXt );
+				probe.setOrientation(normalize(polhemus->getQuaternion()));
 
-				if( cosTheta > 0.9962f )
-					trainingTarget.setColor( 0.f, 1.f, 0.f );
+				glm::quat p = glm::normalize(probe.getOrientation());
+				glm::quat t = glm::normalize(trainingTarget.getOrientation());
+				glm::vec3 vecXp = glm::rotate(p, glm::vec3(1.f, 0.f, 0.f));
+				glm::vec3 vecXt = glm::rotate(t, glm::vec3(1.f, 0.f, 0.f));
+				float cosTheta = dot(vecXp, vecXt);
+
+				if (cosTheta > 0.9962f)
+					trainingTarget.setColor(0.f, 1.f, 0.f);
 				else
-					trainingTarget.setColor( 1.f, 1.f, 1.f );
+					trainingTarget.setColor(1.f, 1.f, 1.f);
 
-				if( draw_probe ) probe.redraw();
+				if (draw_probe) probe.redraw();
 				trainingTarget.redraw();
 			}
 			else
 			{
 				lightingShader->Use();
-				trial.setShader(lightingShader);				
+				trial.setShader(lightingShader);
 				trial.display();
 			}
 		}
 
-        // Swap the screen buffers
-        glfwSwapBuffers(window);
-    }
+		// Swap the screen buffers
+		glfwSwapBuffers(window);
+	}
 
-    // Terminate GLFW, clearing any resources allocated by GLFW.
-    glfwTerminate();
+	// Terminate GLFW, clearing any resources allocated by GLFW.
+	glfwTerminate();
+}
+
+void Study::initGL(Shader *s)
+{
+	// Clear the colorbuffer
+	glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	// Use cooresponding shader when setting uniforms/drawing objects
+	s->Use();
+
+	// Create camera transformations
+	glm::mat4 view = camera.getViewMatrix();
+	glm::mat4 projection = camera.getProjectionMatrix();
+
+	// Pass the matrices to the shader
+	glUniformMatrix4fv(glGetUniformLocation(s->Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glUniformMatrix4fv(glGetUniformLocation(s->Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+	// Pass light and camera positions to shader
+	glm::vec4 lightPos = light.getPosition();
+	glUniform4f(glGetUniformLocation(s->Program, "light.position"), lightPos.x, lightPos.y, lightPos.z, lightPos.w);
+	glm::vec3 cameraPos = camera.getPosition();
+	glUniform3f(glGetUniformLocation(s->Program, "viewPos"), cameraPos.x, cameraPos.y, cameraPos.z);
+
+	glm::vec3 ambientColor = light.getAmbientColor();
+	glm::vec3 diffuseColor = light.getDiffuseColor();
+	glm::vec3 specularColor = light.getSpecularColor();
+	glUniform3f(glGetUniformLocation(s->Program, "light.ambient"), ambientColor.r, ambientColor.g, ambientColor.b);
+	glUniform3f(glGetUniformLocation(s->Program, "light.diffuse"), diffuseColor.r, diffuseColor.g, diffuseColor.b);
+	glUniform3f(glGetUniformLocation(s->Program, "light.specular"), specularColor.r, specularColor.g, specularColor.b);
+
+	glUniform1f(glGetUniformLocation(s->Program, "lengthMult"), lengthMultiplier);
+	glUniform1f(glGetUniformLocation(s->Program, "thicknessMult"), thicknessMultiplier);
+	glUniform1f(glGetUniformLocation(s->Program, "directionalGeomScale"), directionalGeomScale);
 }
 
 void Study::training()
