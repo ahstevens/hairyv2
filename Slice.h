@@ -50,7 +50,7 @@ public:
 private:
 	void generateTubes( int segments = 8 );
 	void generateHairs();
-	void insertDirectionalGeometry(std::vector<Vertex> &v, std::vector<GLuint> i, );
+	GLsizei insertDirectionalGeometry( std::vector<Vertex> &v, std::vector<GLuint> &i, GLsizei &offset );
 
 	std::vector<glm::vec2> circle( int segments );
 
@@ -64,5 +64,5 @@ private:
 
 	float width, height;                  // dimensions of the slice
 
-	bool doIL, ilInit, doLines, geometryChange, tubesGenerated, linesGenerated, directionality;
+	bool doIL, ilInit, doLines, geometryChange, tubesGenerated, linesGenerated, ilGenerated, directionality;
 };
