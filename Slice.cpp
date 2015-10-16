@@ -19,7 +19,7 @@ Slice::Slice(void)
 	width = height = 1.0f;
 	doIL = ilInit = doLines = false;
 	geometryChange = directionality = true;
-	linesGenerated = tubesGenerated = false;
+	linesGenerated = ilGenerated = tubesGenerated = false;
 
 	il = NULL;
 }
@@ -30,20 +30,20 @@ Slice::Slice( float width, float height )
 	this->height = height;
 	doIL = ilInit = doLines = false;
 	geometryChange = directionality = true;
-	linesGenerated = tubesGenerated = false;
+	linesGenerated = ilGenerated = tubesGenerated = false;
 
 	il = NULL;
 }
 
 Slice::Slice( float width, float height, std::vector<Seed> seeds )
-	: width( width ), height( height ), seeds( seeds ), doIL( false ), ilInit( false ), geometryChange( true ), linesGenerated( false ), tubesGenerated( false )
+	: width( width ), height( height ), seeds( seeds ), doIL( false ), ilInit( false ), geometryChange( true ), linesGenerated( false ), ilGenerated( false ), tubesGenerated( false )
 {
 	this->width = width;
 	this->height = height;
 	this->seeds = seeds;
 	doIL = ilInit = doLines = false;
 	geometryChange = directionality = true;
-	linesGenerated = tubesGenerated = false;
+	linesGenerated = ilGenerated = tubesGenerated = false;
 
 	il = NULL;
 }
@@ -159,10 +159,8 @@ void Slice::generateTubes(int segments)
 	GLsizei offset = 0;
 
 	// create directionality geometry
-	if (directionality)
-	{
-
-	}
+	if (directionality) directionalIndicesCount = insertDirectionalGeometry( vertices, indices, offset );
+	else directionalIndicesCount = 0;
 
 	// make a 2D circle to generate the "ribs" of the tube
 	std::vector<vec2> circle = this->circle(segments);
@@ -319,6 +317,8 @@ void Slice::generateTubes(int segments)
 
 	geometryChange = false;
 	tubesGenerated = true;
+	linesGenerated = false;
+
 	//std::cout << "done." << std::endl;
 }
 
@@ -330,13 +330,15 @@ void Slice::generateHairs()
 	indices_offsets.clear();
 	counts.clear();
 
-	GLint offset = 0;
+	GLsizei offset = 0;
 
 	GLsizei nVerts = 2;
 
 	Vertex tV; // temp Vertex
 	
 	std::cout << "Generating geometry for " << seedCount() << " line glyphs... ";
+
+	directionalIndicesCount = insertDirectionalGeometry( vertices, indices, offset );
 
 	tV.position = vec3( 0.f, 0.f, 0.f );
 	tV.normal = vec3( 0.f, 0.f, 0.f );
@@ -417,24 +419,26 @@ void Slice::generateHairs()
 	
 	geometryChange = false;
 	linesGenerated = true;
+	tubesGenerated = false;
 
 	std::cout << "done (" << vertices.size() << " vertices generated)" << std::endl;
 
 }
 
-void Slice::insertDirectionalGeometry()
+
+GLsizei Slice::insertDirectionalGeometry( std::vector<Vertex> &vertices, std::vector<GLuint> &indices, GLsizei &offset )
 {
 		Icosphere sphere;
 		sphere.create(3);
 
-		Vertex v;
+		Vertex tempV;
 
 		for (auto &vert : sphere.getVertices())
 		{
-			v.position = vert;
-			v.normal = normalize(vert); // normal for a vertex on a unit sphere is just the vertex position
-			v.texture = vec2(0.f, 0.f);
-			vertices.push_back(v);
+			tempV.position = vert;
+			tempV.normal = normalize(vert); // normal for a vertex on a unit sphere is just the vertex position
+			tempV.texture = vec2(0.f, 0.f);
+			vertices.push_back(tempV);
 		}
 
 		GLsizei indexCount = 0;
@@ -452,7 +456,7 @@ void Slice::insertDirectionalGeometry()
 
 void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMultiplier )
 {	
-	if( geometryChange || !linesGenerated ) 
+	if( geometryChange || !ilGenerated ) 
 	{
 		vertices.clear();		
 		indices.clear();
@@ -461,10 +465,14 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 
 		std::vector<GLfloat> vertices_flat;
 		std::vector<GLsizei> first;
-
-		GLint offset = 0;
+		
+		GLsizei offset = 0;
 
 		GLsizei nVerts = 2;
+		
+		directionalIndicesCount = insertDirectionalGeometry( vertices, indices, offset );
+
+		offset = 0;
 
 		mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
 
@@ -492,7 +500,8 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 		}
 		
 		geometryChange = false;
-		linesGenerated = true;
+		linesGenerated = false;
+		ilGenerated = true;
 
 		this->il = new IlluminatedLines(seeds.size(), vertices_flat.size() / 3, first, counts, vertices_flat, NULL, lightModel);
 
@@ -501,7 +510,7 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 
 	if( ilInit )
 		il->setLightingModel(lightModel);
-
+		
 	doIL = true;
 }
 
@@ -602,7 +611,7 @@ void Slice::redraw()
 		
 		glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
 
-		glDrawElementsInstanced(doLines ? GL_LINES : GL_TRIANGLES,											// rendering triangle primitives
+		glDrawElementsInstanced(doLines ? GL_LINES : GL_TRIANGLES,						// rendering line or triangle primitives
 								indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
 								GL_UNSIGNED_INT,										// indices array type is unsigned int
 								(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER

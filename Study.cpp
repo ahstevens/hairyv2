@@ -45,7 +45,7 @@ Study::Study( GLFWwindow* window )
 	
     // Build and compile our shader programs
 	lightingShader = new Shader("materials.vert", "materials.frag");
-	lightingShader = new Shader("lines.vert", "lines.frag");
+	lineShader = new Shader("lines.vert", "lines.frag");
 	haloShader = new Shader("halo.vert", "halo.frag");
 	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
     normalShader = new Shader("normals.vert", "normals.frag", "normals.geom");
@@ -75,10 +75,10 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	glEnable(GL_CULL_FACE);
 
 	probe.setShader(lightingShader);
-	probe.renderRT(16, 0.1f);
+	probe.renderRT(8, 0.1f);
 	
 	trainingTarget.setShader(lightingShader);
-	trainingTarget.renderPT(16);
+	trainingTarget.renderPT(8);
 	trainingTarget.setOrientation(getRandomOrientation());
 	trainingTarget.setSize( 1.f, 1.01f, 1.01f );
 
@@ -180,8 +180,24 @@ void Study::mainLoop()
 				glm::vec3 vecXt = glm::rotate(t, glm::vec3(1.f, 0.f, 0.f));
 				float cosTheta = dot(vecXp, vecXt);
 
-				if (cosTheta > 0.9962f)
+				if ( cosTheta > cos( glm::radians(5.f) ) )
+				{
+					glm::vec3 yellow = glm::vec3( 1.f, 1.f, 0.f );
+					glm::vec3 green  = glm::vec3( 0.f, 1.f, 0.f );
 					trainingTarget.setColor(0.f, 1.f, 0.f);
+				}
+				else if ( cosTheta > cos( glm::radians(15.f) ) )
+				{
+					trainingTarget.setColor(1.f, 1.f, 0.f);
+				}
+				else  if( cosTheta > cos( glm::radians(90.f) ) )
+				{
+					glm::vec3 white  = glm::vec3( 1.f, 1.f, 1.f );
+					glm::vec3 yellow = glm::vec3( 1.f, 1.f, 0.f );
+					float a = cosTheta / abs( cos( 90.f ) - cos( 15.f ) );
+					std::cout << a << std::endl;
+					trainingTarget.setColor( mix( white, yellow, a ) );
+				}
 				else
 					trainingTarget.setColor(1.f, 1.f, 1.f);
 
@@ -196,7 +212,11 @@ void Study::mainLoop()
 			}
 
 			break;
+			
 		case Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN:
+			this->initGL(lineShader);
+			trial.setShader(lineShader);
+			trial.display();
 			break;
 		}
 
