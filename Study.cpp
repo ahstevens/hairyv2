@@ -128,7 +128,7 @@ void Study::render()
 	case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN:
 	case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG:
 	case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG:
-		lightingShader->Off();
+		Shader::Off();
 
 		trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
 			(float*)glm::value_ptr(camera.getViewMatrix()));

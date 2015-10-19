@@ -91,7 +91,7 @@ public:
     void Use() { glUseProgram(this->Program); }
 
 	// Turn off shader
-    void Off() { glUseProgram(0); }
+    static void Off() { glUseProgram(0); }
 
 private:
     void checkCompileErrors(GLuint shader, std::string type)
