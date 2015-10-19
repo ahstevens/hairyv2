@@ -75,90 +75,61 @@ void Probe::generateProbe(int segments)
 	// make a 2D circle to generate the "ribs" of the tube
 	std::vector<vec2> circle = this->circle(segments);
 
-	// push origin
-	tV.position = vec3(0.f, 0.f, 0.f);
-	tV.normal = vec3(0.f, 0.f, -1.f);
+	// vertical probe plane
+	tV.position = vec3(0.f, 0.5f, 0.f);
+	tV.normal = vec3(-1.f, 0.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
-
 	vertices.push_back(tV);
 
-	// push first rib for base endcap
-	for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
-	{
-		tV.position = vec3(*iter, 0.f);
-		tV.normal = vec3(0.f, 0.f, -1.f);
-		tV.texture = vec2(0.f, 0.f);
-		vertices.push_back(tV);
-	}
-
-	// push base rib for tube		
-	for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
-	{
-		tV.position = vec3(*iter, 0.f);
-		tV.normal = normalize(vec3(*iter, 0.f));
-		tV.texture = vec2(0.f, 0.f);
-		vertices.push_back(tV);
-	}
-
-	// push tip rib for tube		
-	for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
-	{
-		tV.position = vec3(*iter, 1.f);
-		tV.normal = normalize(vec3(*iter, 0.f));
-		tV.texture = vec2(1.f, 0.f);
-		vertices.push_back(tV);
-	}
-
-	// push tip rib for tip endcap		
-	for (std::vector<vec2>::iterator iter = circle.begin(); iter != circle.end(); ++iter)
-	{
-		tV.position = vec3(*iter, 1.f);
-		tV.normal = vec3(0.f, 0.f, 1.f);
-		tV.texture = vec2(0.f, 0.f);
-		vertices.push_back(tV);
-	}
-
-	// push tip centerpoint
-	tV.position = vec3(0.f, 0.f, 1.f);
-	tV.normal = vec3(0.f, 0.f, 1.f);
-	tV.texture = vec2(0.f, 0.f);
-
+	tV.position = vec3(0.f, -0.5f, 0.f);
+	tV.texture = vec2(0.f, 1.f);
 	vertices.push_back(tV);
+
+	tV.position = vec3(0.f, -0.5f, 1.f);
+	tV.texture = vec2(1.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.f, 0.5f, 1.f);
+	tV.texture = vec2(1.f, 0.f);
+	vertices.push_back(tV);
+
+	// horizontal probe plane
+	tV.position = vec3(0.5f, 0.f, 0.f);
+	tV.normal = vec3(0.f, 1.f, 0.f);
+	tV.texture = vec2(0.f, 0.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(-0.5f, 0.f, 0.f);
+	tV.texture = vec2(0.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(-0.5f, 0.f, 1.f);
+	tV.texture = vec2(1.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, 0.f, 1.f);
+	tV.texture = vec2(1.f, 0.f);
+	vertices.push_back(tV);
+
+
 
 	//+++++++++++++++++++++++++++++++ INDICES +++++++++++++++++++++++++++++
 
-	// triangles for front endcap
-	for (GLsizei i = 1; i < segments + 1; ++i)
-	{
-		indices.push_back(offset);
-		indices.push_back(offset + i % segments + 1);
-		indices.push_back(offset + i);
-	}
+	indices.push_back(offset);
+	indices.push_back(offset + 1);
+	indices.push_back(offset + 2);
+	indices.push_back(offset + 2);
+	indices.push_back(offset + 3);
+	indices.push_back(offset);
 
-	offset += segments + 1;
+	offset += 4;
 
-	// create strip of triangles connecting ribs together
-	for (GLsizei i = 0; i < segments; ++i) {
-		//triangle 1
-		indices.push_back(offset + i);
-		indices.push_back(offset + (i + 1) % segments);
-		indices.push_back(offset + (i + 1) % segments + segments);
-		//triangle 2
-		indices.push_back(offset + (i + 1) % segments + segments);
-		indices.push_back(offset + i + segments);
-		indices.push_back(offset + i);
-	}
-
-	offset += segments * 2;
-
-	// triangles for back endcap
-	GLsizei end = offset + segments;
-	for (GLsizei i = 0; i < segments; ++i)
-	{
-		indices.push_back(end);
-		indices.push_back(offset + i);
-		indices.push_back(offset + (i + 1) % segments);
-	}
+	indices.push_back(offset);
+	indices.push_back(offset + 1);
+	indices.push_back(offset + 2);
+	indices.push_back(offset + 2);
+	indices.push_back(offset + 3);
+	indices.push_back(offset);
 
 	//+++++++++++++++++++++++++++++++ INSTANCE ATTRIBS +++++++++++++++++++++++++++++
 	
@@ -239,6 +210,7 @@ void Probe::renderRT( int segments, float stripe_pairs_per_mm, vec3 stripe_color
 	
 	int nStripes = (int) (stripe_pairs_per_mm * 2 * 10);
 	tex->stripes1D(nStripes, stripe_color1, stripe_color2);
+	tex->checker(4, 4);
 	tex->setMinFilter(GL_NEAREST);
 	tex->setMagFilter(GL_NEAREST);
 }
@@ -278,12 +250,13 @@ void Probe::redraw()
 
 		
 	glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
-
+	glDisable(GL_CULL_FACE);
 	glDrawElementsInstanced(GL_TRIANGLES,											// rendering triangle primitives
 							indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
 							GL_UNSIGNED_INT,										// indices array type is unsigned int
 							(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
 							1);											// number of instances to render
+	glEnable(GL_CULL_FACE);
 	glBindVertexArray(0);
 
 	if (use_texture) tex->disable();	
