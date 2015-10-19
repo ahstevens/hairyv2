@@ -301,7 +301,7 @@ void Slice::generateTubes(int segments)
 
 		// Bind buffer for instance info and fill it
 		glBindBuffer(GL_ARRAY_BUFFER, UBO);
-		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_STATIC_DRAW);
 
 		// Instance base location attribute
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)(sizeof(vec3) * 0));
@@ -324,37 +324,41 @@ void Slice::generateTubes(int segments)
 
 void Slice::generateHairs()
 {
-
 	vertices.clear();
 	indices.clear();
-	indices_offsets.clear();
-	counts.clear();
 
-	GLsizei offset = 0;
+	//std::cout << "Generating geometry for tube glyphs... ";
 
-	GLsizei nVerts = 2;
+	//+++++++++++++++++++++++++++++++ GEOMETRY ++++++++++++++++++++++++++++++++
 
 	Vertex tV; // temp Vertex
-	
-	std::cout << "Generating geometry for " << seedCount() << " line glyphs... ";
+	GLsizei offset = 0;
 
-	directionalIndicesCount = insertDirectionalGeometry( vertices, indices, offset );
+	// create directionality geometry
+	if (directionality) directionalIndicesCount = insertDirectionalGeometry(vertices, indices, offset);
+	else directionalIndicesCount = 0;
 
-	tV.position = vec3( 0.f, 0.f, 0.f );
-	tV.normal = vec3( 0.f, 0.f, 0.f );
-	tV.texture = vec2( 0.f, 0.f );
 
-	vertices.push_back( tV );
+	// push origin
+	tV.position = vec3(0.f, 0.f, 0.f);
+	tV.normal = vec3(0.f, 0.f, -1.f);
+	tV.texture = vec2(0.f, 0.f);
 
-	tV.position = vec3( 0.f, 0.f, 1.f );
-	tV.texture = vec2( 1.f, 0.f );
+	vertices.push_back(tV);
 
-	vertices.push_back( tV );
+	// push tip centerpoint
+	tV.position = vec3(0.f, 0.f, 1.f);
+	tV.normal = vec3(0.f, 0.f, 1.f);
+	tV.texture = vec2(0.f, 0.f);
 
-	indices.push_back( 0 );
-	indices.push_back( 1 );
+	vertices.push_back(tV);
 
-	//+++++++++++++++++++++++++++++++ INSTANCE ATTRIBS +++++++++++++++++++++++++++++
+	//+++++++++++++++++++++++++++++++ INDICES +++++++++++++++++++++++++++++++++
+
+	indices.push_back(offset);
+	indices.push_back(offset + 1);
+
+	//+++++++++++++++++++++++++++++++ INSTANCE ATTRIBS ++++++++++++++++++++++++
 
 	// a translation to center the slice at the origin
 	vec3 trans(-width / 2, -height / 2, 0.f);
@@ -368,21 +372,23 @@ void Slice::generateHairs()
 	for (std::vector<Seed>::iterator it = seeds.begin(); it != seeds.end(); ++it)
 	{
 		// 1 - Seed location on slice.
-		vec3 basePoint = vec3( it->x, it->y, 0.f ) + trans;
-		instances.push_back( basePoint );
-		
+		vec3 basePoint = vec3(it->x, it->y, 0.f) + trans;
+		instances.push_back(basePoint);
+
 		// 2 - Flow vector. Will be used as an analog to the forward vector
 		//                  of a per-seed flow-aligned coordinate frame.
-		glm::vec3 w = glm::vec3( it->dx, it->dy, it->dz );
-		instances.push_back( w );
+		glm::vec3 w = glm::vec3(it->dx, it->dy, it->dz);
+		instances.push_back(w);
 	}
+
+	//+++++++++++++++++++++++++++++++ DATA TRANSFER +++++++++++++++++++++++++++
 
 	// set up VAO
 	glBindVertexArray(VAO);
 
 		// Bind buffer for vertex info and fill it
 		glBindBuffer(GL_ARRAY_BUFFER, VBO);
-		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], GL_STATIC_DRAW);
@@ -403,7 +409,7 @@ void Slice::generateHairs()
 
 		// Bind buffer for instance info and fill it
 		glBindBuffer(GL_ARRAY_BUFFER, UBO);
-		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, instances.size() * sizeof(vec3), &instances[0], GL_STATIC_DRAW);
 
 		// Instance base location attribute
 		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(vec3) * 2, (GLvoid*)(sizeof(vec3) * 0));
@@ -512,6 +518,7 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 		il->setLightingModel(lightModel);
 		
 	doIL = true;
+	doLines = false;
 }
 
 void Slice::renderPL()
