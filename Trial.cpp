@@ -67,6 +67,8 @@ void Trial::sampleBiMap()
 	float yStep = 1 / density;
 
 	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the BiMap... ";
+
+	cp.clearSeeds();
 	
     for( float i = fmod( ( xSize / 2 ), xStep ); i < ( xSize + EPSILON ); i += xStep )
 	{
@@ -160,26 +162,59 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	switch (renderMode)
 	{
 	case Trial::LINES_PLAIN:
+		if (jitter < 0.24)
+		{
+			jitter = 0.25f;
+			sampleBiMap();
+		}
 		cp.renderPL();
 		break;
 	case Trial::LINES_ILLUMINATED_CYLINDER_BLINN:
+		if (jitter < 0.24)
+		{
+			jitter = 0.25f;
+			sampleBiMap();
+		}
 		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_BLINN);
 		break;
 	case Trial::LINES_ILLUMINATED_CYLINDER_PHONG:
+		if (jitter < 0.24)
+		{
+			jitter = 0.25f;
+			sampleBiMap();
+		}
 		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_PHONG);
 		break;
 	case Trial::LINES_ILLUMINATED_MAXIMUM_PHONG:
+		if (jitter < 0.24)
+		{
+			jitter = 0.25f;
+			sampleBiMap();
+		}
 		cp.renderIL(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
 		break;
 	case Trial::TUBES_PLAIN:
+		if (jitter < 0.24)
+		{
+			jitter = 0.25f;
+			sampleBiMap();
+		}
 		cp.renderPT();
 		break;
 	case Trial::TUBES_RINGED:
+		if (jitter <= 0.24)
+		{
+			jitter = 0.25f;
+			sampleBiMap();
+		}
 		cp.renderRT(8, 1.f, vec3(1.f,1.f,1.f), vec3(.1f,.1f,.1f) );
 		break;
 	case Trial::SHADOWED_HEDGEHOGS:
-		jitter = 0.f;
-		sampleBiMap();
+		if (jitter >= 0.001)
+		{
+			jitter = 0.f;
+			sampleBiMap();
+		}
 		cp.renderSH();
 		break;
 	}

@@ -30,6 +30,9 @@ Study::Study( GLFWwindow* window )
 
 	draw_halos = cycle_light = orient_probe = draw_probe = 0;
 
+	density = 0.1f;
+	jitter = 0.25f;
+
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
 	hedgehogOffset = 0.f;
@@ -138,11 +141,11 @@ void Study::render()
 	case Trial::RenderMode::SHADOWED_HEDGEHOGS:
 		initGL(hogShader);
 
-		glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), trial.getMaxLength());
+		glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), ( 1 / density ) / 2 / trial.getMaxLength());
 		glUniform1f(glGetUniformLocation(hogShader->Program, "thicknessMult"), thicknessMultiplier);
 		glUniform1f(glGetUniformLocation(hogShader->Program, "directionalGeomScale"), directionalGeomScale);
 
-		glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
+		glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
 
 		glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
 
@@ -431,7 +434,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 void Study::generateTrial(Trial::RenderMode renderMode)
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
-	trial = Trial(windowWidth, windowHeight, 0.5f, 0.25f);
+	trial = Trial(windowWidth, windowHeight, density, jitter);
 	trial.init();
 	trial.setRenderMode(renderMode);
 	std::cout << "Trial generated" << std::endl;

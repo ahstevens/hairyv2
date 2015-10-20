@@ -63,6 +63,8 @@ private:
 
 	int draw_halos, cycle_light, orient_probe, draw_probe;
 
+	float density, jitter;
+
 	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader;
 
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
