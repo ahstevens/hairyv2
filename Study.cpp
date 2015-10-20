@@ -138,9 +138,9 @@ void Study::render()
 	case Trial::RenderMode::SHADOWED_HEDGEHOGS:
 		initGL(hogShader);
 
-		glUniform1f(glGetUniformLocation(s->Program, "lengthMult"), lengthMultiplier);
-		glUniform1f(glGetUniformLocation(s->Program, "thicknessMult"), thicknessMultiplier);
-		glUniform1f(glGetUniformLocation(s->Program, "directionalGeomScale"), directionalGeomScale);
+		glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), trial.getMaxLength());
+		glUniform1f(glGetUniformLocation(hogShader->Program, "thicknessMult"), thicknessMultiplier);
+		glUniform1f(glGetUniformLocation(hogShader->Program, "directionalGeomScale"), directionalGeomScale);
 
 		glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
 
