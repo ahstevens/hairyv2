@@ -61,6 +61,8 @@ void Trial::sampleBiMap()
 {
 	shadowOffset = 0.f;
 
+	maxLength = 0.f;
+
 	float xStep = 1 / density;
 	float yStep = 1 / density;
 
@@ -99,6 +101,8 @@ void Trial::sampleBiMap()
 			cp.addSeed( seed );
 
 			if(seed.dz < shadowOffset) shadowOffset = seed.dz;
+
+			if (seed.length() > maxLength) maxLength = seed.length();
         }
 	}
 
@@ -155,25 +159,27 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 
 	switch (renderMode)
 	{
-	case Trial::TRIAL_RENDER_LINES_PLAIN:
+	case Trial::LINES_PLAIN:
 		cp.renderPL();
 		break;
-	case Trial::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN:
+	case Trial::LINES_ILLUMINATED_CYLINDER_BLINN:
 		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_BLINN);
 		break;
-	case Trial::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG:
+	case Trial::LINES_ILLUMINATED_CYLINDER_PHONG:
 		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_PHONG);
 		break;
-	case Trial::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG:
+	case Trial::LINES_ILLUMINATED_MAXIMUM_PHONG:
 		cp.renderIL(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
 		break;
-	case Trial::TRIAL_RENDER_TUBES_PLAIN:
+	case Trial::TUBES_PLAIN:
 		cp.renderPT();
 		break;
-	case Trial::TRIAL_RENDER_TUBES_RINGED:
+	case Trial::TUBES_RINGED:
 		cp.renderRT(8, 1.f, vec3(1.f,1.f,1.f), vec3(.1f,.1f,.1f) );
 		break;
-	case Trial::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
+	case Trial::SHADOWED_HEDGEHOGS:
+		jitter = 0.f;
+		sampleBiMap();
 		cp.renderSH();
 		break;
 	}
@@ -189,6 +195,11 @@ void Trial::setShader( Shader *shader )
 	cp.setShader( shader );
 }
 
+void Trial::setJitter(float jitter)
+{
+	this->jitter = jitter;
+}
+
 void Trial::passThroughPVMatrix( float *pM, float *vM )
 {
 	cp.setILPVMatrix( pM, vM );
@@ -197,6 +208,11 @@ void Trial::passThroughPVMatrix( float *pM, float *vM )
 float Trial::getShadowOffset()
 {
 	return shadowOffset;
+}
+
+float Trial::getMaxLength()
+{
+	return maxLength;
 }
 
 void Trial::display()

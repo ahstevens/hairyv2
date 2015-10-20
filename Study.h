@@ -51,7 +51,6 @@ private:
 	glm::quat getRandomOrientation();
 
 	Polhemus* polhemus;
-	//Probe probe;
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;

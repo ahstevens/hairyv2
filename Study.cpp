@@ -86,7 +86,7 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
 	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f );
 
-	generateTrial(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
+	generateTrial(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
 
 	this->mainLoop();
 }
@@ -125,9 +125,9 @@ void Study::render()
 {
 	switch (trial.getRenderMode())
 	{
-	case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN:
-	case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG:
-	case Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG:
+	case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+	case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
+	case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
 		Shader::Off();
 
 		trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
@@ -135,8 +135,12 @@ void Study::render()
 		trial.display();
 
 		break;
-	case Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS:
+	case Trial::RenderMode::SHADOWED_HEDGEHOGS:
 		initGL(hogShader);
+
+		glUniform1f(glGetUniformLocation(s->Program, "lengthMult"), lengthMultiplier);
+		glUniform1f(glGetUniformLocation(s->Program, "thicknessMult"), thicknessMultiplier);
+		glUniform1f(glGetUniformLocation(s->Program, "directionalGeomScale"), directionalGeomScale);
 
 		glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*lengthMultiplier + hedgehogOffset);
 
@@ -151,8 +155,8 @@ void Study::render()
 		trial.display();
 
 		break;
-	case Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN:
-	case Trial::RenderMode::TRIAL_RENDER_TUBES_RINGED:
+	case Trial::RenderMode::TUBES_PLAIN:
+	case Trial::RenderMode::TUBES_RINGED:
 		this->initGL(lightingShader);
 
 		if (draw_halos)
@@ -225,7 +229,7 @@ void Study::render()
 
 		break;
 
-	case Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN:
+	case Trial::RenderMode::LINES_PLAIN:
 		this->initGL(lineShader);
 		trial.setShader(lineShader);
 		trial.display();
@@ -311,13 +315,13 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
         if (action == GLFW_PRESS) {
             keys[key] = true;
 			if (keys[GLFW_KEY_F])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_PLAIN);
+				trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
 			if (keys[GLFW_KEY_G])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_TUBES_RINGED);
+				trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
 			if (keys[GLFW_KEY_H])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_SHADOWED_HEDGEHOGS);
+				trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
 			if (keys[GLFW_KEY_I])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_PLAIN);
+				trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
 			if (keys[GLFW_KEY_L])
 				cycle_light = abs(cycle_light - 1);
 			if (keys[GLFW_KEY_M])
@@ -329,11 +333,11 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			if (keys[GLFW_KEY_R])
 				generateTrial(trial.getRenderMode());
 			if (keys[GLFW_KEY_T])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
+				trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
 			if (keys[GLFW_KEY_U])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG);
+				trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG);
 			if (keys[GLFW_KEY_Y])
-				trial.setRenderMode(Trial::RenderMode::TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG);
+				trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG);
 			if (keys[GLFW_KEY_BACKSPACE])
 			{
 				thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;

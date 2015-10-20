@@ -8,16 +8,16 @@ class Trial
 {
 public:
 	enum RenderMode {
-		TRIAL_RENDER_LINES_PLAIN,
-		TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN,
-		TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_PHONG,
-		TRIAL_RENDER_LINES_ILLUMINATED_MAXIMUM_PHONG,
-		TRIAL_RENDER_TUBES_PLAIN,
-		TRIAL_RENDER_TUBES_RINGED,
-		TRIAL_RENDER_SHADOWED_HEDGEHOGS
+		LINES_PLAIN,
+		LINES_ILLUMINATED_CYLINDER_BLINN,
+		LINES_ILLUMINATED_CYLINDER_PHONG,
+		LINES_ILLUMINATED_MAXIMUM_PHONG,
+		TUBES_PLAIN,
+		TUBES_RINGED,
+		SHADOWED_HEDGEHOGS
 	};
 
-	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = TRIAL_RENDER_LINES_ILLUMINATED_CYLINDER_BLINN);
+	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = LINES_ILLUMINATED_CYLINDER_BLINN);
 	~Trial();
 
 	void init();
@@ -32,16 +32,20 @@ public:
 
 	void setShader( Shader *shader );
 
+	void setJitter(float jitter);
+
 	void passThroughPVMatrix( float *pM, float *vM );
 
 	float getShadowOffset();
+
+	float getMaxLength();
 
 	void display();
 
 private:
 	float xSize, ySize;
 
-	float jitter, density;
+	float jitter, density, maxLength;
 
 	RenderMode renderMode;
 
