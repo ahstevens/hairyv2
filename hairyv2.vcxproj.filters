@@ -93,6 +93,9 @@
     <ClCompile Include="Probe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Stopwatch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Shader.h">
@@ -156,6 +159,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Probe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Stopwatch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

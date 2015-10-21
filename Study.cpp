@@ -28,7 +28,7 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = orient_probe = draw_probe = 0;
+	draw_halos = cycle_light = orient_probe = draw_probe = show_probe_hints = 0;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -126,117 +126,134 @@ void Study::mainLoop()
 
 void Study::render()
 {
-	switch (trial.getRenderMode())
+	if (orient_probe)
 	{
-	case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
-	case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
-	case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
-		Shader::Off();
-
-		trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
-			(float*)glm::value_ptr(camera.getViewMatrix()));
-		trial.display();
-
-		break;
-	case Trial::RenderMode::SHADOWED_HEDGEHOGS:
-		initGL(hogShader);
-
-		glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), ( 1 / density ) / 2 / trial.getMaxLength());
-		glUniform1f(glGetUniformLocation(hogShader->Program, "thicknessMult"), thicknessMultiplier);
-		glUniform1f(glGetUniformLocation(hogShader->Program, "directionalGeomScale"), directionalGeomScale);
-
-		glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
-
-		glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
-
-		trial.setShader(hogShader);
-
-		trial.display();
-
-		glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
-
-		trial.display();
-
-		break;
-	case Trial::RenderMode::TUBES_PLAIN:
-	case Trial::RenderMode::TUBES_RINGED:
-		this->initGL(lightingShader);
-
-		if (draw_halos)
+		if (show_probe_hints)
 		{
-			// reverse the vertex winding order
-			glFrontFace(GL_CW);
-			trial.setShader(haloShader);
-			haloShader->Use();
-			glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), lengthMultiplier);
-			glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), thicknessMultiplier);
-			glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), directionalGeomScale);
-			glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
-
-			// Create camera transformations
-			glm::mat4 view = camera.getViewMatrix();
-			glm::mat4 projection = camera.getProjectionMatrix();
-
-			glUniformMatrix4fv(glGetUniformLocation(haloShader->Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
-			glUniformMatrix4fv(glGetUniformLocation(haloShader->Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-			// Draw model using the halo shader (regular model will be drawn on top)
-			trial.display();
-			// reset vertex winding order
-			glFrontFace(GL_CCW);
-		}
-
-		if (orient_probe)
-		{
-			lightingShader->Use();
-			glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 60.f);
-			glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 10.f);
-			glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 7.5f);
-			probe.setOrientation(normalize(polhemus->getQuaternion()));
-
 			glm::quat p = glm::normalize(probe.getOrientation());
 			glm::quat t = glm::normalize(trainingTarget.getOrientation());
 			glm::vec3 vecXp = glm::rotate(p, glm::vec3(1.f, 0.f, 0.f));
 			glm::vec3 vecXt = glm::rotate(t, glm::vec3(1.f, 0.f, 0.f));
 			float cosTheta = dot(vecXp, vecXt);
+			float theta = glm::degrees(acos(cosTheta));
 
-			if (cosTheta > cos(glm::radians(5.f)))
+			if (theta <= 1.f)
+			{
+				initGL(haloShader);
+
+				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+
+				trainingTarget.setShader(haloShader);
+
+				// reverse the vertex winding order
+				glFrontFace(GL_CW);
+				// Draw model using the halo shader (regular model will be drawn on top)
+				trainingTarget.redraw();
+				// reset vertex winding order
+				glFrontFace(GL_CCW);
+			}
+			if (theta <= 5.f)
 			{
 				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
 				glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 				trainingTarget.setColor(0.f, 1.f, 0.f);
 			}
-			else if (cosTheta > cos(glm::radians(15.f)))
+			else if (theta <= 15.f)
 			{
-				trainingTarget.setColor(1.f, 1.f, 0.f);
+				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
+				glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
+				float a = (theta - 15.f) / (5.f - 15.f);
+				std::cout << a << std::endl;
+				trainingTarget.setColor(mix(yellow, green, a));
 			}
-			else  if (cosTheta > cos(glm::radians(90.f)))
+			else  if (theta <= 90.f)
 			{
 				glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
 				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
-				float a = cosTheta / abs(cos(glm::radians(90.f)) - cos(glm::radians(15.f)));
+				float a = (theta - 90.f) / (15.f - 90.f);
 				std::cout << a << std::endl;
 				trainingTarget.setColor(mix(white, yellow, a));
 			}
 			else
 				trainingTarget.setColor(1.f, 1.f, 1.f);
-
-			if (draw_probe) probe.redraw();
-			trainingTarget.redraw();
 		}
-		else
+
+		initGL(lightingShader);
+		lightingShader->Use();
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 60.f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 10.f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 7.5f);
+
+		probe.setOrientation(normalize(polhemus->getQuaternion()));
+
+		if (draw_probe) probe.redraw();
+		trainingTarget.setShader(lightingShader);
+		trainingTarget.redraw();
+	}
+	else
+	{
+		switch (trial.getRenderMode())
 		{
+		case Trial::RenderMode::LINES_PLAIN:
+			this->initGL(lineShader);
+			trial.setShader(lineShader);
+			trial.display();
+			break;
+		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
+		case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
+			Shader::Off();
+
+			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
+				(float*)glm::value_ptr(camera.getViewMatrix()));
+			trial.display();
+
+			break;
+		case Trial::RenderMode::SHADOWED_HEDGEHOGS:
+			initGL(hogShader);
+
+			glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), (1 / density) / 2 / trial.getMaxLength());
+
+			glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
+
+			// first pass to render shadow plane
+			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
+
+			trial.setShader(hogShader);
+
+			trial.display();
+
+			// second pass to render the glyph plane
+			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
+
+			trial.display();
+
+			break;
+		case Trial::RenderMode::TUBES_PLAIN:
+		case Trial::RenderMode::TUBES_RINGED:
+			if (draw_halos)
+			{
+				initGL(haloShader);
+
+				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+				
+				trial.setShader(haloShader);
+
+				// reverse the vertex winding order
+				glFrontFace(GL_CW);
+				// Draw model using the halo shader (regular model will be drawn on top)
+				trial.display();
+				// reset vertex winding order
+				glFrontFace(GL_CCW);
+			}
+
+			this->initGL(lightingShader);
 			lightingShader->Use();
 			trial.setShader(lightingShader);
 			trial.display();
+
+			break;
 		}
-
-		break;
-
-	case Trial::RenderMode::LINES_PLAIN:
-		this->initGL(lineShader);
-		trial.setShader(lineShader);
-		trial.display();
-		break;
 	}
 }
 
@@ -356,6 +373,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
 				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
 			}
+			if (keys[GLFW_KEY_END])
+				show_probe_hints = abs(show_probe_hints - 1);
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;

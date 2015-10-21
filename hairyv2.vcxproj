@@ -89,6 +89,7 @@
     <ClCompile Include="Probe.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="Slice.cpp" />
+    <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="Study.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Trial.cpp" />
@@ -112,6 +113,7 @@
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Slice.h" />
+    <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Study.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Trial.h" />

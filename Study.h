@@ -11,6 +11,7 @@
 #include "Trial.h"
 #include "Polhemus.h"
 #include "Probe.h"
+#include "Stopwatch.h"
 
 class Study
 {
@@ -52,6 +53,8 @@ private:
 
 	Polhemus* polhemus;
 
+	Stopwatch stopwatch;
+
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
 
@@ -61,7 +64,7 @@ private:
 	GLfloat deltaTime;		// Time between current frame and last frame
 	GLfloat lastFrame;		// Time of last frame
 
-	int draw_halos, cycle_light, orient_probe, draw_probe;
+	int draw_halos, cycle_light, orient_probe, draw_probe, show_probe_hints;
 
 	float density, jitter;
 
