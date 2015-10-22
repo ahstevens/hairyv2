@@ -35,6 +35,7 @@ Study::Study( GLFWwindow* window )
 
 	density = 0.1f;
 	jitter = 0.25f;
+	renderMode = Trial::RenderMode::LINES_PLAIN;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
@@ -75,7 +76,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	if (participant == std::string("demo"))
 	{
 		this->mode = Mode::DEMO;
-		generateTrial(Trial::RenderMode::LINES_PLAIN);
+		generateTrial();
 	}
 	else
 	{
@@ -355,13 +356,25 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			{
 			case DEMO:
 				if (keys[GLFW_KEY_F])
-					trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
+				{
+					renderMode = Trial::RenderMode::TUBES_PLAIN;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_G])
-					trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
+				{
+					renderMode = Trial::RenderMode::TUBES_RINGED;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_H])
-					trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
+				{
+					renderMode = Trial::RenderMode::SHADOWED_HEDGEHOGS;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_I])
-					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
+				{
+					renderMode = Trial::RenderMode::LINES_PLAIN;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_L])
 					cycle_light = abs(cycle_light - 1);
 				if (keys[GLFW_KEY_M])
@@ -371,18 +384,27 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_Q])
 					training();
 				if (keys[GLFW_KEY_R])
-					generateTrial(trial.getRenderMode());
+					generateTrial();
 				if (keys[GLFW_KEY_T])
-					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
+				{
+					renderMode = Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_U])
-					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG);
+				{
+					renderMode = Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_Y])
-					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG);
+				{
+					renderMode = Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG;
+					trial.setRenderMode(renderMode);
+				}
 				if (keys[GLFW_KEY_BACKSPACE])
 				{
 					thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
 					haloSize = 0.5f;
-					hedgehogOffset = 5.f;
+					hedgehogOffset = 0.f;
 				}
 
 				if (keys[GLFW_KEY_MINUS])
@@ -486,7 +508,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
     camera.processMouseScroll((GLfloat) yoffset);
 }
 
-void Study::generateTrial(Trial::RenderMode renderMode)
+void Study::generateTrial()
 {
 	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
 	trial = Trial(windowWidth, windowHeight, density, jitter);

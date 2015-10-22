@@ -426,9 +426,6 @@ void Slice::generateHairs()
 	geometryChange = false;
 	linesGenerated = true;
 	tubesGenerated = false;
-
-	std::cout << "done (" << vertices.size() << " vertices generated)" << std::endl;
-
 }
 
 
@@ -482,7 +479,6 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 
 		mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
 
-		std::cout << "Generating geometry for " << seedCount() << " line glyphs... ";
 		std::vector<Seed>::iterator it;
 		for (it = seeds.begin(); it != seeds.end(); ++it)
 		{
