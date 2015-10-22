@@ -2,9 +2,9 @@
   
 out vec4 color;
   
-uniform vec4 haloColor;
+uniform vec3 haloColor;
 
 void main()
 {	
-	color = haloColor;	
+	color = vec4(haloColor, 1.f);
 } 

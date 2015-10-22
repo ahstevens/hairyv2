@@ -155,7 +155,7 @@ void Study::render()
 				initGL(haloShader);
 
 				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), 1.f);
-				glUniform4f(glGetUniformLocation(haloShader->Program, "haloColor"), 1.f, 1.f, 1.f, 0.5f );
+				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 1.f, 1.f, 1.f );
 				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 60.f);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 10.f);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), 7.5f);

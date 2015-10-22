@@ -605,24 +605,23 @@ void Slice::redraw()
 
 		// Draw the container (using container's vertex attributes)
 		glBindVertexArray(VAO);
-		//glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], directionality ? seeds.size() * 2 : seeds.size());
-		if(directionality)
-		{
-			glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), true);
-			glDrawElementsInstanced(GL_TRIANGLES,			 // rendering triangle primitives
-									directionalIndicesCount, // number of indices to be used in rendering
-									GL_UNSIGNED_INT,		 // indices array type is unsigned int
-									0,						 // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-									seeds.size());			 // number of instances to render
-		}
+			if(directionality)
+			{
+				glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), true);
+				glDrawElementsInstanced(GL_TRIANGLES,			 // rendering triangle primitives
+										directionalIndicesCount, // number of indices to be used in rendering
+										GL_UNSIGNED_INT,		 // indices array type is unsigned int
+										0,						 // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
+										seeds.size());			 // number of instances to render
+			}
 		
-		glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
+			glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
 
-		glDrawElementsInstanced(doLines ? GL_LINES : GL_TRIANGLES,						// rendering line or triangle primitives
-								indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
-								GL_UNSIGNED_INT,										// indices array type is unsigned int
-								(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-								seeds.size());											// number of instances to render
+			glDrawElementsInstanced(doLines ? GL_LINES : GL_TRIANGLES,						// rendering line or triangle primitives
+									indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
+									GL_UNSIGNED_INT,										// indices array type is unsigned int
+									(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
+									seeds.size());											// number of instances to render
 		glBindVertexArray(0);
 
 		if (use_texture) tex->disable();
