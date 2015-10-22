@@ -18,13 +18,20 @@ class Study
 public:
 	static Study* getInstance( GLFWwindow* window );
 
-	void init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm);
+	void init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm);
 	void training();
 	void begin();
 	void next();
 	void end();
 	
 private:
+	enum Mode {
+		DEMO,
+		TRAINING,
+		STUDY,
+		NONE
+	};
+
 	Study( GLFWwindow* window );
 	static Study* instance;
 
@@ -54,6 +61,8 @@ private:
 	Polhemus* polhemus;
 
 	Stopwatch stopwatch;
+
+	Mode mode;
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;

@@ -20,6 +20,10 @@ const GLfloat  DIST_EYE_MM       = 560.0f;  // Eye distance from display (mm)
 // The MAIN function, from here we start the application and run the game loop
 int main()
 {
+	std::string name;
+	std::cout << "Enter subject name: ";
+	std::cin >> name;
+
 	// Init GLFW
 	glfwInit();
 	// Set all the required options for GLFW
@@ -67,7 +71,8 @@ int main()
 	glViewport(0, 0, (GLsizei)retinaDisplayPresent ? WIDTH_RETINA_PX : WIDTH_DELL_PX, (GLsizei)retinaDisplayPresent ? HEIGHT_RETINA_PX : HEIGHT_DELL_PX);
 
     Study* study = Study::getInstance( window );
-	study->init(retinaDisplayPresent ? WIDTH_RETINA_MM : WIDTH_DELL_MM, 
+	study->init(name,
+				retinaDisplayPresent ? WIDTH_RETINA_MM : WIDTH_DELL_MM, 
 				retinaDisplayPresent ? HEIGHT_RETINA_MM : HEIGHT_DELL_MM,
 				DIST_EYE_MM);
    

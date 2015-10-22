@@ -6,6 +6,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
 
+#define NBLOCKS 5
+#define NCONDITIONS 15
+
 // Initialize class variables
 Study* Study::instance = NULL;
 
@@ -62,8 +65,24 @@ Study::~Study()
 	delete normalShader;
 }
 
-void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
+void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 {
+	if (name == std::string("demo"))
+		this->mode = Mode::DEMO;
+	else
+	{
+		this->mode = Mode::NONE;
+		
+		probe.setShader(lightingShader);
+		probe.renderRT(8, 0.1f);
+
+		trainingTarget.setShader(lightingShader);
+		trainingTarget.renderPT(8);
+		trainingTarget.setOrientation(getRandomOrientation());
+		trainingTarget.setSize(1.f, 1.1f, 1.1f);
+	}
+
+	participant = name;
 	windowWidth = width_mm;
 	windowHeight = height_mm;
 	eyeDistance = dist_mm;
@@ -77,19 +96,9 @@ void Study::init(GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 
-	probe.setShader(lightingShader);
-	probe.renderRT(8, 0.1f);
-	
-	trainingTarget.setShader(lightingShader);
-	trainingTarget.renderPT(8);
-	trainingTarget.setOrientation(getRandomOrientation());
-	trainingTarget.setSize( 1.f, 1.01f, 1.01f );
-
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
 	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f );
-
-	generateTrial(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
 
 	this->mainLoop();
 }
@@ -108,13 +117,10 @@ void Study::mainLoop()
 
 		// Check if any events have been activiated (key pressed, mouse moved etc.) and call corresponding response functions
 		glfwPollEvents();
-		do_movement();
 
+		if (mode == Mode::DEMO) do_movement();
 
-		if (cycle_light) light.setPosition(cos(glfwGetTime()), sin(glfwGetTime()), 1.0f);
-		else light.setPosition(1.f, 1.f, 1.f);
-
-		render();
+		if (mode != Mode::NONE) render();
 
 		// Swap the screen buffers
 		glfwSwapBuffers(window);
@@ -177,6 +183,8 @@ void Study::render()
 			else
 				trainingTarget.setColor(1.f, 1.f, 1.f);
 		}
+		else
+			trainingTarget.setColor(1.f, 1.f, 1.f);
 
 		initGL(lightingShader);
 		lightingShader->Use();
@@ -266,12 +274,10 @@ void Study::initGL(Shader *s)
 	// Use cooresponding shader when setting uniforms/drawing objects
 	s->Use();
 
-	// Create camera transformations
-	glm::mat4 view = camera.getViewMatrix();
-	glm::mat4 projection = camera.getProjectionMatrix();
-
 	// Pass the matrices to the shader
+	glm::mat4 view = camera.getViewMatrix();
 	glUniformMatrix4fv(glGetUniformLocation(s->Program, "view"), 1, GL_FALSE, glm::value_ptr(view));
+	glm::mat4 projection = camera.getProjectionMatrix();
 	glUniformMatrix4fv(glGetUniformLocation(s->Program, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
 	// Pass light and camera positions to shader
@@ -306,7 +312,13 @@ void Study::training()
 
 void Study::begin()
 {
+	mode = Mode::STUDY;
+	srand((unsigned int)time(NULL));
+	
+	for (unsigned int i = 0; i < NBLOCKS * NCONDITIONS; ++i)
+	{
 
+	}
 }
 
 void Study::next()
@@ -334,47 +346,88 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
     {
         if (action == GLFW_PRESS) {
             keys[key] = true;
-			if (keys[GLFW_KEY_F])
-				trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
-			if (keys[GLFW_KEY_G])
-				trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
-			if (keys[GLFW_KEY_H])
-				trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
-			if (keys[GLFW_KEY_I])
-				trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
-			if (keys[GLFW_KEY_L])
-				cycle_light = abs(cycle_light - 1);
-			if (keys[GLFW_KEY_M])
-				draw_halos = abs(draw_halos - 1);
-			if (keys[GLFW_KEY_P])
-				polhemus->printInfo();
-			if (keys[GLFW_KEY_Q])
-				training();
-			if (keys[GLFW_KEY_R])
-				generateTrial(trial.getRenderMode());
-			if (keys[GLFW_KEY_T])
-				trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
-			if (keys[GLFW_KEY_U])
-				trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG);
-			if (keys[GLFW_KEY_Y])
-				trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG);
-			if (keys[GLFW_KEY_BACKSPACE])
+			switch (mode)
 			{
-				thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
-				haloSize = 0.5f;
-				hedgehogOffset = 5.f;
+			case DEMO:
+				if (keys[GLFW_KEY_F])
+					trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
+				if (keys[GLFW_KEY_G])
+					trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
+				if (keys[GLFW_KEY_H])
+					trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
+				if (keys[GLFW_KEY_I])
+					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
+				if (keys[GLFW_KEY_L])
+					cycle_light = abs(cycle_light - 1);
+				if (keys[GLFW_KEY_M])
+					draw_halos = abs(draw_halos - 1);
+				if (keys[GLFW_KEY_P])
+					polhemus->printInfo();
+				if (keys[GLFW_KEY_Q])
+					training();
+				if (keys[GLFW_KEY_R])
+					generateTrial(trial.getRenderMode());
+				if (keys[GLFW_KEY_T])
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
+				if (keys[GLFW_KEY_U])
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG);
+				if (keys[GLFW_KEY_Y])
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG);
+				if (keys[GLFW_KEY_BACKSPACE])
+				{
+					thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
+					haloSize = 0.5f;
+					hedgehogOffset = 5.f;
+				}
+
+				if (keys[GLFW_KEY_MINUS])
+					lengthMultiplier -= (lengthMultiplier > 0.1f) ? 0.1f : 0.f;
+				if (keys[GLFW_KEY_EQUAL])
+					lengthMultiplier += 0.1f;
+				if (keys[GLFW_KEY_LEFT_BRACKET])
+					thicknessMultiplier -= (thicknessMultiplier > 0.01f) ? 0.01f : 0.f;
+				if (keys[GLFW_KEY_RIGHT_BRACKET])
+					thicknessMultiplier += 0.01f;
+				if (keys[GLFW_KEY_SEMICOLON])
+					directionalGeomScale -= (directionalGeomScale > 0.01f) ? 0.01f : 0.f;
+				if (keys[GLFW_KEY_APOSTROPHE])
+					directionalGeomScale += 0.01f;
+				if (keys[GLFW_KEY_COMMA])
+					haloSize -= (haloSize > 0.01f) ? 0.01f : 0.f;
+				if (keys[GLFW_KEY_PERIOD])
+					haloSize += 0.01f;
+
+				if (keys[GLFW_KEY_INSERT])
+					orient_probe = abs(orient_probe - 1);
+				if (keys[GLFW_KEY_DELETE])
+					draw_probe = abs(draw_probe - 1);
+				if (keys[GLFW_KEY_HOME])
+				{
+					glm::vec3 eyePos(0.f, 0.f, eyeDistance);
+					camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
+				}
+				if (keys[GLFW_KEY_END])
+					show_probe_hints = abs(show_probe_hints - 1);
+				if (keys[GLFW_KEY_PAGE_DOWN])
+					hedgehogOffset -= (hedgehogOffset > 0.1f) ? 0.1f : 0.f;
+				if (keys[GLFW_KEY_PAGE_UP])
+					hedgehogOffset += 0.1f;
+				break;
+			case NONE:
+				if (keys[GLFW_KEY_S])
+					begin();
+				if (keys[GLFW_KEY_T])
+					mode = Mode::TRAINING;
+				break;
+			case STUDY:
+				if (keys[GLFW_KEY_SPACE])
+					next();
+				break;
+			case TRAINING:
+				if (keys[GLFW_KEY_SPACE])
+					training();
+				break;
 			}
-			if (keys[GLFW_KEY_INSERT])
-				orient_probe = abs(orient_probe - 1);
-			if (keys[GLFW_KEY_DELETE])
-				draw_probe = abs(draw_probe - 1);
-			if (keys[GLFW_KEY_HOME])
-			{
-				glm::vec3 eyePos(0.f, 0.f, eyeDistance);
-				camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
-			}
-			if (keys[GLFW_KEY_END])
-				show_probe_hints = abs(show_probe_hints - 1);
 		}
         else if (action == GLFW_RELEASE)
             keys[key] = false;
@@ -392,28 +445,6 @@ void Study::do_movement()
         camera.processKeyboard(LEFT, deltaTime);
     if (keys[GLFW_KEY_D])
         camera.processKeyboard(RIGHT, deltaTime);
-
-	// Study parameter modifiers
-	if (keys[GLFW_KEY_MINUS])
-		lengthMultiplier -= (lengthMultiplier > 0.1f) ? 0.1f : 0.f;
-	if (keys[GLFW_KEY_EQUAL])
-		lengthMultiplier += 0.1f;
-	if (keys[GLFW_KEY_LEFT_BRACKET])
-		thicknessMultiplier -= (thicknessMultiplier > 0.01f) ? 0.01f : 0.f;
-	if (keys[GLFW_KEY_RIGHT_BRACKET])
-		thicknessMultiplier += 0.01f;
-	if (keys[GLFW_KEY_SEMICOLON])
-		directionalGeomScale -= (directionalGeomScale > 0.01f) ? 0.01f : 0.f;
-	if (keys[GLFW_KEY_APOSTROPHE])
-		directionalGeomScale += 0.01f;
-	if (keys[GLFW_KEY_COMMA])
-		haloSize -= (haloSize > 0.01f) ? 0.01f : 0.f;
-	if (keys[GLFW_KEY_PERIOD])
-		haloSize += 0.01f;
-	if (keys[GLFW_KEY_PAGE_DOWN])
-		hedgehogOffset -= (hedgehogOffset > 0.1f) ? 0.1f : 0.f;
-	if (keys[GLFW_KEY_PAGE_UP])
-		hedgehogOffset += 0.1f;
 }
 
 
