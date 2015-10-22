@@ -54,7 +54,7 @@ private:
 
 	void do_movement();
 
-	void generateTrial(Trial::RenderMode renderMode);
+	void generateTrial();
 
 	glm::quat getRandomOrientation();
 
@@ -76,6 +76,7 @@ private:
 	int draw_halos, cycle_light, orient_probe, draw_probe, show_probe_hints;
 
 	float density, jitter;
+	Trial::RenderMode renderMode;
 
 	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader;
 
