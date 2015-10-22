@@ -67,25 +67,28 @@ Study::~Study()
 
 void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 {
-	if (name == std::string("demo"))
-		this->mode = Mode::DEMO;
-	else
-	{
-		this->mode = Mode::NONE;
-		
-		probe.setShader(lightingShader);
-		probe.renderRT(8, 0.1f);
-
-		trainingTarget.setShader(lightingShader);
-		trainingTarget.renderPT(8);
-		trainingTarget.setOrientation(getRandomOrientation());
-		trainingTarget.setSize(1.f, 1.1f, 1.1f);
-	}
-
 	participant = name;
 	windowWidth = width_mm;
 	windowHeight = height_mm;
 	eyeDistance = dist_mm;
+
+	if (participant == std::string("demo"))
+	{
+		this->mode = Mode::DEMO;
+		generateTrial(Trial::RenderMode::LINES_PLAIN);
+	}
+	else
+	{
+		this->mode = Mode::NONE;
+	}	
+		
+	probe.setShader(lightingShader);
+	probe.renderRT(8, 0.1f);
+
+	trainingTarget.setShader(lightingShader);
+	trainingTarget.renderPT(8);
+	trainingTarget.setOrientation(getRandomOrientation());
+	trainingTarget.setSize(1.f, 1.1f, 1.1f);
 
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
@@ -131,7 +134,11 @@ void Study::mainLoop()
 }
 
 void Study::render()
-{
+{	
+	// Clear the colorbuffer
+	glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	if (orient_probe)
 	{
 		if (show_probe_hints)
@@ -147,10 +154,14 @@ void Study::render()
 			{
 				initGL(haloShader);
 
-				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), 1.f);
+				glUniform4f(glGetUniformLocation(haloShader->Program, "haloColor"), 1.f, 1.f, 1.f, 0.5f );
+				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 60.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 10.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), 7.5f);
 
 				trainingTarget.setShader(haloShader);
-
+				
 				// reverse the vertex winding order
 				glFrontFace(GL_CW);
 				// Draw model using the halo shader (regular model will be drawn on top)
@@ -158,7 +169,7 @@ void Study::render()
 				// reset vertex winding order
 				glFrontFace(GL_CCW);
 			}
-			if (theta <= 5.f)
+			else if (theta <= 5.f)
 			{
 				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
 				glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
@@ -169,7 +180,6 @@ void Study::render()
 				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
 				glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 				float a = (theta - 15.f) / (5.f - 15.f);
-				std::cout << a << std::endl;
 				trainingTarget.setColor(mix(yellow, green, a));
 			}
 			else  if (theta <= 90.f)
@@ -177,7 +187,6 @@ void Study::render()
 				glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
 				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
 				float a = (theta - 90.f) / (15.f - 90.f);
-				std::cout << a << std::endl;
 				trainingTarget.setColor(mix(white, yellow, a));
 			}
 			else
@@ -244,6 +253,7 @@ void Study::render()
 				initGL(haloShader);
 
 				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+				glUniform4f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f, 1.f );
 				
 				trial.setShader(haloShader);
 
@@ -256,7 +266,6 @@ void Study::render()
 			}
 
 			this->initGL(lightingShader);
-			lightingShader->Use();
 			trial.setShader(lightingShader);
 			trial.display();
 
@@ -267,10 +276,6 @@ void Study::render()
 
 void Study::initGL(Shader *s)
 {
-	// Clear the colorbuffer
-	glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	// Use cooresponding shader when setting uniforms/drawing objects
 	s->Use();
 
