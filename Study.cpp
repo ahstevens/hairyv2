@@ -7,9 +7,12 @@
 #include <math.h> // M_PI
 
 #define NBLOCKS 5
-#define NTRIALSPERBLOCK 5
+#define NREPLICATESPERBLOCK 1
 #define NDENSITYCONDITIONS 3
 #define NRENDERINGCONDITIONS 5
+#define NTRIALSPERBLOCK NREPLICATESPERBLOCK * NDENSITYCONDITIONS * NRENDERINGCONDITIONS
+
+#define BGCOLOR glm::vec3(0.325f, 0.486f, 0.812f)
 
 // Initialize class variables
 Study* Study::instance = NULL;
@@ -52,6 +55,8 @@ Study::Study( GLFWwindow* window )
 	for (int i = 0; i < 1024; ++i)
 		keys[i] = 0;
 	
+	bgColor = BGCOLOR;
+
     // Build and compile our shader programs
 	lightingShader = new Shader("materials.vert", "materials.frag");
 	lineShader = new Shader("lines.vert", "lines.frag");
@@ -83,6 +88,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	else
 	{
 		this->mode = Mode::NONE;
+		std::cout << "Press 'T' to begin training, or 'S' to begin the study" << std::endl;
 	}	
 		
 	probe.setShader(lightingShader);
@@ -91,7 +97,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	trainingTarget.setShader(lightingShader);
 	trainingTarget.renderPT(8);
 	trainingTarget.setOrientation(getRandomOrientation());
-	trainingTarget.setSize(1.f, 1.1f, 1.1f);
+	trainingTarget.setSize(1.1f, 1.1f, 1.1f);
 
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
@@ -126,10 +132,13 @@ void Study::mainLoop()
 
 		if (mode == Mode::DEMO) do_movement();
 
-		if (mode != Mode::NONE) render();
+		if (mode != Mode::NONE && mode != Mode::PAUSED)
+		{
+			render();
 
-		// Swap the screen buffers
-		glfwSwapBuffers(window);
+			// Swap the screen buffers
+			glfwSwapBuffers(window);
+		}
 	}
 
 	// Terminate GLFW, clearing any resources allocated by GLFW.
@@ -138,8 +147,14 @@ void Study::mainLoop()
 
 void Study::render()
 {	
+	// Change background for Shadowed Hedgehogs
+	if( renderMode == Trial::RenderMode::SHADOWED_HEDGEHOGS)
+		bgColor = glm::vec3(1.f, 1.f, 1.f);
+	else
+		bgColor = BGCOLOR;
+
 	// Clear the colorbuffer
-	glClearColor(0.325f, 0.486f, 0.812f, 1.0f);
+	glClearColor(bgColor.r, bgColor.g, bgColor.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	if (orient_probe)
@@ -308,12 +323,7 @@ void Study::initGL(Shader *s)
 
 void Study::training()
 {	
-	glm::quat p = glm::normalize( probe.getOrientation() );
-	glm::quat t = glm::normalize( trainingTarget.getOrientation() );
-	glm::vec3 vecXp = glm::rotate( p, glm::vec3( 1.f, 0.f, 0.f ) );
-	glm::vec3 vecXt = glm::rotate( t, glm::vec3( 1.f, 0.f, 0.f ) );
-	float cosTheta = dot( vecXp, vecXt );
-	float angleRad = ( cosTheta > 0.999999f ) ? 0.f : acos( cosTheta );
+	float angleRad = getAngleError( probe.getOrientation(), trainingTarget.getOrientation() );
 	std::cout << "Angular error: " << glm::degrees( angleRad ) << " deg (" << angleRad << " rad)" << std::endl;
 	trainingTarget.setOrientation(getRandomOrientation());
 }
@@ -342,7 +352,8 @@ void Study::begin()
 
 	for (int i = 0; i < NDENSITYCONDITIONS; ++i)
 		for (int j = 0; j < NRENDERINGCONDITIONS; ++j)
-			block.push_back(Condition(renders[j], densities[i], lengths[i], thicknesses[i]));
+			for (int k = 0; k < NREPLICATESPERBLOCK; ++k)
+				block.push_back(Condition(renders[j], densities[i], lengths[i], thicknesses[i]));
 
 	for (int i = 0; i < NBLOCKS; ++i)
 	{
@@ -350,22 +361,40 @@ void Study::begin()
 		conditions.push_back(block);
 	}
 
+	std::cout << "Commencing study..." << std::endl;
+	std::cout << std::endl;
+	std::cout << "participant,block,trial,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.w,probe.x,probe.y,probe.z,target.w,target.x,target.y,target.z,error_degrees,time" << std::endl;
 	next();
 }
 
 void Study::next()
-{
+{	
+	// get current trial block from queue
 	std::vector<Condition> *block = &conditions.back();
 
-	if (block->size == 0)
+	if (block->size() == 0)
 	{
+		std::cout << "Block " << NBLOCKS - conditions.size() + 1 << " of " << NBLOCKS << " completed!" << std::endl;
+		std::cout << std::endl;
 		conditions.pop_back();
 		if (conditions.size() == 0)
 			end();
 		else
-			block = &conditions.back();
+			block = &conditions.back();		
+		
+		bgColor = glm::vec3(0.f, 0.5f, 0.f);
+		std::cout << "Please take a short break, then press the ENTER key when ready to begin the next block." << std::endl;
+		mode = PAUSED;
 	}
+	else	
+		bgColor = glm::vec3(0.f, 0.f, 0.f);
 
+	// Give blank screen immediately while processing new trial
+	glClearColor(bgColor.r, bgColor.g, bgColor.b, 1.f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glfwSwapBuffers(window);
+
+	// get current trial condition from block queue
 	Condition curr = block->back();
 	block->pop_back();
 
@@ -373,11 +402,20 @@ void Study::next()
 	density = curr.density;
 	lengthMultiplier = curr.lengthMultiplier;
 	thicknessMultiplier = curr.thicknessMultiplier;
+	directionalGeomScale = curr.thicknessMultiplier;
+
+	generateTrial();
+
+	stopwatch.start();
 }
 
 void Study::end()
 {
-
+	std::cout << "Study Complete!" << std::endl;
+	mode = Mode::NONE;
+	
+	// Tell GLFW to kill the OpenGL window
+	glfwSetWindowShouldClose(window, GL_TRUE);
 }
 
 
@@ -387,9 +425,9 @@ void Study::key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 // Is called whenever a key is pressed/released via GLFW
-void Study::key_process(GLFWwindow* window, int key, int scancode, int action, int mode)
+void Study::key_process(GLFWwindow* window, int key, int scancode, int action, int keymode)
 {
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS && mode != STUDY)
         glfwSetWindowShouldClose(window, GL_TRUE);
     if (key >= 0 && key < 1024)
     {
@@ -466,6 +504,10 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					haloSize -= (haloSize > 0.01f) ? 0.01f : 0.f;
 				if (keys[GLFW_KEY_PERIOD])
 					haloSize += 0.01f;
+				if (keys[GLFW_KEY_KP_SUBTRACT])
+					density -= (density > 0.1f + 0.0001f) ? 0.1f : 0.f;
+				if (keys[GLFW_KEY_KP_ADD])
+					density += 0.1f;
 
 				if (keys[GLFW_KEY_INSERT])
 					orient_probe = abs(orient_probe - 1);
@@ -483,6 +525,10 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_PAGE_UP])
 					hedgehogOffset += 0.1f;
 				break;
+			case PAUSED:
+				if (keys[GLFW_KEY_ENTER])
+					mode = STUDY;
+				break;
 			case NONE:
 				if (keys[GLFW_KEY_S])
 					begin();
@@ -490,8 +536,31 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					mode = Mode::TRAINING;
 				break;
 			case STUDY:
-				if (keys[GLFW_KEY_SPACE])
+				if (keys[GLFW_KEY_SPACE] && stopwatch.read() > 2.0)
+				{
+					glm::quat probeQuat = polhemus->getQuaternion();
+					glm::quat targetQuat = trial.getTargetOrientation();
+					std::cout << participant << ",";
+					std::cout << NBLOCKS - conditions.size() << ",";
+					std::cout << NTRIALSPERBLOCK - conditions.back().size() - 1 << ",";
+					std::cout << renderMode << ",";
+					std::cout << density << ",";
+					std::cout << lengthMultiplier << ",";
+					std::cout << thicknessMultiplier << ",";
+					std::cout << directionalGeomScale << ",";
+					std::cout << probeQuat.w << ",";
+					std::cout << probeQuat.x << ",";
+					std::cout << probeQuat.y << ",";
+					std::cout << probeQuat.z << ",";
+					std::cout << targetQuat.w << ",";
+					std::cout << targetQuat.x << ",";
+					std::cout << targetQuat.y << ",";
+					std::cout << targetQuat.z << ",";
+					std::cout << glm::degrees( getAngleError( probeQuat, targetQuat ) ) << ",";
+					std::cout << stopwatch.read() << std::endl;
+
 					next();
+				}
 				break;
 			case TRAINING:
 				if (keys[GLFW_KEY_SPACE])
@@ -538,7 +607,7 @@ void Study::mouse_process(GLFWwindow* window, double xpos, double ypos)
     lastX = (GLfloat) xpos;
     lastY = (GLfloat) ypos;
 
-    camera.processMouseMovement(xoffset, yoffset);
+    if(mode == DEMO) camera.processMouseMovement(xoffset, yoffset);
 }
 
 void Study::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
@@ -558,6 +627,16 @@ void Study::generateTrial()
 	trial.init();
 	trial.setRenderMode(renderMode);
 	//std::cout << "Trial generated" << std::endl;
+}
+
+float Study::getAngleError(glm::quat p, glm::quat q)
+{
+	p = glm::normalize( p ); 
+	q = glm::normalize( q );
+	glm::vec3 vecXp = glm::rotate( p, glm::vec3( 1.f, 0.f, 0.f ) );
+	glm::vec3 vecXq = glm::rotate( q, glm::vec3( 1.f, 0.f, 0.f ) );
+	float cosTheta = dot( vecXp, vecXq );
+	return ( cosTheta > 0.999999f ) ? 0.f : acos( cosTheta );
 }
 
 glm::quat Study::getRandomOrientation()

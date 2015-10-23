@@ -29,6 +29,7 @@ private:
 		DEMO,
 		TRAINING,
 		STUDY,
+		PAUSED,
 		NONE
 	};
 
@@ -42,8 +43,6 @@ private:
 			: renderMode(renderMode), density(density), lengthMultiplier(lengthMultiplier), thicknessMultiplier(thicknessMultiplier)
 		{}
 	};
-
-	std::vector<std::vector<Condition>> conditions;
 
 	Study( GLFWwindow* window );
 	static Study* instance;
@@ -69,13 +68,9 @@ private:
 
 	void generateTrial();
 
+	float getAngleError(glm::quat probe, glm::quat target);
+
 	glm::quat getRandomOrientation();
-
-	Polhemus* polhemus;
-
-	Stopwatch stopwatch;
-
-	Mode mode;
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
@@ -86,10 +81,20 @@ private:
 	GLfloat deltaTime;		// Time between current frame and last frame
 	GLfloat lastFrame;		// Time of last frame
 
+	Polhemus* polhemus;
+
+	Stopwatch stopwatch;
+
+	std::vector<std::vector<Condition>> conditions;
+
+	Mode mode;
+
 	int draw_halos, cycle_light, orient_probe, draw_probe, show_probe_hints;
 
 	float density, jitter;
 	Trial::RenderMode renderMode;
+
+	glm::vec3 bgColor;
 
 	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader;
 

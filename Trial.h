@@ -40,6 +40,8 @@ public:
 
 	float getMaxLength();
 
+	glm::quat getTargetOrientation();
+
 	void display();
 
 private:

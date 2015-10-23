@@ -101,10 +101,10 @@ void IlluminatedLines::initIL()
 {
 	if ( cylinderBlinnSupported )
 	{
-		std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
+		//std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
 		cylinderBlinnIL.setupTextures(ka, kd, ks, 4.0f * gloss, texDim,
 			ILines::ILLightingModel::IL_CYLINDER_BLINN, false);
-		std::cout << " done." << std::endl;
+		//std::cout << " done." << std::endl;
 
 		if(lightingModel == ILines::ILLightingModel::IL_CYLINDER_BLINN)
 			curIL = &cylinderBlinnIL;
@@ -114,11 +114,11 @@ void IlluminatedLines::initIL()
 
 	if (cylinderPhongSupported)
 	{
-		std::cout << "Setting up textures for the cylinder averaging Phong lighting model...";
+		//std::cout << "Setting up textures for the cylinder averaging Phong lighting model...";
 		cylinderPhongIL.setupTextures(ka, kd, ks, gloss, texDim,
 			ILines::ILLightingModel::IL_CYLINDER_PHONG, false,
 			lightDirection);
-		std::cout << " done." << std::endl;
+		//std::cout << " done." << std::endl;
 
 		if(lightingModel == ILines::ILLightingModel::IL_CYLINDER_PHONG)
 			curIL = &cylinderPhongIL;
@@ -128,17 +128,17 @@ void IlluminatedLines::initIL()
 
 	if (maximumPhongSupported)
 	{
-		std::cout << "Setting up textures for the maximum principle Phong lighting model...";
+		//std::cout << "Setting up textures for the maximum principle Phong lighting model...";
 		maximumPhongIL.setupTextures(ka, 0.6f * kd, 0.3f * ks, gloss, texDim,
 			ILines::ILLightingModel::IL_MAXIMUM_PHONG, false,
 			lightDirection);
-		std::cout << " done." << std::endl;
+		//std::cout << " done." << std::endl;
 
 		if(lightingModel == ILines::ILLightingModel::IL_MAXIMUM_PHONG)
 			curIL = &maximumPhongIL;
 	}
 	else
-		std::cout << "Maximum principle Phong lighting model not supported." << std::endl;
+		std::cerr << "Maximum principle Phong lighting model not supported." << std::endl;
 	
 	if (curIL == NULL)
 	{

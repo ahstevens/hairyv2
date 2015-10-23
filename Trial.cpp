@@ -102,7 +102,7 @@ void Trial::sampleBiMap()
 
 			cp.addSeed( seed );
 
-			if(seed.dz < shadowOffset) shadowOffset = seed.dz;
+			if (seed.dz < shadowOffset) shadowOffset = seed.dz;
 
 			if (seed.length() > maxLength) maxLength = seed.length();
         }
@@ -110,7 +110,7 @@ void Trial::sampleBiMap()
 
 	//std::cout << "done" << std::endl;
 
-	std::cout << "Max Length: " << maxLength << std::endl;
+	//std::cout << "Max Length: " << maxLength << std::endl;
 }
 
 void Trial::testPattern()
@@ -118,7 +118,7 @@ void Trial::testPattern()
 	float xStep = 1 / density;
 	float yStep = 1 / density;
 
-	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the test pattern... ";
+	//std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the test pattern... ";
 	
     for( float i = fmod( ( xSize / 2 ), xStep ); i < ( xSize + EPSILON ); i += xStep )
 	{
@@ -154,7 +154,7 @@ void Trial::testPattern()
         }
 	}
 
-	std::cout << "done" << std::endl;
+	//std::cout << "done" << std::endl;
 }
 
 void Trial::setRenderMode(Trial::RenderMode renderMode)
@@ -250,6 +250,11 @@ float Trial::getShadowOffset()
 float Trial::getMaxLength()
 {
 	return maxLength;
+}
+
+glm::quat Trial::getTargetOrientation()
+{
+	return glm::quat();
 }
 
 void Trial::display()
