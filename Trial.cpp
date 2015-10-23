@@ -52,9 +52,9 @@ void Trial::makeBiMap()
 	if(bimap != NULL)
 		delete bimap;
 
-	std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")... ";
+	//std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")... ";
 	bimap = new BiMap( bmMaxX, bmMaxY );
-	std::cout << "done" << std::endl;	
+	//std::cout << "done" << std::endl;	
 }
 
 void Trial::sampleBiMap()
@@ -66,7 +66,7 @@ void Trial::sampleBiMap()
 	float xStep = 1 / density;
 	float yStep = 1 / density;
 
-	std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the BiMap... ";
+	//std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the BiMap... ";
 
 	cp.clearSeeds();
 	
@@ -108,7 +108,9 @@ void Trial::sampleBiMap()
         }
 	}
 
-	std::cout << "done" << std::endl;
+	//std::cout << "done" << std::endl;
+
+	std::cout << "Max Length: " << maxLength << std::endl;
 }
 
 void Trial::testPattern()

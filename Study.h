@@ -32,6 +32,19 @@ private:
 		NONE
 	};
 
+	struct Condition {
+		Trial::RenderMode renderMode;
+		float density;
+		float lengthMultiplier;
+		float thicknessMultiplier;
+		
+		Condition(Trial::RenderMode renderMode, float density, float lengthMultiplier, float thicknessMultiplier) 
+			: renderMode(renderMode), density(density), lengthMultiplier(lengthMultiplier), thicknessMultiplier(thicknessMultiplier)
+		{}
+	};
+
+	std::vector<std::vector<Condition>> conditions;
+
 	Study( GLFWwindow* window );
 	static Study* instance;
 

@@ -7,7 +7,9 @@
 #include <math.h> // M_PI
 
 #define NBLOCKS 5
-#define NCONDITIONS 15
+#define NTRIALSPERBLOCK 5
+#define NDENSITYCONDITIONS 3
+#define NRENDERINGCONDITIONS 5
 
 // Initialize class variables
 Study* Study::instance = NULL;
@@ -320,16 +322,57 @@ void Study::begin()
 {
 	mode = Mode::STUDY;
 	srand((unsigned int)time(NULL));
-	
-	for (unsigned int i = 0; i < NBLOCKS * NCONDITIONS; ++i)
-	{
 
+	Trial::RenderMode renders[5] = { Trial::RenderMode::LINES_PLAIN, 
+									 Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, 
+									 Trial::RenderMode::SHADOWED_HEDGEHOGS, 
+									 Trial::RenderMode::TUBES_PLAIN, 
+									 Trial::RenderMode::TUBES_RINGED };
+	float densities[3]			 = { 0.1f, 
+									 0.5f, 
+									 1.f };
+	float lengths[3]			 = { 1.f, 
+									 0.5f, 
+									 0.1f };
+	float thicknesses[3]		 = { 1.f, 
+									 0.5f, 
+									 0.1f };
+	
+	std::vector<Condition> block;
+
+	for (int i = 0; i < NDENSITYCONDITIONS; ++i)
+		for (int j = 0; j < NRENDERINGCONDITIONS; ++j)
+			block.push_back(Condition(renders[j], densities[i], lengths[i], thicknesses[i]));
+
+	for (int i = 0; i < NBLOCKS; ++i)
+	{
+		std::random_shuffle(block.begin(), block.end());
+		conditions.push_back(block);
 	}
+
+	next();
 }
 
 void Study::next()
 {
+	std::vector<Condition> *block = &conditions.back();
 
+	if (block->size == 0)
+	{
+		conditions.pop_back();
+		if (conditions.size() == 0)
+			end();
+		else
+			block = &conditions.back();
+	}
+
+	Condition curr = block->back();
+	block->pop_back();
+
+	renderMode = curr.renderMode;
+	density = curr.density;
+	lengthMultiplier = curr.lengthMultiplier;
+	thicknessMultiplier = curr.thicknessMultiplier;
 }
 
 void Study::end()
@@ -510,11 +553,11 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
 
 void Study::generateTrial()
 {
-	std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
+	//std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
 	trial = Trial(windowWidth, windowHeight, density, jitter);
 	trial.init();
 	trial.setRenderMode(renderMode);
-	std::cout << "Trial generated" << std::endl;
+	//std::cout << "Trial generated" << std::endl;
 }
 
 glm::quat Study::getRandomOrientation()

@@ -41,7 +41,7 @@ int main()
 	for (int i = 0; i < count; ++i)
 	{
 		glfwGetMonitorPhysicalSize(monitors[i], &widthMM, &heightMM);
-		std::cout << "Monitor " << i << ": " << widthMM << "mm x " << heightMM << "mm" << std::endl;
+		//std::cout << "Monitor " << i << ": " << widthMM << "mm x " << heightMM << "mm" << std::endl;
 		if (widthMM == 722 && heightMM == 542)
 		{
 			retinaDisplayPresent = true;
