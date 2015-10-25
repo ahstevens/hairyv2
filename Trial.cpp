@@ -166,7 +166,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::LINES_PLAIN:
 		if (jitter < 0.24)
 		{
-			jitter = 0.25f;
+			setJitter(0.25f);
 			sampleBiMap();
 		}
 		cp.renderPL();
@@ -174,7 +174,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::LINES_ILLUMINATED_CYLINDER_BLINN:
 		if (jitter < 0.24)
 		{
-			jitter = 0.25f;
+			setJitter(0.25f);
 			sampleBiMap();
 		}
 		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_BLINN);
@@ -182,7 +182,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::LINES_ILLUMINATED_CYLINDER_PHONG:
 		if (jitter < 0.24)
 		{
-			jitter = 0.25f;
+			setJitter(0.25f);
 			sampleBiMap();
 		}
 		cp.renderIL(ILines::ILLightingModel::IL_CYLINDER_PHONG);
@@ -190,7 +190,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::LINES_ILLUMINATED_MAXIMUM_PHONG:
 		if (jitter < 0.24)
 		{
-			jitter = 0.25f;
+			setJitter(0.25f);
 			sampleBiMap();
 		}
 		cp.renderIL(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
@@ -198,7 +198,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::TUBES_PLAIN:
 		if (jitter < 0.24)
 		{
-			jitter = 0.25f;
+			setJitter(0.25f);
 			sampleBiMap();
 		}
 		cp.renderPT();
@@ -206,7 +206,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::TUBES_RINGED:
 		if (jitter <= 0.24)
 		{
-			jitter = 0.25f;
+			setJitter(0.25f);
 			sampleBiMap();
 		}
 		cp.renderRT(8, 1.f, vec3(1.f,1.f,1.f), vec3(.1f,.1f,.1f) );
@@ -214,7 +214,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 	case Trial::SHADOWED_HEDGEHOGS:
 		if (jitter >= 0.001)
 		{
-			jitter = 0.f;
+			setJitter(0.f);
 			sampleBiMap();
 		}
 		cp.renderSH();
@@ -235,6 +235,11 @@ void Trial::setShader( Shader *shader )
 void Trial::setJitter(float jitter)
 {
 	this->jitter = jitter;
+}
+
+void Trial::setDensity(float density)
+{
+	this->density = density;
 }
 
 void Trial::passThroughPVMatrix( float *pM, float *vM )

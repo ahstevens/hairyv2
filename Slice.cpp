@@ -555,7 +555,7 @@ void Slice::renderRT( int segments, float stripe_pairs_per_mm, vec3 stripe_color
 void Slice::renderSH()
 {
 	if (geometryChange || !tubesGenerated)
-		generateTubes(8);
+		generateTubes(16);
 
 	doIL = doLines = false;
 	use_texture = false;
@@ -568,6 +568,12 @@ void Slice::setILPVMatrix( float * pM, float *vM )
 
 void Slice::redraw()
 {
+	if (geometryChange)
+		if (doLines)
+			generateHairs();
+		else
+			generateTubes();
+
 	if (doIL)
 	{
 		if( !ilInit )

@@ -7,12 +7,13 @@
 #include <math.h> // M_PI
 
 #define NBLOCKS 5
-#define NREPLICATESPERBLOCK 1
+#define NREPLICATESPERBLOCK 5
 #define NDENSITYCONDITIONS 3
 #define NRENDERINGCONDITIONS 5
 #define NTRIALSPERBLOCK NREPLICATESPERBLOCK * NDENSITYCONDITIONS * NRENDERINGCONDITIONS
 
-#define BGCOLOR glm::vec3(0.325f, 0.486f, 0.812f)
+//#define BGCOLOR glm::vec3(0.325f, 0.486f, 0.812f)
+#define BGCOLOR glm::vec3(0.f, 0.f, 0.f)
 
 // Initialize class variables
 Study* Study::instance = NULL;
@@ -107,6 +108,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
     // OpenGL options
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	glLineWidth(2.f);
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
@@ -505,9 +507,20 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_PERIOD])
 					haloSize += 0.01f;
 				if (keys[GLFW_KEY_KP_SUBTRACT])
-					density -= (density > 0.1f + 0.0001f) ? 0.1f : 0.f;
+				{
+					if (density > 0.1f + 0.0001f)
+					{
+						density -= 0.1f;
+						trial.setDensity(density);
+						trial.sampleBiMap();
+					}
+				}
 				if (keys[GLFW_KEY_KP_ADD])
+				{
 					density += 0.1f;
+					trial.setDensity(density);
+					trial.sampleBiMap();
+				}
 
 				if (keys[GLFW_KEY_INSERT])
 					orient_probe = abs(orient_probe - 1);
@@ -524,6 +537,18 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					hedgehogOffset -= (hedgehogOffset > 0.1f) ? 0.1f : 0.f;
 				if (keys[GLFW_KEY_PAGE_UP])
 					hedgehogOffset += 0.1f;
+
+				if (keys[GLFW_KEY_KP_1])
+					glLineWidth(1.f);
+				if (keys[GLFW_KEY_KP_2])
+					glLineWidth(2.f);
+				if (keys[GLFW_KEY_KP_3])
+					glLineWidth(3.f);
+				if (keys[GLFW_KEY_KP_4])
+					glLineWidth(4.f);
+				if (keys[GLFW_KEY_KP_5])
+					glLineWidth(5.f);
+
 				break;
 			case PAUSED:
 				if (keys[GLFW_KEY_ENTER])

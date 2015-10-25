@@ -34,6 +34,8 @@ public:
 
 	void setJitter(float jitter);
 
+	void setDensity(float density);
+
 	void passThroughPVMatrix( float *pM, float *vM );
 
 	float getShadowOffset();
