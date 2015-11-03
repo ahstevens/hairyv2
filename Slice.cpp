@@ -610,6 +610,7 @@ void Slice::redraw()
 			if(directionality)
 			{
 				glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), true);
+				glUniform1ui(glGetUniformLocation(shader->Program, "glyphHead"), true);
 				glDrawElementsInstanced(GL_TRIANGLES,			 // rendering triangle primitives
 										directionalIndicesCount, // number of indices to be used in rendering
 										GL_UNSIGNED_INT,		 // indices array type is unsigned int

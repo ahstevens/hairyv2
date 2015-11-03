@@ -73,63 +73,112 @@ void Probe::generateProbe(int segments)
 
 
 	// make a 2D circle to generate the "ribs" of the tube
-	std::vector<vec2> circle = this->circle(segments);
+	//std::vector<vec2> circle = this->circle(segments);
 
-	// vertical probe plane
-	tV.position = vec3(0.f, 0.5f, 0.f);
+	// left face
+	tV.position = vec3(-0.5f, 0.5f, 0.f);
 	tV.normal = vec3(-1.f, 0.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.f, -0.5f, 0.f);
+	tV.position = vec3(-0.5f, -0.5f, 0.f);
 	tV.texture = vec2(0.f, 1.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.f, -0.5f, 1.f);
+	tV.position = vec3(-0.5f, -0.5f, 1.f);
 	tV.texture = vec2(1.f, 1.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.f, 0.5f, 1.f);
+	tV.position = vec3(-0.5f, 0.5f, 1.f);
 	tV.texture = vec2(1.f, 0.f);
 	vertices.push_back(tV);
 
-	// horizontal probe plane
-	tV.position = vec3(0.5f, 0.f, 0.f);
+	// right face
+	tV.position = vec3(0.5f, -0.5f, 0.f);
+	tV.normal = vec3(1.f, 0.f, 0.f);
+	tV.texture = vec2(0.f, 0.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, 0.5f, 0.f);
+	tV.texture = vec2(0.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, 0.5f, 1.f);
+	tV.texture = vec2(1.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, -0.5f, 1.f);
+	tV.texture = vec2(1.f, 0.f);
+	vertices.push_back(tV);
+
+	// top face
+	tV.position = vec3(0.5f, 0.5f, 0.f);
 	tV.normal = vec3(0.f, 1.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, 0.f, 0.f);
+	tV.position = vec3(-0.5f, 0.5f, 0.f);
 	tV.texture = vec2(0.f, 1.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, 0.f, 1.f);
+	tV.position = vec3(-0.5f, 0.5f, 1.f);
 	tV.texture = vec2(1.f, 1.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, 0.f, 1.f);
+	tV.position = vec3(0.5f, 0.5f, 1.f);
 	tV.texture = vec2(1.f, 0.f);
+	vertices.push_back(tV);
+
+	// bottom face
+	tV.position = vec3(-0.5f, -0.5f, 0.f);
+	tV.normal = vec3(0.f, -1.f, 0.f);
+	tV.texture = vec2(0.f, 0.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, -0.5f, 0.f);
+	tV.texture = vec2(0.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, -0.5f, 1.f);
+	tV.texture = vec2(1.f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(-0.5f, -0.5f, 1.f);
+	tV.texture = vec2(1.f, 0.f);
+	vertices.push_back(tV);
+
+	// endcap face
+	tV.position = vec3(0.5f, 0.5f, 1.f);
+	tV.normal = vec3(0.f, 0.f, 1.f);
+	tV.texture = vec2(0.01f, 0.01f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(-0.5f, 0.5f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(-0.5f, -0.5f, 1.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(0.5f, -0.5f, 1.f);
 	vertices.push_back(tV);
 
 
 
 	//+++++++++++++++++++++++++++++++ INDICES +++++++++++++++++++++++++++++
 
-	indices.push_back(offset);
-	indices.push_back(offset + 1);
-	indices.push_back(offset + 2);
-	indices.push_back(offset + 2);
-	indices.push_back(offset + 3);
-	indices.push_back(offset);
+	int nFaces = 5;
 
-	offset += 4;
+	for(int i = 0; i < nFaces; ++i)
+	{
+		indices.push_back(offset);
+		indices.push_back(offset + 1);
+		indices.push_back(offset + 2);
+		indices.push_back(offset + 2);
+		indices.push_back(offset + 3);
+		indices.push_back(offset);
 
-	indices.push_back(offset);
-	indices.push_back(offset + 1);
-	indices.push_back(offset + 2);
-	indices.push_back(offset + 2);
-	indices.push_back(offset + 3);
-	indices.push_back(offset);
+		offset += 4;
+	}
 
 	//+++++++++++++++++++++++++++++++ INSTANCE ATTRIBS +++++++++++++++++++++++++++++
 	
@@ -242,6 +291,7 @@ void Probe::redraw()
 	//glMultiDrawElements(GL_TRIANGLES, &counts[0], GL_UNSIGNED_INT, (const GLvoid **)&indices_offsets[0], directionality ? seeds.size() * 2 : seeds.size());
 
 	glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), true);
+	glUniform1ui(glGetUniformLocation(shader->Program, "glyphHead"), false);
 	glDrawElementsInstanced(GL_TRIANGLES,			 // rendering triangle primitives
 							directionalIndicesCount, // number of indices to be used in rendering
 							GL_UNSIGNED_INT,		 // indices array type is unsigned int

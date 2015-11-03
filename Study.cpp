@@ -12,8 +12,8 @@
 #define NRENDERINGCONDITIONS 5
 #define NTRIALSPERBLOCK NREPLICATESPERBLOCK * NDENSITYCONDITIONS * NRENDERINGCONDITIONS
 
-//#define BGCOLOR glm::vec3(0.325f, 0.486f, 0.812f)
-#define BGCOLOR glm::vec3(0.f, 0.f, 0.f)
+#define BGCOLOR glm::vec3(0.325f, 0.486f, 0.812f)
+//#define BGCOLOR glm::vec3(0.f, 0.f, 0.f)
 
 // Initialize class variables
 Study* Study::instance = NULL;
@@ -96,9 +96,9 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	probe.renderRT(8, 0.1f);
 
 	trainingTarget.setShader(lightingShader);
-	trainingTarget.renderPT(8);
+	trainingTarget.renderRT(8, 0.1f);
 	trainingTarget.setOrientation(getRandomOrientation());
-	trainingTarget.setSize(1.1f, 1.1f, 1.1f);
+	//trainingTarget.setSize(1.1f, 1.1f, 1.1f);
 
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
@@ -181,18 +181,19 @@ void Study::render()
 
 				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), 1.f);
 				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 1.f, 1.f, 1.f );
-				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 60.f);
-				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 10.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 80.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 20.f);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), 7.5f);
+				glUniform1i(glGetUniformLocation(haloShader->Program, "glyphHead"), false);
 
 				trainingTarget.setShader(haloShader);
 				
 				// reverse the vertex winding order
-				glFrontFace(GL_CW);
+				//glFrontFace(GL_CW);
 				// Draw model using the halo shader (regular model will be drawn on top)
 				trainingTarget.redraw();
 				// reset vertex winding order
-				glFrontFace(GL_CCW);
+				//glFrontFace(GL_CCW);
 			}
 			else if (theta <= 5.f) // green probe if within 5 degrees
 				trainingTarget.setColor(green);			
@@ -214,8 +215,8 @@ void Study::render()
 
 		initGL(lightingShader);
 		lightingShader->Use();
-		glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 60.f);
-		glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 10.f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 80.f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 20.f);
 		glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 7.5f);
 
 		probe.setOrientation(normalize(polhemus->getQuaternion()));

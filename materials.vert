@@ -17,6 +17,7 @@ uniform float lengthMult;
 uniform float thicknessMult;
 
 uniform bool directionalGeom;
+uniform bool glyphHead;
 uniform float directionalGeomScale;
 
 void main()
@@ -38,7 +39,8 @@ void main()
 		u *= directionalGeomScale;
 		v *= directionalGeomScale;
 		w_new = normalize( w ) * directionalGeomScale;
-		pos = instanceLocation + w * lengthMult;
+		if( glyphHead ) pos = instanceLocation + w * lengthMult;
+		else pos = instanceLocation;
 	}
 	else
 	{
