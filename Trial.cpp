@@ -209,7 +209,7 @@ void Trial::setRenderMode(Trial::RenderMode renderMode)
 			setJitter(0.25f);
 			sampleBiMap();
 		}
-		cp.renderRT(8, 1.f, vec3(1.f,1.f,1.f), vec3(.1f,.1f,.1f) );
+		cp.renderRT(8, 1.f, vec3( 1.f, 1.f, 1.f), vec3(0.5f, 0.5f, 0.5f) );
 		break;
 	case Trial::SHADOWED_HEDGEHOGS:
 		if (jitter >= 0.001)

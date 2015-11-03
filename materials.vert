@@ -5,7 +5,6 @@ layout (location = 2) in vec2 texCoord;
 layout (location = 3) in vec3 instanceLocation;
 layout (location = 4) in vec3 w;
 
-
 out vec3 Normal;
 out vec3 FragPos;
 out vec2 TexCoords;

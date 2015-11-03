@@ -159,8 +159,13 @@ void Study::render()
 	glClearColor(bgColor.r, bgColor.g, bgColor.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (orient_probe)
-	{
+	if (orient_probe) // probe orientation training
+	{	
+		// define probe colors
+		glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
+		glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
+		glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
+
 		if (show_probe_hints)
 		{
 			glm::quat p = glm::normalize(probe.getOrientation());
@@ -170,7 +175,7 @@ void Study::render()
 			float cosTheta = dot(vecXp, vecXt);
 			float theta = glm::degrees(acos(cosTheta));
 
-			if (theta <= 1.f)
+			if (theta <= 1.f) // white halo if within 1 degree
 			{
 				initGL(haloShader);
 
@@ -189,31 +194,23 @@ void Study::render()
 				// reset vertex winding order
 				glFrontFace(GL_CCW);
 			}
-			else if (theta <= 5.f)
+			else if (theta <= 5.f) // green probe if within 5 degrees
+				trainingTarget.setColor(green);			
+			else if (theta <= 15.f) // from 15 degrees to 5 degrees, gradient from yellow to green
 			{
-				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
-				glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
-				trainingTarget.setColor(0.f, 1.f, 0.f);
-			}
-			else if (theta <= 15.f)
-			{
-				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
-				glm::vec3 green = glm::vec3(0.f, 1.f, 0.f);
 				float a = (theta - 15.f) / (5.f - 15.f);
 				trainingTarget.setColor(mix(yellow, green, a));
 			}
-			else  if (theta <= 90.f)
+			else  if (theta <= 90.f) // from 90 degrees to 15 degrees, gradient from white to yellow
 			{
-				glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
-				glm::vec3 yellow = glm::vec3(1.f, 1.f, 0.f);
 				float a = (theta - 90.f) / (15.f - 90.f);
 				trainingTarget.setColor(mix(white, yellow, a));
 			}
-			else
-				trainingTarget.setColor(1.f, 1.f, 1.f);
+			else // if greater than 90 degrees, white
+				trainingTarget.setColor(white);
 		}
-		else
-			trainingTarget.setColor(1.f, 1.f, 1.f);
+		else // default probe color is white
+			trainingTarget.setColor(white);
 
 		initGL(lightingShader);
 		lightingShader->Use();
@@ -234,7 +231,6 @@ void Study::render()
 		case Trial::RenderMode::LINES_PLAIN:
 			this->initGL(lineShader);
 			trial.setShader(lineShader);
-			trial.display();
 			break;
 		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
 		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
@@ -243,7 +239,6 @@ void Study::render()
 
 			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
 				(float*)glm::value_ptr(camera.getViewMatrix()));
-			trial.display();
 
 			break;
 		case Trial::RenderMode::SHADOWED_HEDGEHOGS:
@@ -262,9 +257,7 @@ void Study::render()
 
 			// second pass to render the glyph plane
 			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
-
-			trial.display();
-
+			
 			break;
 		case Trial::RenderMode::TUBES_PLAIN:
 		case Trial::RenderMode::TUBES_RINGED:
@@ -287,10 +280,11 @@ void Study::render()
 
 			this->initGL(lightingShader);
 			trial.setShader(lightingShader);
-			trial.display();
 
 			break;
 		}
+
+		trial.display();
 	}
 }
 
