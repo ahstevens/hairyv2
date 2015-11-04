@@ -37,7 +37,7 @@ Study::Study( GLFWwindow* window )
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = orient_probe = draw_probe = show_probe_hints = 0;
+	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = 0;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -108,6 +108,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
     // OpenGL options
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+	//glCullFace(GL_FRONT);
 	glLineWidth(2.f);
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
@@ -159,7 +160,7 @@ void Study::render()
 	glClearColor(bgColor.r, bgColor.g, bgColor.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	if (orient_probe) // probe orientation training
+	if (probe_training) // probe orientation training
 	{	
 		// define probe colors
 		glm::vec3 white = glm::vec3(1.f, 1.f, 1.f);
@@ -189,11 +190,11 @@ void Study::render()
 				trainingTarget.setShader(haloShader);
 				
 				// reverse the vertex winding order
-				//glFrontFace(GL_CW);
+				glFrontFace(GL_CW);
 				// Draw model using the halo shader (regular model will be drawn on top)
 				trainingTarget.redraw();
 				// reset vertex winding order
-				//glFrontFace(GL_CCW);
+				glFrontFace(GL_CCW);
 			}
 			else if (theta <= 5.f) // green probe if within 5 degrees
 				trainingTarget.setColor(green);			
@@ -236,10 +237,16 @@ void Study::render()
 		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
 		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
 		case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
-			Shader::Off();
+			//Shader::Off();
+			
+			this->initGL(lightingShader);
+			trial.setShader(lightingShader);
 
 			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
 				(float*)glm::value_ptr(camera.getViewMatrix()));
+
+			// to display 3D glyph heads using GLSL
+			//trial.display();
 
 			break;
 		case Trial::RenderMode::SHADOWED_HEDGEHOGS:
@@ -267,7 +274,7 @@ void Study::render()
 				initGL(haloShader);
 
 				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
-				glUniform4f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f, 1.f );
+				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f );
 				
 				trial.setShader(haloShader);
 
@@ -518,7 +525,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				}
 
 				if (keys[GLFW_KEY_INSERT])
-					orient_probe = abs(orient_probe - 1);
+					probe_training = abs(probe_training - 1);
 				if (keys[GLFW_KEY_DELETE])
 					draw_probe = abs(draw_probe - 1);
 				if (keys[GLFW_KEY_HOME])

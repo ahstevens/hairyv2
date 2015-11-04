@@ -89,7 +89,7 @@ private:
 
 	Mode mode;
 
-	int draw_halos, cycle_light, orient_probe, draw_probe, show_probe_hints;
+	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints;
 
 	float density, jitter;
 	Trial::RenderMode renderMode;

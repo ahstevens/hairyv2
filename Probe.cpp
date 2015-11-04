@@ -72,9 +72,6 @@ void Probe::generateProbe(int segments)
 	offset += sphere.getVertices().size();
 
 
-	// make a 2D circle to generate the "ribs" of the tube
-	//std::vector<vec2> circle = this->circle(segments);
-
 	// left face
 	tV.position = vec3(-0.5f, 0.5f, 0.f);
 	tV.normal = vec3(-1.f, 0.f, 0.f);

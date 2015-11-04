@@ -573,9 +573,45 @@ void Slice::redraw()
 			generateHairs();
 		else
 			generateTubes();
+	
+	glUniform3f(glGetUniformLocation(shader->Program, "material.ambient"),
+		mat.getAmbientColor().r, mat.getAmbientColor().g, mat.getAmbientColor().b);
+	glUniform3f(glGetUniformLocation(shader->Program, "material.diffuse"),
+		mat.getDiffuseColor().r, mat.getDiffuseColor().g, mat.getDiffuseColor().b);
+	glUniform3f(glGetUniformLocation(shader->Program, "material.specular"),
+		mat.getSpecularColor().r, mat.getSpecularColor().g, mat.getSpecularColor().b);
+	glUniform1f(glGetUniformLocation(shader->Program, "material.shininess"),
+		mat.getShininess());
+	glUniform1i(glGetUniformLocation(shader->Program, "use_texture"),
+		use_texture);
+
+	//glActiveTexture(GL_TEXTURE0);
+	if (use_texture) tex->enable();
+
+	glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"),
+		1,
+		GL_FALSE,
+		glm::value_ptr(getModelMatrix())
+		);
+
+	// Draw the container (using container's vertex attributes)
+	glBindVertexArray(VAO);
+		if(directionality)
+		{
+			glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), true);
+			glUniform1ui(glGetUniformLocation(shader->Program, "glyphHead"), true);
+			glDrawElementsInstanced(GL_TRIANGLES,			 // rendering triangle primitives
+									directionalIndicesCount, // number of indices to be used in rendering
+									GL_UNSIGNED_INT,		 // indices array type is unsigned int
+									0,						 // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
+									seeds.size());			 // number of instances to render
+		}			
+	glBindVertexArray(0);
 
 	if (doIL)
 	{
+		Shader::Off();
+
 		if( !ilInit )
 		{
 			il->init();
@@ -583,40 +619,12 @@ void Slice::redraw()
 		}
 
 		il->redraw();
+
+		shader->Use();
 	}
-	else {
-		glUniform3f(glGetUniformLocation(shader->Program, "material.ambient"),
-			mat.getAmbientColor().r, mat.getAmbientColor().g, mat.getAmbientColor().b);
-		glUniform3f(glGetUniformLocation(shader->Program, "material.diffuse"),
-			mat.getDiffuseColor().r, mat.getDiffuseColor().g, mat.getDiffuseColor().b);
-		glUniform3f(glGetUniformLocation(shader->Program, "material.specular"),
-			mat.getSpecularColor().r, mat.getSpecularColor().g, mat.getSpecularColor().b);
-		glUniform1f(glGetUniformLocation(shader->Program, "material.shininess"),
-			mat.getShininess());
-		glUniform1i(glGetUniformLocation(shader->Program, "use_texture"),
-			use_texture);
-
-		//glActiveTexture(GL_TEXTURE0);
-		if (use_texture) tex->enable();
-
-		glUniformMatrix4fv(glGetUniformLocation(shader->Program, "model"),
-			1,
-			GL_FALSE,
-			glm::value_ptr(getModelMatrix())
-			);
-
-		// Draw the container (using container's vertex attributes)
+	else
+	{
 		glBindVertexArray(VAO);
-			if(directionality)
-			{
-				glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), true);
-				glUniform1ui(glGetUniformLocation(shader->Program, "glyphHead"), true);
-				glDrawElementsInstanced(GL_TRIANGLES,			 // rendering triangle primitives
-										directionalIndicesCount, // number of indices to be used in rendering
-										GL_UNSIGNED_INT,		 // indices array type is unsigned int
-										0,						 // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-										seeds.size());			 // number of instances to render
-			}
 		
 			glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
 
@@ -626,7 +634,8 @@ void Slice::redraw()
 									(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
 									seeds.size());											// number of instances to render
 		glBindVertexArray(0);
-
-		if (use_texture) tex->disable();
 	}
+
+	if (use_texture) tex->disable();
+	
 }
