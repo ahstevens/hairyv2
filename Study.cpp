@@ -1,8 +1,7 @@
 #include "Study.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "Slice.h"
-#include <time.h>
-#include <random>
+#include <time.h> // time() for srand()
 
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
@@ -229,92 +228,72 @@ void Study::render()
 	}
 	else
 	{
-		// Setup trial based on rendering mode using the following switch statement
 		switch (trial.getRenderMode())
 		{
-			case Trial::RenderMode::LINES_PLAIN:
-				setupPL();
-				break;
-			case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
-			case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
-			case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:			
-				setupIL();
-				break;
-			case Trial::RenderMode::SHADOWED_HEDGEHOGS:
-				setupSH();			
-				break;
-			case Trial::RenderMode::TUBES_PLAIN:
-			case Trial::RenderMode::TUBES_RINGED:
-				setupTubes();
-				break;
+		case Trial::RenderMode::LINES_PLAIN:
+			this->initGL(lineShader);
+			trial.setShader(lineShader);
+			break;
+		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
+		case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
+			//Shader::Off();
+			
+			this->initGL(lightingShader);
+			trial.setShader(lightingShader);
+
+			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
+				(float*)glm::value_ptr(camera.getViewMatrix()));
+
+			// to display 3D glyph heads using GLSL
+			//trial.display();
+
+			break;
+		case Trial::RenderMode::SHADOWED_HEDGEHOGS:
+			initGL(hogShader);
+
+			glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), (1 / density) / 2 / trial.getMaxLength());
+
+			glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
+
+			// first pass to render shadow plane
+			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
+
+			trial.setShader(hogShader);
+
+			trial.display();
+
+			// second pass to render the glyph plane
+			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
+			
+			break;
+		case Trial::RenderMode::TUBES_PLAIN:
+		case Trial::RenderMode::TUBES_RINGED:
+			if (draw_halos)
+			{
+				initGL(haloShader);
+
+				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f );
+				
+				trial.setShader(haloShader);
+
+				// reverse the vertex winding order
+				glFrontFace(GL_CW);
+				// Draw model using the halo shader (regular model will be drawn on top)
+				trial.display();
+				// reset vertex winding order
+				glFrontFace(GL_CCW);
+			}
+
+			this->initGL(lightingShader);
+			trial.setShader(lightingShader);
+
+			break;
 		}
 
-		// Render the trial using settings passed through the switch statement above
 		trial.display();
 	}
-}
-
-void Study::setupPL()
-{
-	this->initGL(lineShader);
-	trial.setShader(lineShader);
-}
-
-void Study::setupIL()
-{
-	this->initGL(lightingShader);
-	trial.setShader(lightingShader);
-
-	trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
-		(float*)glm::value_ptr(camera.getViewMatrix()));
-}
-
-void Study::setupSH()
-{
-	initGL(hogShader);
-
-	// The maximum length of a glyph should be 1/2 the size of a grid cell
-	float maxGlyphLength = (1.f / density) / 2.f / trial.getMaxLength();
-								
-	glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), maxGlyphLength);
-
-	// The shadow plane should be set behind the glyph plane; the distance between the planes
-	// is based off of the largest -z value sampled and a user-controlled offset
-	glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), 
-		-trial.getShadowOffset() * maxGlyphLength + hedgehogOffset);
-
-	// first pass to render shadow plane
-	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
-
-	trial.setShader(hogShader);
-
-	trial.display();
-
-	// second pass to render the glyph plane
-	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
-}
-
-void Study::setupTubes()
-{
-	if (draw_halos)
-	{
-		initGL(haloShader);
-
-		glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
-		glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f );
-				
-		trial.setShader(haloShader);
-
-		// reverse the vertex winding order
-		glFrontFace(GL_CW);
-		// Draw model using the halo shader (regular model will be drawn on top)
-		trial.display();
-		// reset vertex winding order
-		glFrontFace(GL_CCW);
-	}
-
-	this->initGL(lightingShader);
-	trial.setShader(lightingShader);
 }
 
 void Study::initGL(Shader *s)
@@ -689,16 +668,21 @@ float Study::getAngleError(glm::quat p, glm::quat q)
 
 glm::quat Study::getRandomOrientation()
 {
-	std::random_device seed;  // random seed
-	std::mt19937 gen(seed()); // Mersenne Twister RNG
-	std::uniform_real_distribution<float> dist(-1, 1);
+	srand( (unsigned) time( NULL ) );
 
-	float w, x, y, z;
+	float angle = ( (float) rand() / (float) RAND_MAX ) * 360; // 0 to 360 
+
+	float z = ( (float) rand() / (float) RAND_MAX ) * 2 - 1; // -1 to 1
+
+	glm::vec3 axis;
+
+	axis.x = sqrtf(1.f - z * z) * cos(angle);
+	axis.y = sqrtf(1.f - z * z) * sin(angle);
+	axis.z = z;
 	
-	w = dist( gen );
-	x = dist( gen );
-	y = dist( gen );
-	z = dist( gen );
-	
-	return glm::normalize( glm::quat( w, x, y, z ) );
+	angle = ((float)rand() / (float)RAND_MAX) * 2 * M_PI; // 0 to 2pi 
+
+	glm::quat ret = glm::normalize( glm::angleAxis( angle, axis ) );
+
+	return ret;
 }
