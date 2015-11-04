@@ -2,6 +2,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Slice.h"
 #include <time.h> // time() for srand()
+#include <random>
 
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
@@ -668,21 +669,16 @@ float Study::getAngleError(glm::quat p, glm::quat q)
 
 glm::quat Study::getRandomOrientation()
 {
-	srand( (unsigned) time( NULL ) );
+	std::random_device seed;  // random seed
+	std::mt19937 gen(seed()); // Mersenne Twister RNG
+	std::uniform_real_distribution<float> dist(-1, 1);
 
-	float angle = ( (float) rand() / (float) RAND_MAX ) * 360; // 0 to 360 
+	float w, x, y, z;
 
-	float z = ( (float) rand() / (float) RAND_MAX ) * 2 - 1; // -1 to 1
-
-	glm::vec3 axis;
-
-	axis.x = sqrtf(1.f - z * z) * cos(angle);
-	axis.y = sqrtf(1.f - z * z) * sin(angle);
-	axis.z = z;
+	w = dist( gen );
+	x = dist( gen );
+	y = dist( gen );
+	z = dist( gen );
 	
-	angle = ((float)rand() / (float)RAND_MAX) * 2 * M_PI; // 0 to 2pi 
-
-	glm::quat ret = glm::normalize( glm::angleAxis( angle, axis ) );
-
-	return ret;
+	return glm::normalize( glm::quat( w, x, y, z ) );
 }
