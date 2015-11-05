@@ -242,25 +242,25 @@ void Study::render()
 	{
 		switch (trial.getRenderMode())
 		{
-		case Trial::RenderMode::LINES_PLAIN:
-			setupPL();
-			break;
-		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
-		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
-		case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
-			setupIL();
+			case Trial::RenderMode::LINES_PLAIN:
+				setupPL();
+				break;
+			case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+			case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
+			case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
+				setupIL();
 
-			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
-				(float*)glm::value_ptr(camera.getViewMatrix()));
+				trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
+					(float*)glm::value_ptr(camera.getViewMatrix()));
 
-			break;
-		case Trial::RenderMode::SHADOWED_HEDGEHOGS:
-			setupSH();
-			break;
-		case Trial::RenderMode::TUBES_PLAIN:
-		case Trial::RenderMode::TUBES_RINGED:
-			setupTubes();
-			break;
+				break;
+			case Trial::RenderMode::SHADOWED_HEDGEHOGS:
+				setupSH();
+				break;
+			case Trial::RenderMode::TUBES_PLAIN:
+			case Trial::RenderMode::TUBES_RINGED:
+				setupTubes();
+				break;
 		}
 
 		// Display the trial slice
@@ -274,8 +274,16 @@ void Study::render()
 
 		// Turn off writing to the depth mask for transparency effects
 		glDepthMask( GL_FALSE );
+				
+		// First draw target cursor as a filled object
+		glUniform1f(glGetUniformLocation(targetShader->Program, "opacity"), 0.1f);
+		target.redraw(); // draw target cursor		
 
-		target.redraw(); // draw target cursor
+		// Now draw target cursor outline slightly darker
+		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+		glUniform1f(glGetUniformLocation(targetShader->Program, "opacity"), 0.25f);
+		target.redraw();
+		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 
 		// Reenable writing to the depth mask
 		glDepthMask( GL_TRUE );
@@ -372,7 +380,8 @@ void Study::training()
 {	
 	float angleRad = getAngleError( probe.getOrientation(), trainingTarget.getOrientation() );
 	std::cout << "Angular error: " << glm::degrees( angleRad ) << " deg (" << angleRad << " rad)" << std::endl;
-	trainingTarget.setOrientation(getRandomOrientation());
+	//trainingTarget.setOrientation(getRandomOrientation());
+	trainingTarget.setOrientation(target.getOrientation());
 }
 
 void Study::begin()
@@ -508,7 +517,11 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_M])
 					draw_halos = abs(draw_halos - 1);
 				if (keys[GLFW_KEY_P])
+				{
 					polhemus->printInfo();
+					std::cout << "Angular Error to Target: " << glm::degrees( getAngleError( getTargetOrientation(), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << std::endl;
+				}
 				if (keys[GLFW_KEY_Q])
 					training();
 				if (keys[GLFW_KEY_R])
@@ -611,7 +624,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_SPACE] && stopwatch.read() > 2.0)
 				{
 					glm::quat probeQuat = polhemus->getQuaternion();
-					glm::quat targetQuat = trial.getTargetOrientation();
+					glm::quat targetQuat = getTargetOrientation();
 					std::cout << participant << ",";
 					std::cout << NBLOCKS - conditions.size() << ",";
 					std::cout << NTRIALSPERBLOCK - conditions.back().size() - 1 << ",";
@@ -698,7 +711,26 @@ void Study::generateTrial()
 	trial = Trial(windowWidth, windowHeight, density, jitter);
 	trial.init();
 	trial.setRenderMode(renderMode);
+
+	Slice::Seed targSeed = trial.getRandomSeed();
+	target.setPosition( targSeed.x - windowWidth / 2.f, targSeed.y - windowHeight / 2.f, 0.f );
+	target.setSeed( targSeed );
+	std::cout << "Target Vec: ( " << targSeed.dx << ", " << targSeed.dy << ", " << targSeed.dx << " )" << std::endl;
 	//std::cout << "Trial generated" << std::endl;
+}
+
+glm::quat Study::getTargetOrientation()
+{
+	Slice::Seed seed = target.getSeed();
+
+	glm::vec3 v1 = glm::normalize( glm::vec3( seed.dx, seed.dy, seed.dz ) );
+	glm::vec3 v2 = glm::vec3( 1.f, 0.f, 0.f );
+
+	glm::vec3 xProd = glm::cross( v1, v2 );
+
+	float w = sqrt( ( v1.length() ^ 2 ) * ( v2.length() ^ 2 ) ) + glm::dot( v1, v2 );
+
+	return glm::normalize( glm::quat( w, xProd.x, xProd.y, xProd.z ) );
 }
 
 float Study::getAngleError(glm::quat p, glm::quat q)

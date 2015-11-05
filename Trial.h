@@ -24,8 +24,7 @@ public:
 
 	void makeBiMap();
 	void sampleBiMap();
-
-	void testPattern();
+	Slice::Seed getRandomSeed();
 
 	void setRenderMode(Trial::RenderMode renderMode);
 	Trial::RenderMode getRenderMode();
@@ -41,8 +40,6 @@ public:
 	float getShadowOffset();
 
 	float getMaxLength();
-
-	glm::quat getTargetOrientation();
 
 	void display();
 

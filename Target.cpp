@@ -29,6 +29,16 @@ void Target::init()
 	use_texture = false;
 }
 
+void Target::setSeed( Slice::Seed seed )
+{
+	this->seed = seed;
+}
+
+Slice::Seed Target::getSeed()
+{
+	return seed;
+}
+
 void Target::generate()
 {
 	vertices.clear();
@@ -162,22 +172,10 @@ void Target::redraw()
 
 	// Draw the container (using container's vertex attributes)
 	glBindVertexArray(VAO);
-
-		glUniform1f(glGetUniformLocation(shader->Program, "opacity"), 0.1f);
 		glDrawElementsInstanced(GL_TRIANGLES,					// rendering triangle primitives
 								indices.size(),					// number of indices to be used in rendering
 								GL_UNSIGNED_INT,				// indices array type is unsigned int
 								(GLvoid*) (sizeof(GLuint) * 0),	// byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
 								1);								// number of instances to render
-
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-		glUniform1f(glGetUniformLocation(shader->Program, "opacity"), 0.25f);
-		glDrawElementsInstanced(GL_TRIANGLES,					// rendering triangle primitives
-								indices.size(),					// number of indices to be used in rendering
-								GL_UNSIGNED_INT,				// indices array type is unsigned int
-								(GLvoid*) (sizeof(GLuint) * 0),	// byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
-								1);								// number of instances to render
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-
 	glBindVertexArray(0);
 }

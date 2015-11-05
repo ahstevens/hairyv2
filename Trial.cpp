@@ -1,5 +1,5 @@
 #include "Trial.h"
-
+#include <random>
 #include <time.h> // time() for srand()
 
 #define BIMAP_BASE_SIZE 100.f
@@ -113,48 +113,26 @@ void Trial::sampleBiMap()
 	//std::cout << "Max Length: " << maxLength << std::endl;
 }
 
-void Trial::testPattern()
+Slice::Seed Trial::getRandomSeed()
 {
-	float xStep = 1 / density;
-	float yStep = 1 / density;
+	Slice::Seed seed;
 
-	//std::cout << "Seeding the " << xSize << " x " << ySize << " cutting plane at a density of " << density << " glyphs/mm using the test pattern... ";
-	
-    for( float i = fmod( ( xSize / 2 ), xStep ); i < ( xSize + EPSILON ); i += xStep )
-	{
-        for( float j = fmod( ( ySize / 2 ), yStep ); j < ( ySize + EPSILON ); j += yStep )
-        {
-			float x_jitter;
-            if( i < EPSILON )
-                x_jitter = ( rand() % 2 ) * jitter;
-            else if( abs( i - ( xSize - xStep ) ) < EPSILON )
-                x_jitter = ( rand() % 2 - 1 ) * jitter;
-            else
-                x_jitter = ( rand() % 3 - 1 ) * jitter;
+	float xMin = xSize * 0.25f;
+	float xMax = xSize * 0.75f;
+	float yMin = ySize * 0.25f;
+	float yMax = ySize * 0.75f;
 
-			float y_jitter;
-            if( j < EPSILON )
-                y_jitter = ( rand() % 2 ) * jitter;
-            else if( abs( j - ( ySize - yStep ) ) < EPSILON )
-                y_jitter = ( rand() % 2 - 1 ) * jitter;
-            else
-                y_jitter = ( rand() % 3 - 1 ) * jitter;
+	std::random_device rand_seed;  // random seed
+	std::mt19937 gen(rand_seed()); // Mersenne Twister RNG
+	std::uniform_real_distribution<float> x_dist(xMin, xMax);	
+	std::uniform_real_distribution<float> y_dist(yMin, yMax);
 
-			Slice::Seed seed;
-            seed.x = (float) i + ( x_jitter * xStep );
-            seed.y = (float) j + ( y_jitter * yStep );
+	seed.x = x_dist( gen );
+	seed.y = y_dist( gen );
 
-			vec3 temp = normalize(vec3(seed.x, seed.y, 10.0) - vec3(xSize / 2, ySize / 2, 0.f)) * 10.f;
+	bimap->getVecValues( seed.x, seed.y, seed.dx, seed.dy, seed.dz );
 
-			seed.dx = temp.x;
-			seed.dy = temp.y;
-			seed.dz = temp.z;
-
-			cp.addSeed( seed );
-        }
-	}
-
-	//std::cout << "done" << std::endl;
+	return seed;
 }
 
 void Trial::setRenderMode(Trial::RenderMode renderMode)
@@ -255,11 +233,6 @@ float Trial::getShadowOffset()
 float Trial::getMaxLength()
 {
 	return maxLength;
-}
-
-glm::quat Trial::getTargetOrientation()
-{
-	return glm::quat();
 }
 
 void Trial::display()

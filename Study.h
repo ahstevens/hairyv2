@@ -74,6 +74,8 @@ private:
 
 	void generateTrial();
 
+	glm::quat getTargetOrientation();
+
 	float getAngleError(glm::quat probe, glm::quat target);
 
 	glm::quat getRandomOrientation();

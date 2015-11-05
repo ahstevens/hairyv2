@@ -477,7 +477,7 @@ void Slice::renderIL( ILines::ILLightingModel::Model lightModel, float lengthMul
 
 		offset = 0;
 
-		mat4 trans = translate(mat4(1.f), vec3(-width / 2, -height / 2, 0.0));
+		mat4 trans = translate(mat4(1.f), vec3(-width / 2.f, -height / 2.f, 0.f));
 
 		std::vector<Seed>::iterator it;
 		for (it = seeds.begin(); it != seeds.end(); ++it)
