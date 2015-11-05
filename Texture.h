@@ -31,6 +31,7 @@ class Texture
 		void stripes(int nStripes, GLubyte s1r,
 			GLubyte s1g, GLubyte s1b, GLubyte s2r, GLubyte s2g, GLubyte s2b);
 		void stripes1D(int nStripes, glm::vec3 stripe_color1, glm::vec3 stripe_color2);
+		void grid( glm::vec3 line_color );
 
     protected:
         GLuint  textureID;

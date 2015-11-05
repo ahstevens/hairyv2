@@ -191,3 +191,38 @@ void Texture::stripes1D(int nStripes, glm::vec3 stripe_color1, glm::vec3 stripe_
 
 	delete[] stripes;
 }
+
+void Texture::grid( glm::vec3 line_color )
+{
+	width  = 10; // mm
+	height = 10; // mm
+
+	GLfloat* grid = new GLfloat[width * height * RGB_SIZE];
+
+	int base;
+	for (int i = 0; i < height; i++) {
+		for (int j = 0; j < width; j++) {
+			base = (i * width + j) * RGB_SIZE;
+			if (i == 0 || i == height - 1 || j == 0 || j == width - 1) 
+			{
+				grid[base + 0] = line_color.r; // r
+				grid[base + 1] = line_color.g; // g
+				grid[base + 2] = line_color.b; // b
+			}
+			else 
+			{
+				grid[base + 0] = 1.f; // r
+				grid[base + 1] = 1.f; // g
+				grid[base + 2] = 1.f; // b
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0,
+		GL_RGB, GL_FLOAT, grid);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	delete[] grid;
+}

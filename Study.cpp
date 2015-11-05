@@ -27,7 +27,7 @@ Study* Study::getInstance( GLFWwindow* window )
     return instance;
 }
 
-Study::Study( GLFWwindow* window )
+Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Probe(80.f, 20.f))
 {
 	int width_px, height_px;
 	glfwGetWindowSize(window, &width_px, &height_px);
@@ -94,10 +94,10 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	}	
 		
 	probe.setShader(lightingShader);
-	probe.renderRT(8, 0.1f);
+	probe.init();
 
 	trainingTarget.setShader(lightingShader);
-	trainingTarget.renderRT(8, 0.1f);
+	trainingTarget.init();
 	trainingTarget.setOrientation(getRandomOrientation());
 	//trainingTarget.setSize(1.1f, 1.1f, 1.1f);
 
@@ -183,9 +183,9 @@ void Study::render()
 
 				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), 1.f);
 				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 1.f, 1.f, 1.f );
-				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 80.f);
-				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 20.f);
-				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), 7.5f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 1.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 1.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "directionalGeomScale"), 10.f);
 				glUniform1i(glGetUniformLocation(haloShader->Program, "glyphHead"), false);
 
 				trainingTarget.setShader(haloShader);
@@ -217,9 +217,9 @@ void Study::render()
 
 		initGL(lightingShader);
 		lightingShader->Use();
-		glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 80.f);
-		glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 20.f);
-		glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 7.5f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "lengthMult"), 1.f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "thicknessMult"), 1.f);
+		glUniform1f(glGetUniformLocation(lightingShader->Program, "directionalGeomScale"), 10.f);
 
 		probe.setOrientation(normalize(polhemus->getQuaternion()));
 

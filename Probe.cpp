@@ -13,10 +13,10 @@
 
 using namespace glm;
 
-Probe::Probe(void) 
+Probe::Probe(float length_mm, float width_mm) 
 {
-	geometryChange = true;
-	tubesGenerated = false;
+	this->length = length_mm;
+	this->width = width_mm;
 }
 
 Probe::~Probe(void)
@@ -36,12 +36,25 @@ std::vector<vec2> Probe::circle(int segments)
     return circle;
 }
 
-void Probe::generateProbe(int segments)
+void Probe::init()
+{
+	generateProbe();
+
+	use_texture = true;
+
+	tex = new Texture();
+	
+	glm::vec3 line_color = glm::vec3( 0.f, 0.f, 0.f);
+
+	tex->grid( line_color );
+	tex->setMinFilter(GL_NEAREST);
+	tex->setMagFilter(GL_NEAREST);
+}
+
+void Probe::generateProbe()
 {
 	vertices.clear();
 	indices.clear();
-
-	//std::cout << "Generating geometry for tube glyphs... ";
 	
 	//+++++++++++++++++++++++++++++++ GEOMETRY +++++++++++++++++++++++++++++
 
@@ -71,99 +84,116 @@ void Probe::generateProbe(int segments)
 
 	offset += sphere.getVertices().size();
 
+	// Position and Texture coords are given in mm
+	float half_width = width / 2.f;
 
 	// left face
-	tV.position = vec3(-0.5f, 0.5f, 0.f);
+	tV.position = vec3(-half_width, half_width, 0.f);
 	tV.normal = vec3(-1.f, 0.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, -0.5f, 0.f);
-	tV.texture = vec2(0.f, 1.f);
+	tV.position = vec3(-half_width, -half_width, 0.f);
+	tV.texture = vec2(width, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, -0.5f, 1.f);
-	tV.texture = vec2(1.f, 1.f);
+	tV.position = vec3(-half_width, -half_width, length);
+	tV.texture = vec2(width, length);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, 0.5f, 1.f);
-	tV.texture = vec2(1.f, 0.f);
+	tV.position = vec3(-half_width, half_width, length);
+	tV.texture = vec2(0.f, length);
 	vertices.push_back(tV);
 
 	// right face
-	tV.position = vec3(0.5f, -0.5f, 0.f);
+	tV.position = vec3(half_width, -half_width, 0.f);
 	tV.normal = vec3(1.f, 0.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, 0.5f, 0.f);
-	tV.texture = vec2(0.f, 1.f);
+	tV.position = vec3(half_width, half_width, 0.f);
+	tV.texture = vec2(width, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, 0.5f, 1.f);
-	tV.texture = vec2(1.f, 1.f);
+	tV.position = vec3(half_width, half_width, length);
+	tV.texture = vec2(width, length);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, -0.5f, 1.f);
-	tV.texture = vec2(1.f, 0.f);
+	tV.position = vec3(half_width, -half_width, length);
+	tV.texture = vec2(0.f, length);
 	vertices.push_back(tV);
 
 	// top face
-	tV.position = vec3(0.5f, 0.5f, 0.f);
+	tV.position = vec3(half_width, half_width, 0.f);
 	tV.normal = vec3(0.f, 1.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, 0.5f, 0.f);
-	tV.texture = vec2(0.f, 1.f);
+	tV.position = vec3(-half_width, half_width, 0.f);
+	tV.texture = vec2(width, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, 0.5f, 1.f);
-	tV.texture = vec2(1.f, 1.f);
+	tV.position = vec3(-half_width, half_width, length);
+	tV.texture = vec2(width, length);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, 0.5f, 1.f);
-	tV.texture = vec2(1.f, 0.f);
+	tV.position = vec3(half_width, half_width, length);
+	tV.texture = vec2(0.f, length);
 	vertices.push_back(tV);
 
 	// bottom face
-	tV.position = vec3(-0.5f, -0.5f, 0.f);
+	tV.position = vec3(-half_width, -half_width, 0.f);
 	tV.normal = vec3(0.f, -1.f, 0.f);
 	tV.texture = vec2(0.f, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, -0.5f, 0.f);
-	tV.texture = vec2(0.f, 1.f);
+	tV.position = vec3(half_width, -half_width, 0.f);
+	tV.texture = vec2(width, 0.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, -0.5f, 1.f);
-	tV.texture = vec2(1.f, 1.f);
+	tV.position = vec3(half_width, -half_width, length);
+	tV.texture = vec2(width, length);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, -0.5f, 1.f);
-	tV.texture = vec2(1.f, 0.f);
+	tV.position = vec3(-half_width, -half_width, length);
+	tV.texture = vec2(0.f, length);
 	vertices.push_back(tV);
 
-	// endcap face
-	tV.position = vec3(0.5f, 0.5f, 1.f);
+	// origin endcap face
+	tV.position = vec3(-half_width, half_width, 0.f);
+	tV.normal = vec3(0.f, 0.f, -1.f);
+	tV.texture = vec2(5.f, 5.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(half_width, half_width, 0.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(half_width, -half_width, 0.f);
+	vertices.push_back(tV);
+
+	tV.position = vec3(-half_width, -half_width, 0.f);
+	vertices.push_back(tV);
+
+	// tip endcap face
+	tV.position = vec3(half_width, half_width, length);
 	tV.normal = vec3(0.f, 0.f, 1.f);
-	tV.texture = vec2(0.01f, 0.01f);
+	tV.texture = vec2(5.f, 5.f);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, 0.5f, 1.f);
+	tV.position = vec3(-half_width, half_width, length);
 	vertices.push_back(tV);
 
-	tV.position = vec3(-0.5f, -0.5f, 1.f);
+	tV.position = vec3(-half_width, -half_width, length);
 	vertices.push_back(tV);
 
-	tV.position = vec3(0.5f, -0.5f, 1.f);
+	tV.position = vec3(half_width, -half_width, length);
 	vertices.push_back(tV);
 
 
 
 	//+++++++++++++++++++++++++++++++ INDICES +++++++++++++++++++++++++++++
 
-	int nFaces = 5;
+	int nFaces = 6;
 
 	for(int i = 0; i < nFaces; ++i)
 	{
@@ -231,34 +261,6 @@ void Probe::generateProbe(int segments)
 		glVertexAttribDivisor(4, 1);
 
 	glBindVertexArray(0);
-
-	geometryChange = false;
-	tubesGenerated = true;
-	//std::cout << "done." << std::endl;
-}
-
-void Probe::renderPT( int segments )
-{
-	if (geometryChange || !tubesGenerated)
-		generateProbe( segments );
-	
-	use_texture = false;
-}
-
-void Probe::renderRT( int segments, float stripe_pairs_per_mm, vec3 stripe_color1, vec3 stripe_color2 )
-{
-	if( geometryChange || !tubesGenerated )
-		generateProbe( segments );
-
-	use_texture = true;
-
-	tex = new Texture();
-	
-	int nStripes = (int) (stripe_pairs_per_mm * 2 * 10);
-	tex->stripes1D(nStripes, stripe_color1, stripe_color2);
-	tex->checker(4, 4);
-	tex->setMinFilter(GL_NEAREST);
-	tex->setMagFilter(GL_NEAREST);
 }
 
 void Probe::redraw()
