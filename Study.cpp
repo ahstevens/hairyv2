@@ -232,69 +232,82 @@ void Study::render()
 		switch (trial.getRenderMode())
 		{
 		case Trial::RenderMode::LINES_PLAIN:
-			this->initGL(lineShader);
-			trial.setShader(lineShader);
+			setupPL();
 			break;
 		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
 		case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
 		case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
-			//Shader::Off();
-			
-			this->initGL(lightingShader);
-			trial.setShader(lightingShader);
+			setupIL();
 
 			trial.passThroughPVMatrix((float*)glm::value_ptr(camera.getProjectionMatrix()),
 				(float*)glm::value_ptr(camera.getViewMatrix()));
 
-			// to display 3D glyph heads using GLSL
-			//trial.display();
-
 			break;
 		case Trial::RenderMode::SHADOWED_HEDGEHOGS:
-			initGL(hogShader);
-
-			glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), (1 / density) / 2 / trial.getMaxLength());
-
-			glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
-
-			// first pass to render shadow plane
-			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
-
-			trial.setShader(hogShader);
-
-			trial.display();
-
-			// second pass to render the glyph plane
-			glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
-			
+			setupSH();
 			break;
 		case Trial::RenderMode::TUBES_PLAIN:
 		case Trial::RenderMode::TUBES_RINGED:
-			if (draw_halos)
-			{
-				initGL(haloShader);
-
-				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
-				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f );
-				
-				trial.setShader(haloShader);
-
-				// reverse the vertex winding order
-				glFrontFace(GL_CW);
-				// Draw model using the halo shader (regular model will be drawn on top)
-				trial.display();
-				// reset vertex winding order
-				glFrontFace(GL_CCW);
-			}
-
-			this->initGL(lightingShader);
-			trial.setShader(lightingShader);
-
+			setupTubes();
 			break;
 		}
 
 		trial.display();
 	}
+}
+
+void Study::setupPL()
+{
+	this->initGL(lineShader);
+	trial.setShader(lineShader);
+}
+
+void Study::setupIL()
+{
+	this->initGL(lightingShader);
+	trial.setShader(lightingShader);	
+}
+
+void Study::setupSH()
+{
+	initGL(hogShader);
+
+	glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), (1 / density) / 2 / trial.getMaxLength());
+
+	glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
+
+	// first pass to render shadow plane
+	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
+
+	trial.setShader(hogShader);
+
+	trial.display();
+
+	// second pass to render the glyph plane
+	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
+}
+
+void Study::setupTubes()
+{
+	if (draw_halos)
+	{
+		initGL(haloShader);
+
+		glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), haloSize);
+		glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 0.f, 0.f, 0.f);
+
+		trial.setShader(haloShader);
+
+		// reverse the vertex winding order
+		glFrontFace(GL_CW);
+		// Draw model using the halo shader (regular model will be drawn on top)
+		trial.display();
+		// reset vertex winding order
+		glFrontFace(GL_CCW);
+	}
+
+	this->initGL(lightingShader);
+	trial.setShader(lightingShader);
 }
 
 void Study::initGL(Shader *s)
