@@ -91,6 +91,7 @@
     <ClCompile Include="Slice.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="Study.cpp" />
+    <ClCompile Include="Target.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Trial.cpp" />
   </ItemGroup>
@@ -115,6 +116,7 @@
     <ClInclude Include="Slice.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Study.h" />
+    <ClInclude Include="Target.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Trial.h" />
   </ItemGroup>
@@ -133,6 +135,8 @@
     <None Include="normals.frag" />
     <None Include="normals.geom" />
     <None Include="normals.vert" />
+    <None Include="target.frag" />
+    <None Include="target.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

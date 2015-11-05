@@ -12,6 +12,7 @@
 #include "Polhemus.h"
 #include "Probe.h"
 #include "Stopwatch.h"
+#include "Target.h"
 
 class Study
 {
@@ -94,14 +95,14 @@ private:
 
 	Mode mode;
 
-	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints;
+	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top;
 
 	float density, jitter;
 	Trial::RenderMode renderMode;
 
 	glm::vec3 bgColor;
 
-	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader;
+	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader, *targetShader;
 
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
@@ -109,6 +110,8 @@ private:
 	Light light;
 	
 	Probe probe, trainingTarget;
+
+	Target target;
 
 	std::string participant;
 	Trial trial;

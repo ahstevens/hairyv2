@@ -27,7 +27,7 @@ Study* Study::getInstance( GLFWwindow* window )
     return instance;
 }
 
-Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Probe(80.f, 20.f))
+Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Probe(80.f, 20.f)), target(Target( glm::vec3(1.f, 0.f, 0.f) ) )
 {
 	int width_px, height_px;
 	glfwGetWindowSize(window, &width_px, &height_px);
@@ -38,7 +38,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = 0;
+	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = target_on_top = 0;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -64,6 +64,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	lineShader = new Shader("lines.vert", "lines.frag");
 	haloShader = new Shader("halo.vert", "halo.frag");
 	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
+	targetShader = new Shader("target.vert", "target.frag");
     normalShader = new Shader("normals.vert", "normals.frag", "normals.geom");
 }
 
@@ -101,6 +102,14 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	trainingTarget.setOrientation(getRandomOrientation());
 	//trainingTarget.setSize(1.1f, 1.1f, 1.1f);
 
+	target.setSize( 5.f, 5.f, 0.f );
+	target.setShader( targetShader );
+
+	// set target color and opacity. Shader must be active to set the uniform
+	targetShader->Use();	
+	glUniform3f(glGetUniformLocation(targetShader->Program, "col"), 1.f, 0.f, 0.f); // red
+	Shader::Off(); // turn shader back off
+
 	// Set the required callback functions
 	glfwSetKeyCallback(window, key_callback);
 	glfwSetCursorPosCallback(window, mouse_callback);
@@ -109,7 +118,9 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
     // OpenGL options
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	//glCullFace(GL_FRONT);
+	glEnable(GL_LINE_SMOOTH);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glLineWidth(2.f);
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
@@ -252,7 +263,25 @@ void Study::render()
 			break;
 		}
 
+		// Display the trial slice
 		trial.display();
+			
+		// Now display target cursor
+		initGL(targetShader);
+
+		// Should we render the target atop everything else, or render it on the slice?
+		if(target_on_top) glDisable( GL_DEPTH_TEST );
+
+		// Turn off writing to the depth mask for transparency effects
+		glDepthMask( GL_FALSE );
+
+		target.redraw(); // draw target cursor
+
+		// Reenable writing to the depth mask
+		glDepthMask( GL_TRUE );
+
+		// Turn the depth test back on if it was turned off previously
+		if(target_on_top) glEnable( GL_DEPTH_TEST );
 	}
 }
 
@@ -522,6 +551,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					haloSize -= (haloSize > 0.01f) ? 0.01f : 0.f;
 				if (keys[GLFW_KEY_PERIOD])
 					haloSize += 0.01f;
+				if (keys[GLFW_KEY_NUM_LOCK])
+					target_on_top = abs(target_on_top - 1);
 				if (keys[GLFW_KEY_KP_SUBTRACT])
 				{
 					if (density > 0.1f + 0.0001f)

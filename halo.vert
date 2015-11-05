@@ -62,5 +62,5 @@ void main()
 	FragPos = vec3( coordFrameTrans * vec4(position, 1.0f));
 	Normal = mat3(transpose(inverse( model * coordFrameTrans ))) * normal;
 	
-	TexCoords = vec2(texCoord.x * length(w) * lengthMult / 10.f, 1.0 - texCoord.y);
+	TexCoords = vec2(texCoord.x * length(w) * lengthMult / 10.f, 1.0 - texCoord.y * thicknessMult / 10.f);
 } 

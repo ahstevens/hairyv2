@@ -23,22 +23,9 @@ Probe::~Probe(void)
 {
 }
 
-std::vector<vec2> Probe::circle(int segments)
-{
-    float angleIncrement = 2.0f * (float) M_PI / (float) segments;
-    
-    std::vector<vec2> circle;
-
-    for( int i = segments - 1; i >= 0; --i )
-        circle.push_back(vec2(float(sin(i * angleIncrement)) * 0.5f, 
-                              float(cos(i * angleIncrement)) * 0.5f));
-
-    return circle;
-}
-
 void Probe::init()
 {
-	generateProbe();
+	generate();
 
 	use_texture = true;
 
@@ -51,7 +38,7 @@ void Probe::init()
 	tex->setMagFilter(GL_NEAREST);
 }
 
-void Probe::generateProbe()
+void Probe::generate()
 {
 	vertices.clear();
 	indices.clear();
@@ -299,13 +286,13 @@ void Probe::redraw()
 
 		
 	glUniform1ui(glGetUniformLocation(shader->Program, "directionalGeom"), false);
-	glDisable(GL_CULL_FACE);
+
 	glDrawElementsInstanced(GL_TRIANGLES,											// rendering triangle primitives
 							indices.size() - directionalIndicesCount,				// number of indices to be used in rendering
 							GL_UNSIGNED_INT,										// indices array type is unsigned int
 							(GLvoid*) (sizeof(GLuint) * directionalIndicesCount),   // byte offset into indices array bound to GL_ELEMENT_ARRAY_BUFFER
 							1);											// number of instances to render
-	glEnable(GL_CULL_FACE);
+
 	glBindVertexArray(0);
 
 	if (use_texture) tex->disable();	

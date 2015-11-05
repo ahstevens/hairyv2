@@ -16,12 +16,8 @@ public:
 	virtual void redraw();
 
 private:
-	void generateProbe();
+	void generate();
 
-	std::vector<glm::vec2> circle( int segments );
-	
-	std::vector<GLfloat> vertices_flat;     // a float array of vertices for Illumnated Lines
-	std::vector<GLsizei> first;               // the array of starting indices for Illuminated Lines
 	std::vector<glm::vec3> instances;
 
 	GLsizei directionalIndicesCount;      // number of indices used to render the directionality geometry	
