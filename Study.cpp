@@ -125,7 +125,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
-	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f );
+	camera = Camera( eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 200000.0f );
 
 	this->mainLoop();
 }
@@ -589,7 +589,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_HOME])
 				{
 					glm::vec3 eyePos(0.f, 0.f, eyeDistance);
-					camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 2000.0f);
+					camera = Camera(eyePos, windowWidth, windowHeight, eyeDistance, eyeDistance + 200000.0f);
 				}
 				if (keys[GLFW_KEY_END])
 					show_probe_hints = abs(show_probe_hints - 1);

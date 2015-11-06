@@ -23,7 +23,7 @@ enum Camera_Movement {
 // Default camera values
 const GLfloat YAW        = -90.0f;
 const GLfloat PITCH      =  0.0f;
-const GLfloat SPEED      =  100.0f;
+const GLfloat SPEED      =  40000.0f;
 const GLfloat SENSITIVTY =  0.25f;
 const GLfloat ZOOM       =  29.0f;
 const GLfloat WIDTH      =  100.0f;
@@ -68,7 +68,7 @@ public:
     {
 		// Build transformation matrix to position slices in middle of clipping volume and scale to fill screen
 		float scaleRatio = (screen_distance + ( far - screen_distance ) / 2.f ) / screen_distance;
-		glm::mat4 translate_mat = glm::translate(glm::mat4(1.f), glm::vec3(0.0f, 0.0f, -1000.0f)); // Identity matrix
+		glm::mat4 translate_mat = glm::translate(glm::mat4(1.f), glm::vec3(0.0f, 0.0f, -100000.0f)); // Identity matrix
 		glm::mat4 scale_mat = glm::scale(glm::mat4(1.f), glm::vec3(scaleRatio)); // Identity matrix
 		glm::mat4 xform_mat = translate_mat * scale_mat;
 
