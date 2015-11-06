@@ -17,7 +17,7 @@ public:
 		SHADOWED_HEDGEHOGS
 	};
 
-	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = LINES_ILLUMINATED_CYLINDER_BLINN);
+	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = LINES_PLAIN);
 	~Trial();
 
 	void init();
