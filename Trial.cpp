@@ -2,8 +2,8 @@
 #include <random>
 #include <time.h> // time() for srand()
 
-#define BIMAP_BASE_SIZE 100.f
-#define EPSILON           0.001f
+#define BIMAP_BASE_SIZE 1000.f
+#define EPSILON            0.001f
 
 using namespace glm;
 

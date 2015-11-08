@@ -594,7 +594,7 @@ void Slice::redraw()
 		glm::value_ptr(getModelMatrix())
 		);
 
-	// Draw the container (using container's vertex attributes)
+	// Draw the directional glyph heads
 	glBindVertexArray(VAO);
 		if(directionality)
 		{
@@ -608,6 +608,7 @@ void Slice::redraw()
 		}			
 	glBindVertexArray(0);
 
+	// Now draw the line rendering
 	if (doIL)
 	{
 		Shader::Off();
