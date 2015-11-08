@@ -88,7 +88,6 @@
     <ClCompile Include="Polhemus.cpp" />
     <ClCompile Include="Probe.cpp" />
     <ClCompile Include="Quaternion.cpp" />
-    <ClCompile Include="Slice.cpp" />
     <ClCompile Include="Stopwatch.cpp" />
     <ClCompile Include="Study.cpp" />
     <ClCompile Include="Target.cpp" />
@@ -113,7 +112,6 @@
     <ClInclude Include="Probe.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="Shader.h" />
-    <ClInclude Include="Slice.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="Study.h" />
     <ClInclude Include="Target.h" />

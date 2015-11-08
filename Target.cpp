@@ -29,12 +29,12 @@ void Target::init()
 	use_texture = false;
 }
 
-void Target::setSeed( Slice::Seed seed )
+void Target::setSeed( Trial::Seed seed )
 {
 	this->seed = seed;
 }
 
-Slice::Seed Target::getSeed()
+Trial::Seed Target::getSeed()
 {
 	return seed;
 }

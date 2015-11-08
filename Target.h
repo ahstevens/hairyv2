@@ -1,6 +1,6 @@
 #pragma once
 #include "Object.h"
-#include "Slice.h"
+#include "Trial.h"
 #include <vector>
 
 
@@ -14,15 +14,15 @@ public:
 
 	void init();
 
-	void setSeed( Slice::Seed seed );
-	Slice::Seed getSeed();
+	void setSeed( Trial::Seed seed );
+	Trial::Seed getSeed();
 
 	virtual void redraw();
 
 private:
 	void generate();
 
-	Slice::Seed seed;
+	Trial::Seed seed;
 
 	std::vector<glm::vec3> instances;
 };

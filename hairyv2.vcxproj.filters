@@ -51,9 +51,6 @@
     <ClCompile Include="BiMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Slice.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ILines\Vector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -126,9 +123,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BiMap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Slice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ILines\Vector.h">

@@ -1,10 +1,12 @@
 #pragma once
 
 #include <vector>
+#include "Object.h"
 #include "BiMap.h"
-#include "Slice.h"
+#include "Shader.h"
+#include "IlluminatedLines.h"
 
-class Trial
+class Trial : public Object
 {
 public:
 	enum RenderMode {
@@ -17,6 +19,14 @@ public:
 		SHADOWED_HEDGEHOGS
 	};
 
+	struct Seed {
+		GLfloat x, y;
+		GLfloat dx, dy, dz;
+		GLfloat twist;
+
+		float length() { return sqrt(dx*dx + dy*dy + dz*dz); }
+	};
+
 	Trial(float xSize = 10, float ySize = 10, float density = 1.0f, float jitter = 0.25f, RenderMode renderMode = LINES_PLAIN);
 	~Trial();
 
@@ -24,12 +34,10 @@ public:
 
 	void makeBiMap();
 	void sampleBiMap();
-	Slice::Seed getRandomSeed();
+	Seed getRandomSeed();
 
-	void setRenderMode(Trial::RenderMode renderMode);
+	void setRenderMode(Trial::RenderMode renderMode, float lengthMultiplier = 1.f);
 	Trial::RenderMode getRenderMode();
-
-	void setShader( Shader *shader );
 
 	void setJitter(float jitter);
 
@@ -41,9 +49,17 @@ public:
 
 	float getMaxLength();
 
-	void display();
+	void addSeed(Seed s);                   // Add a seed to the Slice
+	void clearSeeds(void);                  // Clear all seeds from the Slice
+
+	void redraw();
 
 private:
+	void generateTubes(int segments = 8);
+	void generateHairs();
+	GLsizei insertDirectionalGeometry(std::vector<Vertex> &v, std::vector<GLuint> &i, GLsizei &offset);
+	std::vector<glm::vec2> circle(int segments);
+
 	float xSize, ySize;
 
 	float jitter, density, maxLength;
@@ -52,8 +68,16 @@ private:
 
 	BiMap* bimap;
 
+	IlluminatedLines *il;
+
+	std::vector<Seed> seeds;              // the seeds to populate the Slice
+
+	std::vector<glm::vec3> instances;
+
 	float shadowOffset;
 
-	Slice cp;
+	GLsizei directionalIndicesCount;      // number of indices used to render the directionality geometry
+
+	bool doIL, ilInit, doLines, geometryChange, tubesGenerated, linesGenerated, ilGenerated, directionality;
 };
 

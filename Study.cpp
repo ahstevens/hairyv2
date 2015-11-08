@@ -1,6 +1,5 @@
 #include "Study.h"
 #include <glm/gtc/type_ptr.hpp>
-#include "Slice.h"
 #include <time.h> // time() for srand()
 #include <random>
 
@@ -264,7 +263,7 @@ void Study::render()
 		}
 
 		// Display the trial slice
-		trial.display();
+		trial.redraw();
 			
 		// Now display target cursor
 		initGL(targetShader);
@@ -318,7 +317,7 @@ void Study::setupSH()
 
 	trial.setShader(hogShader);
 
-	trial.display();
+	trial.redraw();
 
 	// second pass to render the glyph plane
 	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
@@ -338,7 +337,7 @@ void Study::setupTubes()
 		// reverse the vertex winding order
 		glFrontFace(GL_CW);
 		// Draw model using the halo shader (regular model will be drawn on top)
-		trial.display();
+		trial.redraw();
 		// reset vertex winding order
 		glFrontFace(GL_CCW);
 	}
@@ -710,9 +709,9 @@ void Study::generateTrial()
 	//std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
 	trial = Trial(windowWidth, windowHeight, density, jitter);
 	trial.init();
-	trial.setRenderMode(renderMode);
+	trial.setRenderMode(renderMode, lengthMultiplier);
 
-	Slice::Seed targSeed = trial.getRandomSeed();
+	Trial::Seed targSeed = trial.getRandomSeed();
 	target.setPosition( targSeed.x - windowWidth / 2.f, targSeed.y - windowHeight / 2.f, 0.f );
 	target.setSeed( targSeed );
 	std::cout << "Target Vec: ( " << targSeed.dx << ", " << targSeed.dy << ", " << targSeed.dx << " )" << std::endl;
@@ -721,7 +720,7 @@ void Study::generateTrial()
 
 glm::quat Study::getTargetOrientation()
 {
-	Slice::Seed seed = target.getSeed();
+	Trial::Seed seed = target.getSeed();
 
 	glm::vec3 v1 = glm::normalize( glm::vec3( seed.dx, seed.dy, seed.dz ) );
 	glm::vec3 v2 = glm::vec3( 1.f, 0.f, 0.f );
