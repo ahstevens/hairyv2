@@ -72,7 +72,7 @@ private:
 
 	void do_movement();
 
-	void generateTrial();
+	void generateTrial( Trial::RenderMode renderMode );
 
 	glm::quat getTargetOrientation();
 
@@ -100,7 +100,6 @@ private:
 	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top;
 
 	float density, jitter;
-	Trial::RenderMode renderMode;
 
 	glm::vec3 bgColor;
 

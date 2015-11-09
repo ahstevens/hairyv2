@@ -41,7 +41,6 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 
 	density = 0.1f;
 	jitter = 0.25f;
-	renderMode = Trial::RenderMode::LINES_PLAIN;
 
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
@@ -85,7 +84,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	if (participant == std::string("demo"))
 	{
 		this->mode = Mode::DEMO;
-		generateTrial();
+		generateTrial(Trial::RenderMode::LINES_PLAIN);
 	}
 	else
 	{
@@ -162,7 +161,7 @@ void Study::mainLoop()
 void Study::render()
 {	
 	// Change background for Shadowed Hedgehogs
-	if( renderMode == Trial::RenderMode::SHADOWED_HEDGEHOGS)
+	if( trial.getRenderMode() == Trial::RenderMode::SHADOWED_HEDGEHOGS)
 		bgColor = glm::vec3(1.f, 1.f, 1.f);
 	else
 		bgColor = BGCOLOR;
@@ -191,7 +190,7 @@ void Study::render()
 			{
 				initGL(haloShader);
 
-				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), 1.f);
+				glUniform1f(glGetUniformLocation(haloShader->Program, "haloSize"), 0.05f);
 				glUniform3f(glGetUniformLocation(haloShader->Program, "haloColor"), 1.f, 1.f, 1.f );
 				glUniform1f(glGetUniformLocation(haloShader->Program, "lengthMult"), 1.f);
 				glUniform1f(glGetUniformLocation(haloShader->Program, "thicknessMult"), 1.f);
@@ -453,13 +452,12 @@ void Study::next()
 	Condition curr = block->back();
 	block->pop_back();
 
-	renderMode = curr.renderMode;
 	density = curr.density;
 	lengthMultiplier = curr.lengthMultiplier;
 	thicknessMultiplier = curr.thicknessMultiplier;
 	directionalGeomScale = curr.thicknessMultiplier;
 
-	generateTrial();
+	generateTrial(curr.renderMode);
 
 	stopwatch.start();
 }
@@ -492,25 +490,13 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			{
 			case DEMO:
 				if (keys[GLFW_KEY_F])
-				{
-					renderMode = Trial::RenderMode::TUBES_PLAIN;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
 				if (keys[GLFW_KEY_G])
-				{
-					renderMode = Trial::RenderMode::TUBES_RINGED;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
 				if (keys[GLFW_KEY_H])
-				{
-					renderMode = Trial::RenderMode::SHADOWED_HEDGEHOGS;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
 				if (keys[GLFW_KEY_I])
-				{
-					renderMode = Trial::RenderMode::LINES_PLAIN;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
 				if (keys[GLFW_KEY_L])
 					cycle_light = abs(cycle_light - 1);
 				if (keys[GLFW_KEY_M])
@@ -524,22 +510,13 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_Q])
 					training();
 				if (keys[GLFW_KEY_R])
-					generateTrial();
+					generateTrial(trial.getRenderMode());
 				if (keys[GLFW_KEY_T])
-				{
-					renderMode = Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, lengthMultiplier);
 				if (keys[GLFW_KEY_U])
-				{
-					renderMode = Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG, lengthMultiplier);
 				if (keys[GLFW_KEY_Y])
-				{
-					renderMode = Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG;
-					trial.setRenderMode(renderMode);
-				}
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG, lengthMultiplier);
 				if (keys[GLFW_KEY_BACKSPACE])
 				{
 					thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
@@ -548,9 +525,21 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				}
 
 				if (keys[GLFW_KEY_MINUS])
+				{
 					lengthMultiplier -= (lengthMultiplier > 0.1f) ? 0.1f : 0.f;
+					if (trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG)
+						trial.setRenderMode(trial.getRenderMode(), lengthMultiplier);
+				}
 				if (keys[GLFW_KEY_EQUAL])
+				{
 					lengthMultiplier += 0.1f;
+					if (trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG)
+						trial.setRenderMode(trial.getRenderMode(), lengthMultiplier);
+				}
 				if (keys[GLFW_KEY_LEFT_BRACKET])
 					thicknessMultiplier -= (thicknessMultiplier > 0.01f) ? 0.01f : 0.f;
 				if (keys[GLFW_KEY_RIGHT_BRACKET])
@@ -572,6 +561,10 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 						density -= 0.1f;
 						trial.setDensity(density);
 						trial.sampleBiMap();
+						if (trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+							trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+							trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG)
+							trial.setRenderMode(trial.getRenderMode(), lengthMultiplier);
 					}
 				}
 				if (keys[GLFW_KEY_KP_ADD])
@@ -579,6 +572,10 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					density += 0.1f;
 					trial.setDensity(density);
 					trial.sampleBiMap();
+					if (trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG)
+						trial.setRenderMode(trial.getRenderMode(), lengthMultiplier);
 				}
 
 				if (keys[GLFW_KEY_INSERT])
@@ -627,7 +624,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					std::cout << participant << ",";
 					std::cout << NBLOCKS - conditions.size() << ",";
 					std::cout << NTRIALSPERBLOCK - conditions.back().size() - 1 << ",";
-					std::cout << renderMode << ",";
+					std::cout << trial.getRenderMode() << ",";
 					std::cout << density << ",";
 					std::cout << lengthMultiplier << ",";
 					std::cout << thicknessMultiplier << ",";
@@ -704,7 +701,7 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
     camera.processMouseScroll((GLfloat) yoffset);
 }
 
-void Study::generateTrial()
+void Study::generateTrial( Trial::RenderMode renderMode )
 {
 	//std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
 	trial = Trial(windowWidth, windowHeight, density, jitter);

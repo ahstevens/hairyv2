@@ -45,7 +45,7 @@ void Trial::init()
 
 	//testPattern();
 
-	setRenderMode(renderMode, 1.f);
+	setRenderMode(renderMode);
 }
 
 void Trial::makeBiMap()
@@ -150,36 +150,63 @@ Trial::Seed Trial::getRandomSeed()
 	return seed;
 }
 
-void Trial::setRenderMode(Trial::RenderMode renderMode, float lengthMultiplier)
+void Trial::setRenderMode(RenderMode renderMode, float lengthMultiplier)
 {
 	this->renderMode = renderMode;
 
+	if (renderMode == SHADOWED_HEDGEHOGS)
+	{
+		setJitter(0.f);
+		sampleBiMap();
+	}
+	else
+	{
+		if (jitter < 0.24)
+		{
+			setJitter(0.25f);
+			sampleBiMap();
+		}
+	}
+
 	switch (renderMode)
 	{
-	case Trial::LINES_PLAIN:
-		if (jitter < 0.24)
+		case LINES_PLAIN:
+			if (geometryChange || !linesGenerated)
+				generateHairs();
+
+			doIL = false;
+			doLines = true;
+			use_texture = false;
+			break;	
+		case TUBES_PLAIN:
+		case TUBES_RINGED:
+		case SHADOWED_HEDGEHOGS:
 		{
-			setJitter(0.25f);
-			sampleBiMap();
+			if (geometryChange || !tubesGenerated)
+				generateTubes(16);
+
+			if (renderMode == TUBES_RINGED)
+			{
+				use_texture = true;
+				tex = new Texture();
+
+				int nStripes = (int)(1 * 2 * 10); // first number is stripes per mm
+				tex->stripes1D(nStripes, vec3(1.f, 1.f, 1.f), vec3(0.5f, 0.5f, 0.5f));
+				tex->setMinFilter(GL_NEAREST);
+				tex->setMagFilter(GL_NEAREST);
+			}
+			else
+				use_texture = false;
+
+			doIL = doLines = false;
+			break;
 		}
-		if (geometryChange || !linesGenerated)
+		case LINES_ILLUMINATED_CYLINDER_BLINN:
+		case LINES_ILLUMINATED_CYLINDER_PHONG:
+		case LINES_ILLUMINATED_MAXIMUM_PHONG:
+		{
 			generateHairs();
 
-		doIL = false;
-		doLines = true;
-		use_texture = false;
-		break;
-	case Trial::LINES_ILLUMINATED_CYLINDER_BLINN:
-	case Trial::LINES_ILLUMINATED_CYLINDER_PHONG:
-	case Trial::LINES_ILLUMINATED_MAXIMUM_PHONG:
-		if (jitter < 0.24)
-		{
-			setJitter(0.25f);
-			sampleBiMap();
-		}
-
-		if (geometryChange || !ilGenerated)
-		{
 			vertices.clear();
 			indices.clear();
 			indices_offsets.clear();
@@ -220,89 +247,24 @@ void Trial::setRenderMode(Trial::RenderMode renderMode, float lengthMultiplier)
 				counts.push_back(nVerts);
 			}
 
-			geometryChange = false;
-			linesGenerated = false;
-			ilGenerated = true;
+			if (this->il != NULL) delete this->il;
 
 			switch (renderMode)
 			{
-				case Trial::LINES_ILLUMINATED_CYLINDER_BLINN:
+				case LINES_ILLUMINATED_CYLINDER_BLINN:
 					this->il = new IlluminatedLines(seeds.size(), vertices_flat.size() / 3, first, counts, vertices_flat, NULL, ILines::ILLightingModel::IL_CYLINDER_BLINN);
 					break;
-				case Trial::LINES_ILLUMINATED_CYLINDER_PHONG:
+				case LINES_ILLUMINATED_CYLINDER_PHONG:
 					this->il = new IlluminatedLines(seeds.size(), vertices_flat.size() / 3, first, counts, vertices_flat, NULL, ILines::ILLightingModel::IL_CYLINDER_PHONG);
 					break;
-				case Trial::LINES_ILLUMINATED_MAXIMUM_PHONG:
+				case LINES_ILLUMINATED_MAXIMUM_PHONG:
 					this->il = new IlluminatedLines(seeds.size(), vertices_flat.size() / 3, first, counts, vertices_flat, NULL, ILines::ILLightingModel::IL_MAXIMUM_PHONG);
 					break;
 			}
-			
 
-			ilInit = false;
+			doIL = ilGenerated = true;
+			doLines = ilInit = geometryChange = linesGenerated = false;
 		}
-
-		if (ilInit)
-			switch (renderMode)
-			{
-				case Trial::LINES_ILLUMINATED_CYLINDER_BLINN:
-					il->setLightingModel(ILines::ILLightingModel::IL_CYLINDER_BLINN);
-					break;
-				case Trial::LINES_ILLUMINATED_CYLINDER_PHONG:
-					il->setLightingModel(ILines::ILLightingModel::IL_CYLINDER_PHONG);
-					break;
-				case Trial::LINES_ILLUMINATED_MAXIMUM_PHONG:
-					il->setLightingModel(ILines::ILLightingModel::IL_MAXIMUM_PHONG);
-					break;
-			}
-
-		doIL = true;
-		doLines = false;
-		break;
-	case Trial::TUBES_PLAIN:
-		if (jitter < 0.24)
-		{
-			setJitter(0.25f);
-			sampleBiMap();
-		}
-		if (geometryChange || !tubesGenerated)
-			generateTubes(8);
-
-		doIL = doLines = false;
-		use_texture = false;
-		break;
-	case Trial::TUBES_RINGED:
-	{
-		if (jitter <= 0.24)
-		{
-			setJitter(0.25f);
-			sampleBiMap();
-		}
-		if (geometryChange || !tubesGenerated)
-			generateTubes(8);
-
-		doIL = doLines = false;
-		use_texture = true;
-
-		tex = new Texture();
-
-		int nStripes = (int)(1 * 2 * 10); // first number is stripes per mm
-		tex->stripes1D(nStripes, vec3(1.f, 1.f, 1.f), vec3(0.5f, 0.5f, 0.5f));
-		tex->setMinFilter(GL_NEAREST);
-		tex->setMagFilter(GL_NEAREST);
-		break;
-	}
-	case Trial::SHADOWED_HEDGEHOGS:
-		if (jitter >= 0.001)
-		{
-			setJitter(0.f);
-			sampleBiMap();
-		}
-		if (geometryChange || !tubesGenerated)
-			generateTubes(16);
-
-		doIL = doLines = false;
-		use_texture = false;
-		break;
 	}
 }
 

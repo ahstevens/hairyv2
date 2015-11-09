@@ -36,8 +36,8 @@ public:
 	void sampleBiMap();
 	Seed getRandomSeed();
 
-	void setRenderMode(Trial::RenderMode renderMode, float lengthMultiplier = 1.f);
-	Trial::RenderMode getRenderMode();
+	void setRenderMode(RenderMode renderMode, float lengthMultiplier = 1.f);
+	RenderMode getRenderMode();
 
 	void setJitter(float jitter);
 
