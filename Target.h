@@ -17,6 +17,8 @@ public:
 	void setSeed( Trial::Seed seed );
 	Trial::Seed getSeed();
 
+	glm::vec3 getFlowVector();
+
 	virtual void redraw();
 
 private:

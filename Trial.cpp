@@ -12,7 +12,7 @@
 // glm::translate
 #include <glm/gtc/matrix_transform.hpp>
 
-#define BIMAP_BASE_SIZE 1000.f
+//#define BIMAP_BASE_SIZE 1000.f
 #define EPSILON            0.001f
 
 using namespace glm;
@@ -51,24 +51,25 @@ void Trial::init()
 void Trial::makeBiMap()
 {
 	// aspect ratio
-	float ar = xSize / ySize;
-	float bmMaxX, bmMaxY;
+	//float ar = xSize / ySize;
+	//float bmMaxX, bmMaxY;
 
-	if( ar > 1.0f ) {
-		bmMaxX = BIMAP_BASE_SIZE;
-		bmMaxY = BIMAP_BASE_SIZE / ar;
-	}
-	else {
-		bmMaxX = BIMAP_BASE_SIZE * ar;
-		bmMaxY = BIMAP_BASE_SIZE;
-	}
+	//if( ar > 1.0f ) {
+	//	bmMaxX = BIMAP_BASE_SIZE;
+	//	bmMaxY = BIMAP_BASE_SIZE / ar;
+	//}
+	//else {
+	//	bmMaxX = BIMAP_BASE_SIZE * ar;
+	//	bmMaxY = BIMAP_BASE_SIZE;
+	//}
 
 	// free memory held by any existing BiMap
 	if(bimap != NULL)
 		delete bimap;
 
 	//std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")... ";
-	bimap = new BiMap( bmMaxX, bmMaxY );
+	//bimap = new BiMap( bmMaxX, bmMaxY );
+	bimap = new BiMap( xSize, ySize );
 	//std::cout << "done" << std::endl;	
 }
 
@@ -109,9 +110,7 @@ void Trial::sampleBiMap()
             seed.x = (float) i + ( x_jitter * xStep );
             seed.y = (float) j + ( y_jitter * yStep );
 
-            bimap->getVecValues( ( seed.x / xSize ) * bimap->getXSize(), 
-								 ( seed.y / ySize ) * bimap->getYSize(),
-								 seed.dx, seed.dy, seed.dz);
+            bimap->getVecValues(seed.x, seed.y, seed.dx, seed.dy, seed.dz);
 
 			seed.twist = 0.f;
 
@@ -132,20 +131,15 @@ Trial::Seed Trial::getRandomSeed()
 {
 	Seed seed;
 
-	float xMin = xSize * 0.25f;
-	float xMax = xSize * 0.75f;
-	float yMin = ySize * 0.25f;
-	float yMax = ySize * 0.75f;
-
 	std::random_device rand_seed;  // random seed
 	std::mt19937 gen(rand_seed()); // Mersenne Twister RNG
-	std::uniform_real_distribution<float> x_dist(xMin, xMax);	
-	std::uniform_real_distribution<float> y_dist(yMin, yMax);
+	std::uniform_real_distribution<float> x_dist(0.f, xSize);
+	std::uniform_real_distribution<float> y_dist(0.f, ySize);
 
 	seed.x = x_dist( gen );
 	seed.y = y_dist( gen );
 
-	bimap->getVecValues( seed.x, seed.y, seed.dx, seed.dy, seed.dz );
+	bimap->getVecValues(seed.x, seed.y, seed.dx, seed.dy, seed.dz);
 
 	return seed;
 }

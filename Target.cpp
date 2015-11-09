@@ -39,6 +39,11 @@ Trial::Seed Target::getSeed()
 	return seed;
 }
 
+glm::vec3 Target::getFlowVector()
+{
+	return vec3(this->seed.dx, this->seed.dy, this->seed.dz);
+}
+
 void Target::generate()
 {
 	vertices.clear();

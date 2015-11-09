@@ -72,13 +72,15 @@ private:
 
 	void do_movement();
 
-	void generateTrial( Trial::RenderMode renderMode );
+	void generateTrial( Trial::RenderMode renderMode, float targetCursorCenterRatio = 1.f );
 
-	glm::quat getTargetOrientation();
+	glm::quat getTargetCursorOrientation();
 
 	float getAngleError(glm::quat probe, glm::quat target);
 
 	glm::quat getRandomOrientation();
+
+	glm::quat vecsToQuat(glm::vec3 u, glm::vec3 v);
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
@@ -105,14 +107,14 @@ private:
 
 	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader, *targetShader;
 
-	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
+	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset, targetCenterRatio;
 	
 	Camera camera;
 	Light light;
 	
 	Probe probe, trainingTarget;
 
-	Target target;
+	Target targetCursor;
 
 	std::string participant;
 	Trial trial;
