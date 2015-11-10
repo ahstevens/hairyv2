@@ -492,14 +492,20 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			switch (mode)
 			{
 			case DEMO:
+				if (keys[GLFW_KEY_1])
+					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
+				if (keys[GLFW_KEY_2])
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, lengthMultiplier);
+				if (keys[GLFW_KEY_3])
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG, lengthMultiplier);
+				if (keys[GLFW_KEY_4])
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG, lengthMultiplier);
 				if (keys[GLFW_KEY_5])
 					trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
 				if (keys[GLFW_KEY_6])
 					trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
 				if (keys[GLFW_KEY_7])
 					trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
-				if (keys[GLFW_KEY_1])
-					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
 				if (keys[GLFW_KEY_L])
 					cycle_light = abs(cycle_light - 1);
 				if (keys[GLFW_KEY_M])
@@ -513,12 +519,6 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					training();
 				if (keys[GLFW_KEY_R])
 					generateTrial(trial.getRenderMode());
-				if (keys[GLFW_KEY_2])
-					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, lengthMultiplier);
-				if (keys[GLFW_KEY_4])
-					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG, lengthMultiplier);
-				if (keys[GLFW_KEY_3])
-					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG, lengthMultiplier);
 				if (keys[GLFW_KEY_BACKSPACE])
 				{
 					thicknessMultiplier = lengthMultiplier = directionalGeomScale = 1.f;
