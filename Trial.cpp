@@ -127,14 +127,23 @@ void Trial::sampleBiMap()
 	//std::cout << "Max Length: " << maxLength << std::endl;
 }
 
-Trial::Seed Trial::getRandomSeed()
+Trial::Seed Trial::getRandomSeed( float targetCursorCenterRatio )
 {
 	Seed seed;
 
+	// find inner box for target cursor
+	float targBoxW = targetCursorCenterRatio * xSize;
+	float targBoxH = targetCursorCenterRatio * ySize;
+
+	float xMin = 0 * targBoxW + (xSize - targBoxW) / 2;
+	float xMax = 1 * targBoxW + (xSize - targBoxW) / 2;
+	float yMin = 0 * targBoxH + (ySize - targBoxH) / 2;
+	float yMax = 1 * targBoxH + (ySize - targBoxH) / 2;
+
 	std::random_device rand_seed;  // random seed
 	std::mt19937 gen(rand_seed()); // Mersenne Twister RNG
-	std::uniform_real_distribution<float> x_dist(0.f, xSize);
-	std::uniform_real_distribution<float> y_dist(0.f, ySize);
+	std::uniform_real_distribution<float> x_dist(xMin, xMax);
+	std::uniform_real_distribution<float> y_dist(yMin, yMax);
 
 	seed.x = x_dist( gen );
 	seed.y = y_dist( gen );

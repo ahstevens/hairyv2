@@ -72,9 +72,9 @@ private:
 
 	void do_movement();
 
-	void generateTrial( Trial::RenderMode renderMode, float targetCursorCenterRatio = 1.f );
+	void generateTrial( Trial::RenderMode renderMode );
 
-	glm::quat getTargetCursorOrientation();
+	glm::quat getAdjustedTargetCursorOrientation();
 
 	float getAngleError(glm::quat probe, glm::quat target);
 
@@ -107,7 +107,7 @@ private:
 
 	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader, *targetShader;
 
-	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset, targetCenterRatio;
+	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
 	Camera camera;
 	Light light;

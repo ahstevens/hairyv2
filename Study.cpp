@@ -6,6 +6,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
 
+#define NCALIBRATIONTRIALS 5
+
 #define NBLOCKS 5
 #define NREPLICATESPERBLOCK 5
 #define NDENSITYCONDITIONS 3
@@ -45,7 +47,6 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	lengthMultiplier = thicknessMultiplier = directionalGeomScale = 1.f;
 	haloSize = 0.5f;
 	hedgehogOffset = 0.f;
-	targetCenterRatio = 0.5f;
 
 	polhemus = Polhemus::getInstance();
 
@@ -85,7 +86,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	if (participant == std::string("demo"))
 	{
 		this->mode = Mode::DEMO;
-		generateTrial(Trial::RenderMode::LINES_PLAIN, targetCenterRatio);
+		generateTrial(Trial::RenderMode::LINES_PLAIN);
 	}
 	else
 	{
@@ -459,7 +460,7 @@ void Study::next()
 	thicknessMultiplier = curr.thicknessMultiplier;
 	directionalGeomScale = curr.thicknessMultiplier;
 
-	generateTrial(curr.renderMode, targetCenterRatio);
+	generateTrial(curr.renderMode);
 
 	stopwatch.start();
 }
@@ -491,13 +492,13 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			switch (mode)
 			{
 			case DEMO:
-				if (keys[GLFW_KEY_F])
+				if (keys[GLFW_KEY_5])
 					trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
-				if (keys[GLFW_KEY_G])
+				if (keys[GLFW_KEY_6])
 					trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
-				if (keys[GLFW_KEY_H])
+				if (keys[GLFW_KEY_7])
 					trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
-				if (keys[GLFW_KEY_I])
+				if (keys[GLFW_KEY_1])
 					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
 				if (keys[GLFW_KEY_L])
 					cycle_light = abs(cycle_light - 1);
@@ -505,19 +506,18 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					draw_halos = abs(draw_halos - 1);
 				if (keys[GLFW_KEY_P])
 				{
-					polhemus->printInfo();
-					std::cout << "Angular Error to Target: " << glm::degrees( getAngleError( getTargetCursorOrientation(), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "Angular Error to Target: " << glm::degrees( getAngleError( getAdjustedTargetCursorOrientation(), polhemus->getQuaternion() ) ) << std::endl;
 					std::cout << std::endl;
 				}
 				if (keys[GLFW_KEY_Q])
 					training();
 				if (keys[GLFW_KEY_R])
-					generateTrial(trial.getRenderMode(), targetCenterRatio);
-				if (keys[GLFW_KEY_T])
+					generateTrial(trial.getRenderMode());
+				if (keys[GLFW_KEY_2])
 					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, lengthMultiplier);
-				if (keys[GLFW_KEY_U])
+				if (keys[GLFW_KEY_4])
 					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG, lengthMultiplier);
-				if (keys[GLFW_KEY_Y])
+				if (keys[GLFW_KEY_3])
 					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG, lengthMultiplier);
 				if (keys[GLFW_KEY_BACKSPACE])
 				{
@@ -626,7 +626,9 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_SPACE] && stopwatch.read() > 2.0)
 				{
 					glm::quat probeQuat = polhemus->getQuaternion();
-					glm::quat targetQuat = getTargetCursorOrientation();
+					glm::quat targetQuat = getAdjustedTargetCursorOrientation();
+					glm::vec3 pVec = glm::normalize(glm::rotate(probeQuat, glm::vec3(1.f, 0.f, 0.f)));
+					glm::vec3 tVec = glm::normalize(glm::rotate(targetQuat, glm::vec3(1.f, 0.f, 0.f)));
 					std::cout << participant << ",";
 					std::cout << NBLOCKS - conditions.size() << ",";
 					std::cout << NTRIALSPERBLOCK - conditions.back().size() - 1 << ",";
@@ -635,15 +637,13 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					std::cout << lengthMultiplier << ",";
 					std::cout << thicknessMultiplier << ",";
 					std::cout << directionalGeomScale << ",";
-					std::cout << probeQuat.w << ",";
-					std::cout << probeQuat.x << ",";
-					std::cout << probeQuat.y << ",";
-					std::cout << probeQuat.z << ",";
-					std::cout << targetQuat.w << ",";
-					std::cout << targetQuat.x << ",";
-					std::cout << targetQuat.y << ",";
-					std::cout << targetQuat.z << ",";
-					std::cout << glm::degrees( getAngleError( probeQuat, targetQuat ) ) << ",";
+					std::cout << pVec.x << ",";
+					std::cout << pVec.y << ",";
+					std::cout << pVec.z << ",";
+					std::cout << tVec.x << ",";
+					std::cout << tVec.y << ",";
+					std::cout << tVec.z << ",";
+					std::cout << glm::degrees(getAngleError(targetQuat, probeQuat)) << ",";
 					std::cout << stopwatch.read() << std::endl;
 
 					next();
@@ -707,46 +707,28 @@ void Study::scroll_process(GLFWwindow* window, double xoffset, double yoffset)
     camera.processMouseScroll((GLfloat) yoffset);
 }
 
-void Study::generateTrial( Trial::RenderMode renderMode, float targetCursorCenterRatio )
+void Study::generateTrial( Trial::RenderMode renderMode )
 {
 	//std::cout << "Generating trial for " << windowWidth << " x " << windowHeight << "mm screen..." << std::endl;
 	trial = Trial(windowWidth, windowHeight, density, jitter);
 	trial.init();
 	trial.setRenderMode(renderMode, lengthMultiplier);
-	
-	// find inner box for target cursor
-	float targBoxW = targetCursorCenterRatio * windowWidth;
-	float targBoxH = targetCursorCenterRatio * windowHeight;
 
-	float xMin = 0 * targBoxW + ( windowWidth - targBoxW ) / 2;
-	float xMax = 1 * targBoxW + ( windowWidth - targBoxW ) / 2;
-	float yMin = 0 * targBoxH + ( windowHeight - targBoxH ) / 2;
-	float yMax = 1 * targBoxH + ( windowHeight - targBoxH ) / 2;
-
-	// keep getting random seed till it meets our needs
-	Trial::Seed targSeed;
-	do
-	{
-		targSeed = trial.getRandomSeed();
-	} while ( targSeed.x < xMin || targSeed.x > xMax || targSeed.y < yMin || targSeed.y > yMax );
+	Trial::Seed targSeed = trial.getRandomSeed( 0.5f );
 
 	targetCursor.setPosition(targSeed.x - windowWidth / 2.f, targSeed.y - windowHeight / 2.f, 0.f);
 	targetCursor.setSeed(targSeed);
 	//std::cout << "Trial generated" << std::endl;
 }
 
-glm::quat Study::getTargetCursorOrientation()
+glm::quat Study::getAdjustedTargetCursorOrientation()
 {
 	glm::vec3 flowVec = targetCursor.getFlowVector();
 
-	glm::vec3 v1 = glm::normalize( flowVec );
-	glm::vec3 v2 = glm::vec3( 0.f, 0.f, 1.f );
+	glm::vec3 v1 = glm::vec3(1.f, 0.f, 0.f);
+	glm::vec3 v2 = glm::normalize( flowVec );
 
-	glm::vec3 xProd = glm::cross( v1, v2 );
-
-	float w = sqrt( ( v1.length() ^ 2 ) * ( v2.length() ^ 2 ) ) + glm::dot( v1, v2 );
-
-	return glm::normalize(glm::normalize(glm::quat(w, xProd.x, xProd.y, xProd.z)) * vecsToQuat(glm::vec3(1.f, 0.f, 0.f), glm::vec3(0.f, 0.f, 1.f)));
+	return glm::normalize(vecsToQuat(v1, v2));
 }
 
 float Study::getAngleError(glm::quat p, glm::quat q)

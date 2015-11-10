@@ -102,7 +102,7 @@ void IlluminatedLines::initIL()
 	if ( cylinderBlinnSupported )
 	{
 		//std::cout << "Setting up textures for the cylinder averaging Phong/Blinn lighting model...";
-		cylinderBlinnIL.setupTextures(ka, kd, ks, 4.0f * gloss, texDim,
+		cylinderBlinnIL.setupTextures(ka, kd, ks, 4.f * gloss, texDim,
 			ILines::ILLightingModel::IL_CYLINDER_BLINN, false);
 		//std::cout << " done." << std::endl;
 
@@ -180,8 +180,6 @@ void IlluminatedLines::redraw()
 	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 
 	glMultMatrixf(vM);
-	
-	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	displayScene();
 }

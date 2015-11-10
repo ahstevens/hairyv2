@@ -34,7 +34,7 @@ public:
 
 	void makeBiMap();
 	void sampleBiMap();
-	Seed getRandomSeed();
+	Seed getRandomSeed( float targetCursorCenterRatio = 1.f );
 
 	void setRenderMode(RenderMode renderMode, float lengthMultiplier = 1.f);
 	RenderMode getRenderMode();
