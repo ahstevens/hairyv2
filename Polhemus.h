@@ -25,12 +25,21 @@ public:
 	float getRotationDegrees();
 	glm::quat getQuaternion();
 	glm::mat4 getOrientationMatrix();
+	
+	void calibrate();
+	void calibrateReset();
+	void calibrateRollUp();
+	void calibrateRollDown();
+	void calibratePitchUp();
+	void calibratePitchDown();
+	void calibrateYawUp();
+	void calibrateYawDown();
 
 private:
 	static Polhemus* instance;
 	vrpn_Tracker_Remote* vrpnTracker;
 
-	glm::quat quat;
+	glm::quat quat, calibration;
 	glm::vec3 pos;
 	glm::mat4 orientation;
 };

@@ -13,7 +13,7 @@ Polhemus* Polhemus::instance = NULL;
 Polhemus* Polhemus::getInstance( )
 {
     if ( !instance )
-        instance = new Polhemus( "Tracker0", "localhost" );
+        instance = new Polhemus( "Tracker0", "192.168.8.149" );//"localhost" );
     return instance;
 }
 
@@ -35,14 +35,16 @@ void VRPN_CALLBACK Polhemus::handle_tracker_callback( void* userData, const vrpn
 
 void VRPN_CALLBACK Polhemus::handle_tracker( void* userData, const vrpn_TRACKERCB t )
 {	
-	quat.x = t.quat[0];
-	quat.y = t.quat[1];
-	quat.z = t.quat[2];
-	quat.w = t.quat[3];
+	glm::quat temp_quat;
+	temp_quat.x = t.quat[0];
+	temp_quat.y = t.quat[1];
+	temp_quat.z = t.quat[2];
+	temp_quat.w = t.quat[3];
 	pos.x = t.pos[0];
 	pos.y = t.pos[1];
 	pos.z = t.pos[2];
 
+	quat = calibration * temp_quat;
 	orientation = glm::toMat4( quat );
 }
 
