@@ -88,7 +88,55 @@ glm::quat Polhemus::getQuaternion()
 	return quat;
 }
 
-glm::mat4 Polhemus::getOrientationMatrix()
+// the following function assumes that the probe is aligned along its origin
+// (i.e., points down the +x axis with the top of the probe pointing along +z)
+void Polhemus::calibrate()
 {
-	return orientation;
+	calibrateReset();
+
+	// get the raw orientation from the Polhemus into quat variable
+	this->update();
+
+	// the calibration is the inverse of the current orientation, since we
+	// would expect an aligned probe to return the identity quaternion
+	calibration = glm::inverse(quat);
+
+	// now recalculate current position using new calibration
+	this->update();
+}
+
+void Polhemus::calibrateReset()
+{
+	// reset the calibration to the identity quaternion
+	calibration = glm::quat();
+}
+
+void Polhemus::calibrateRollUp( float degree )
+{
+	this->calibration *= glm::angleAxis( glm::radians( degree ), glm::vec3( 1.f, 0.f, 0.f ) );
+}
+
+void Polhemus::calibrateRollDown( float degree )
+{
+	this->calibration *= glm::angleAxis( -glm::radians( degree ), glm::vec3(1.f, 0.f, 0.f));
+}
+
+void Polhemus::calibratePitchUp( float degree )
+{
+	this->calibration *= glm::angleAxis( glm::radians( degree ), glm::vec3( 0.f, -1.f, 0.f ) );
+}
+
+void Polhemus::calibratePitchDown( float degree )
+{
+	this->calibration *= glm::angleAxis( -glm::radians( degree ), glm::vec3( 0.f, -1.f, 0.f ) );
+}
+
+void Polhemus::calibrateYawUp( float degree )
+{
+	this->calibration *= glm::angleAxis( glm::radians( degree ), glm::vec3( 0.f, 0.f, 1.f ) );
+}
+
+void Polhemus::calibrateYawDown( float degree )
+{
+	this->calibration *= glm::angleAxis( -glm::radians( degree ), glm::vec3( 0.f, 0.f, 1.f ) );
 }

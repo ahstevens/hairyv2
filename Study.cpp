@@ -607,9 +607,21 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_KP_3])
 					glLineWidth(3.f);
 				if (keys[GLFW_KEY_KP_4])
-					glLineWidth(4.f);
+					polhemus->calibratePitchUp();
 				if (keys[GLFW_KEY_KP_5])
-					glLineWidth(5.f);
+					polhemus->calibrateRollUp();
+				if (keys[GLFW_KEY_KP_6])
+					polhemus->calibratePitchDown();
+				if (keys[GLFW_KEY_KP_7])
+					polhemus->calibrateYawUp();
+				if (keys[GLFW_KEY_KP_8])
+					polhemus->calibrateRollDown();
+				if (keys[GLFW_KEY_KP_9])
+					polhemus->calibrateYawDown();
+				if (keys[GLFW_KEY_KP_DECIMAL])
+					polhemus->calibrateReset();
+				if (keys[GLFW_KEY_KP_ENTER])
+					polhemus->calibrate();
 
 				break;
 			case PAUSED:

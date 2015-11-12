@@ -24,16 +24,15 @@ public:
 	float getRotation();
 	float getRotationDegrees();
 	glm::quat getQuaternion();
-	glm::mat4 getOrientationMatrix();
 	
 	void calibrate();
 	void calibrateReset();
-	void calibrateRollUp();
-	void calibrateRollDown();
-	void calibratePitchUp();
-	void calibratePitchDown();
-	void calibrateYawUp();
-	void calibrateYawDown();
+	void calibrateRollUp( float degree = 1.f );
+	void calibrateRollDown( float degree = 1.f );
+	void calibratePitchUp( float degree = 1.f );
+	void calibratePitchDown( float degree = 1.f );
+	void calibrateYawUp( float degree = 1.f );
+	void calibrateYawDown( float degree = 1.f );
 
 private:
 	static Polhemus* instance;
