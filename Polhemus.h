@@ -17,12 +17,7 @@ public:
 
 	void update();
 
-	void printInfo();
-
 	glm::vec3 getPosition();
-	glm::vec3 getAxis();
-	float getRotation();
-	float getRotationDegrees();
 	glm::quat getQuaternion();
 	
 	void calibrate();
@@ -40,6 +35,5 @@ private:
 
 	glm::quat quat, calibration;
 	glm::vec3 pos;
-	glm::mat4 orientation;
 };
 

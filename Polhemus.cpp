@@ -35,17 +35,13 @@ void VRPN_CALLBACK Polhemus::handle_tracker_callback( void* userData, const vrpn
 
 void VRPN_CALLBACK Polhemus::handle_tracker( void* userData, const vrpn_TRACKERCB t )
 {	
-	glm::quat temp_quat;
-	temp_quat.x = t.quat[0];
-	temp_quat.y = t.quat[1];
-	temp_quat.z = t.quat[2];
-	temp_quat.w = t.quat[3];
+	quat.x = t.quat[0];
+	quat.y = t.quat[1];
+	quat.z = t.quat[2];
+	quat.w = t.quat[3];
 	pos.x = t.pos[0];
 	pos.y = t.pos[1];
 	pos.z = t.pos[2];
-
-	quat = calibration * temp_quat;
-	orientation = glm::toMat4( quat );
 }
 
 void Polhemus::update()
@@ -53,39 +49,14 @@ void Polhemus::update()
 	vrpnTracker->mainloop();
 }
 
-void Polhemus::printInfo()
-{
-	glm::vec3 axis = getAxis();
-	std::cout << "Position = (" << pos.x << ", " <<  pos.y << ", " << pos.z << ")" << std::endl;
-	std::cout << "Quaternion = (" << quat.x << ", " << quat.y << ", " << quat.z << ", " << quat.w << ")" << std::endl;
-	std::cout << "Vector = (" << axis.x << ", " << axis.y << ", " << axis.z << ")" << std::endl;	
-	std::cout << "Rotation = "<< getRotationDegrees() << " degrees, " << getRotation() << " radians" << std::endl;
-	std::cout << std::endl;
-}
-
 glm::vec3 Polhemus::getPosition()
 {
 	return pos;
 }
 
-glm::vec3 Polhemus::getAxis()
-{
-	return glm::axis( quat );
-}
-
-float Polhemus::getRotation()
-{
-	return glm::angle( quat );
-}
-
-float Polhemus::getRotationDegrees()
-{
-	return glm::angle( quat ) * 180.f / M_PI;
-}
-
 glm::quat Polhemus::getQuaternion()
 {
-	return quat;
+	return quat * calibration;
 }
 
 // the following function assumes that the probe is aligned along its origin
