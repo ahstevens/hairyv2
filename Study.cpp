@@ -9,10 +9,12 @@
 #define NCALIBRATIONTRIALS 5
 
 #define NBLOCKS 5
-#define NREPLICATESPERBLOCK 5
+#define NREPLICATESPERBLOCK 4
 #define NDENSITYCONDITIONS 3
+#define NTHICKNESSCONDITIONS 3
 #define NRENDERINGCONDITIONS 5
-#define NTRIALSPERBLOCK NREPLICATESPERBLOCK * NDENSITYCONDITIONS * NRENDERINGCONDITIONS
+#define NCONDITIONS NDENSITYCONDITIONS * ( ( NRENDERINGCONDITIONS - 2 ) + ( NTHICKNESSCONDITIONS * ( NRENDERINGCONDITIONS - 3 ) ) )
+#define NTRIALSPERBLOCK NREPLICATESPERBLOCK * NCONDITIONS
 
 #define BGCOLOR glm::vec3(0.325f, 0.486f, 0.812f)
 //#define BGCOLOR glm::vec3(0.f, 0.f, 0.f)
@@ -83,16 +85,8 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	windowHeight = height_mm;
 	eyeDistance = dist_mm;
 
-	if (participant == std::string("demo"))
-	{
-		this->mode = Mode::DEMO;
-		generateTrial(Trial::RenderMode::LINES_PLAIN);
-	}
-	else
-	{
-		this->mode = Mode::NONE;
-		std::cout << "Press 'T' to begin training, or 'S' to begin the study" << std::endl;
-	}	
+	this->mode = Mode::NONE;
+	std::cout << "Press 'D' to enter demo/training mode, or <Enter> to begin the study" << std::endl;
 		
 	probe.setShader(lightingShader);
 	probe.init();
@@ -102,7 +96,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	trainingTarget.setOrientation(getRandomOrientation());
 	//trainingTarget.setSize(1.1f, 1.1f, 1.1f);
 
-	targetCursor.setSize(5.f, 5.f, 0.f);
+	targetCursor.setSize(10.f, 10.f, 0.f);
 	targetCursor.setShader(targetShader);
 
 	// set target color and opacity. Shader must be active to set the uniform
@@ -121,7 +115,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	glEnable(GL_LINE_SMOOTH);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glLineWidth(2.f);
+	glLineWidth(3.f);
 
 	// set camera at eye position; far clipping plane is 1 meter behind screen
 	glm::vec3 eyePos( 0.f, 0.f, eyeDistance );
@@ -395,22 +389,53 @@ void Study::begin()
 									 Trial::RenderMode::SHADOWED_HEDGEHOGS, 
 									 Trial::RenderMode::TUBES_PLAIN, 
 									 Trial::RenderMode::TUBES_RINGED };
-	float densities[3]			 = { 0.1f, 
-									 0.5f, 
-									 1.f };
-	float lengths[3]			 = { 1.f, 
-									 0.5f, 
-									 0.1f };
-	float thicknesses[3]		 = { 1.f, 
-									 0.5f, 
-									 0.1f };
+	float densities[3]			 = { 0.4f, 
+									 0.3f, 
+									 0.2f };
+	float thicknesses[3]		 = { 2.f, 
+									 1.f, 
+									 0.5f };
+	float glyphHeads[3] 		 = { 1.15f, 
+									 0.75f, 
+									 0.5f };
 	
 	std::vector<Condition> block;
 
 	for (int i = 0; i < NDENSITYCONDITIONS; ++i)
 		for (int j = 0; j < NRENDERINGCONDITIONS; ++j)
-			for (int k = 0; k < NREPLICATESPERBLOCK; ++k)
-				block.push_back(Condition(renders[j], densities[i], lengths[i], thicknesses[i]));
+		{
+			Trial::RenderMode rm = renders[j];
+			float d = densities[i];
+			float l = 1.f;
+			float t = 0.f;
+			float gh = glyphHeads[i];
+				
+			if( rm == Trial::RenderMode::LINES_PLAIN ||
+				rm == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+				rm == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+				rm == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG )
+				gh = 0.75;
+
+			if( rm == Trial::RenderMode::SHADOWED_HEDGEHOGS )
+			{
+				t = 0.57;
+				gh = 0.47;
+			}
+
+			if( rm == Trial::RenderMode::TUBES_PLAIN || rm == Trial::RenderMode::TUBES_RINGED )
+			{
+				for( int m = 0; m < NTHICKNESSCONDITIONS; ++m)
+				{
+					t = thicknesses[m];
+
+					for (int k = 0; k < NREPLICATESPERBLOCK; ++k)
+						block.push_back(Condition(rm, d, l, t, gh));
+				}
+			}
+			else
+				for (int k = 0; k < NREPLICATESPERBLOCK; ++k)
+					block.push_back(Condition(rm, d, l, t, gh));
+		}
 
 	for (int i = 0; i < NBLOCKS; ++i)
 	{
@@ -420,7 +445,7 @@ void Study::begin()
 
 	std::cout << "Commencing study..." << std::endl;
 	std::cout << std::endl;
-	std::cout << "participant,block,trial,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.w,probe.x,probe.y,probe.z,target.w,target.x,target.y,target.z,error_degrees,time" << std::endl;
+	std::cout << "participant,block,trial,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,error_degrees,time" << std::endl;
 	next();
 }
 
@@ -457,8 +482,8 @@ void Study::next()
 
 	density = curr.density;
 	lengthMultiplier = curr.lengthMultiplier;
-	thicknessMultiplier = curr.thicknessMultiplier;
-	directionalGeomScale = curr.thicknessMultiplier;
+	thicknessMultiplier = curr.renderMode == Trial::RenderMode::SHADOWED_HEDGEHOGS ? 0.57f : curr.thicknessMultiplier;
+	directionalGeomScale = curr.renderMode == Trial::RenderMode::SHADOWED_HEDGEHOGS ? 0.47f : curr.thicknessMultiplier * 0.75;
 
 	generateTrial(curr.renderMode);
 
@@ -513,6 +538,14 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_P])
 				{
 					std::cout << "Angular Error to Target: " << glm::degrees( getAngleError( getAdjustedTargetCursorOrientation(), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "density: " << density << std::endl;
+					std::cout << "jitter: " << jitter << std::endl;
+					std::cout << "lengthMultiplier: " << lengthMultiplier << std::endl;
+					std::cout << "thicknessMultiplier: " << thicknessMultiplier << std::endl;
+					std::cout << "directionalGeomScale: " << directionalGeomScale << std::endl;
+					std::cout << "haloSize: " << haloSize << std::endl;
+					std::cout << "hedgehogOffset: " << hedgehogOffset << std::endl;
+					std::cout << std::endl;
 					std::cout << std::endl;
 				}
 				if (keys[GLFW_KEY_Q])
@@ -623,16 +656,23 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_KP_ENTER])
 					polhemus->calibrate();
 
+				
+				if (keys[GLFW_KEY_ENTER])
+					begin();
+
 				break;
 			case PAUSED:
 				if (keys[GLFW_KEY_ENTER])
 					mode = STUDY;
 				break;
 			case NONE:
-				if (keys[GLFW_KEY_S])
+				if (keys[GLFW_KEY_ENTER])
 					begin();
-				if (keys[GLFW_KEY_T])
-					mode = Mode::TRAINING;
+				if (keys[GLFW_KEY_D])
+				{
+					mode = Mode::DEMO;
+					generateTrial(Trial::RenderMode::LINES_PLAIN);
+				}
 				break;
 			case STUDY:
 				if (keys[GLFW_KEY_SPACE] && stopwatch.read() > 2.0)

@@ -39,9 +39,10 @@ private:
 		float density;
 		float lengthMultiplier;
 		float thicknessMultiplier;
+		float glyphHeadMultiplier;
 		
-		Condition(Trial::RenderMode renderMode, float density, float lengthMultiplier, float thicknessMultiplier) 
-			: renderMode(renderMode), density(density), lengthMultiplier(lengthMultiplier), thicknessMultiplier(thicknessMultiplier)
+		Condition(Trial::RenderMode renderMode, float density, float lengthMultiplier, float thicknessMultiplier, float glyphHeadMultiplier) 
+			: renderMode(renderMode), density(density), lengthMultiplier(lengthMultiplier), thicknessMultiplier(thicknessMultiplier), glyphHeadMultiplier(glyphHeadMultiplier)
 		{}
 	};
 

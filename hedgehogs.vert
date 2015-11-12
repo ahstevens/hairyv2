@@ -110,7 +110,7 @@ void main()
 		
 		coordFrameTrans = trans * shadow * coordFrameTrans;
 
-		col = vec4(vec3(0.5f), 1.f);
+		col = vec4(vec3(0.33f), 1.f);
 	}
 	else
 	{
