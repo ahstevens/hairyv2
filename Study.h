@@ -98,6 +98,9 @@ private:
 
 	std::vector<std::vector<Condition>> conditions;
 
+	std::ofstream outFile;
+	std::string outFileName;
+
 	Mode mode;
 
 	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top;

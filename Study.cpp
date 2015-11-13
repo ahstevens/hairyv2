@@ -80,6 +80,18 @@ Study::~Study()
 
 void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 {
+	// open file
+	outFileName = std::string( name + "_data" );
+	outFile.open( outFileName );
+
+	// if file could not be opened for some reason
+	for (int i = 0; !outFile.is_open(); ++i)
+	{
+		outFileName = std::string(name + "_data_" + std::to_string(i));
+		outFile.open( outFileName );
+	}
+
+
 	participant = name;
 	windowWidth = width_mm;
 	windowHeight = height_mm;
