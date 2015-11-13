@@ -2,6 +2,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <time.h> // time() for srand()
 #include <random>
+#include <sys/stat.h> // stat()
 
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
@@ -41,7 +42,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = target_on_top = 0;
+	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = target_on_top = training_target_random = 0;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -80,17 +81,7 @@ Study::~Study()
 
 void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)
 {
-	// open file
-	outFileName = std::string( name + "_data" );
-	outFile.open( outFileName );
-
-	// if file could not be opened for some reason
-	for (int i = 0; !outFile.is_open(); ++i)
-	{
-		outFileName = std::string(name + "_data_" + std::to_string(i));
-		outFile.open( outFileName );
-	}
-
+	prepareOutput( name );
 
 	participant = name;
 	windowWidth = width_mm;
@@ -105,8 +96,6 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 
 	trainingTarget.setShader(lightingShader);
 	trainingTarget.init();
-	trainingTarget.setOrientation(getRandomOrientation());
-	//trainingTarget.setSize(1.1f, 1.1f, 1.1f);
 
 	targetCursor.setSize(10.f, 10.f, 0.f);
 	targetCursor.setShader(targetShader);
@@ -385,10 +374,7 @@ void Study::training()
 {	
 	float angleRad = getAngleError( probe.getOrientation(), trainingTarget.getOrientation() );
 	std::cout << "Angular error: " << glm::degrees( angleRad ) << " deg (" << angleRad << " rad)" << std::endl;
-	//trainingTarget.setOrientation(getRandomOrientation());
-	glm::vec3 flowVec = normalize(targetCursor.getFlowVector());
-	glm::quat q = vecsToQuat(glm::vec3(1.f, 0.f, 0.f), flowVec);
-	trainingTarget.setOrientation(q);
+	updateTrainingTarget();
 }
 
 void Study::begin()
@@ -457,7 +443,7 @@ void Study::begin()
 
 	std::cout << "Commencing study..." << std::endl;
 	std::cout << std::endl;
-	std::cout << "participant,block,trial,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,error_degrees,time" << std::endl;
+
 	next();
 }
 
@@ -667,7 +653,17 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					polhemus->calibrateReset();
 				if (keys[GLFW_KEY_KP_ENTER])
 					polhemus->calibrate();
-
+				
+				if (keys[GLFW_KEY_SPACE] && probe_training)
+				{
+					recordTrial( true );
+					updateTrainingTarget();
+				}				
+				if ( ( keys[GLFW_KEY_LEFT_SHIFT] || keys[GLFW_KEY_RIGHT_SHIFT] ) && probe_training )
+				{					
+					training_target_random = abs(training_target_random - 1);
+					updateTrainingTarget();
+				}
 				
 				if (keys[GLFW_KEY_ENTER])
 					begin();
@@ -689,27 +685,7 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			case STUDY:
 				if (keys[GLFW_KEY_SPACE] && stopwatch.read() > 2.0)
 				{
-					glm::quat probeQuat = polhemus->getQuaternion();
-					glm::quat targetQuat = getAdjustedTargetCursorOrientation();
-					glm::vec3 pVec = glm::normalize(glm::rotate(probeQuat, glm::vec3(1.f, 0.f, 0.f)));
-					glm::vec3 tVec = glm::normalize(glm::rotate(targetQuat, glm::vec3(1.f, 0.f, 0.f)));
-					std::cout << participant << ",";
-					std::cout << NBLOCKS - conditions.size() << ",";
-					std::cout << NTRIALSPERBLOCK - conditions.back().size() - 1 << ",";
-					std::cout << trial.getRenderMode() << ",";
-					std::cout << density << ",";
-					std::cout << lengthMultiplier << ",";
-					std::cout << thicknessMultiplier << ",";
-					std::cout << directionalGeomScale << ",";
-					std::cout << pVec.x << ",";
-					std::cout << pVec.y << ",";
-					std::cout << pVec.z << ",";
-					std::cout << tVec.x << ",";
-					std::cout << tVec.y << ",";
-					std::cout << tVec.z << ",";
-					std::cout << glm::degrees(getAngleError(targetQuat, probeQuat)) << ",";
-					std::cout << stopwatch.read() << std::endl;
-
+					recordTrial();
 					next();
 				}
 				break;
@@ -805,6 +781,17 @@ float Study::getAngleError(glm::quat p, glm::quat q)
 	return ( cosTheta > 0.999999f ) ? 0.f : acos( cosTheta );
 }
 
+void Study::updateTrainingTarget()
+{
+	if( training_target_random )
+		trainingTarget.setOrientation(getRandomOrientation());
+	else
+	{
+		glm::vec3 flowVec = normalize(targetCursor.getFlowVector());
+		glm::quat q = vecsToQuat(glm::vec3(1.f, 0.f, 0.f), flowVec);
+		trainingTarget.setOrientation(q);
+	}
+}
 glm::quat Study::getRandomOrientation()
 {
 	std::random_device seed;  // random seed
@@ -834,4 +821,91 @@ glm::quat Study::vecsToQuat(glm::vec3 u, glm::vec3 v)
 	q.w = sqrt((u.length() ^ 2) * (v.length() ^ 2)) + glm::dot(u, v);
 
 	return glm::normalize(q);
+}
+
+bool Study::fileExists( const std::string &fname )
+{
+  struct stat buffer;   
+  return (stat (fname.c_str(), &buffer) == 0);
+}
+
+void Study::prepareOutput( std::string name )
+{
+	// construct filename
+	outFileName = std::string( name + "_data" + ".csv" );
+
+	// if file exists, keep trying until we find a filename that doesn't already exist
+	for (int i = 0; fileExists( outFileName ); ++i)
+		outFileName = std::string(name + "_data_" + std::to_string(i) + ".csv");
+	
+	outFile.open( outFileName );
+
+	if( outFile.is_open() )
+	{
+		std::cout << "Opened file " << outFileName << " for writing output" << std::endl;		
+		outFile << "participant,block,trial,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,error_degrees,time" << std::endl;
+	}
+	else
+		std::cout << "Error opening file " << outFileName << " for writing output" << std::endl;
+}
+
+// takes in a target orientation quaternion referenced to the +x axis vector
+// (1,0,0) and compares it to the Polhemus probe to get angular difference
+// (error) between the two and records it to the output file
+void Study::recordTrial( bool trainingTrial )
+{
+	// Construct string for rendering mode enum
+	std::string rm;
+
+	if( trainingTrial )
+		rm = std::string( "training" );
+	else
+		switch( trial.getRenderMode() )
+		{
+			case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+				rm = std::string("il_cylblinn");
+				break;		
+			case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG:
+				rm = std::string("il_cylphong");
+				break;
+			case Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG:
+				rm = std::string("il_maxphong");
+				break;
+			case Trial::RenderMode::LINES_PLAIN:
+				rm = std::string("plain_lines");
+				break;
+			case Trial::RenderMode::SHADOWED_HEDGEHOGS:
+				rm = std::string("shadowed_hedgehogs");
+				break;
+			case Trial::RenderMode::TUBES_PLAIN:
+				rm = std::string("tubes_plain");
+				break;
+			case Trial::RenderMode::TUBES_RINGED:
+				rm = std::string("tubes_ringed");
+				break;
+		}
+
+	// Get unit vectors of probe and target directions
+	glm::quat probeQuat = polhemus->getQuaternion();
+	glm::quat targetQuat = trainingTrial ? trainingTarget.getOrientation() : getAdjustedTargetCursorOrientation();
+	glm::vec3 pVec = glm::normalize(glm::rotate(probeQuat, glm::vec3(1.f, 0.f, 0.f)));
+	glm::vec3 tVec = glm::normalize(glm::rotate(targetQuat, glm::vec3(1.f, 0.f, 0.f)));
+	
+	// Begin outputting trial into file
+	outFile << participant << ",";
+	outFile << ( trainingTrial ? 0 : ( NBLOCKS - conditions.size() ) ) << ",";
+	outFile << ( trainingTrial ? 0 : ( NTRIALSPERBLOCK - conditions.back().size() - 1 ) ) << ",";
+	outFile << rm << ",";
+	outFile << ( trainingTrial ? 0 : density ) << ",";
+	outFile << ( trainingTrial ? 0 : lengthMultiplier ) << ",";
+	outFile << ( trainingTrial ? 0 : thicknessMultiplier ) << ",";
+	outFile << ( trainingTrial ? 0 : directionalGeomScale ) << ",";
+	outFile << pVec.x << ",";
+	outFile << pVec.y << ",";
+	outFile << pVec.z << ",";
+	outFile << tVec.x << ",";
+	outFile << tVec.y << ",";
+	outFile << tVec.z << ",";
+	outFile << glm::degrees( getAngleError( targetQuat, probeQuat ) ) << ",";
+	outFile << ( trainingTrial ? 0 : stopwatch.read() ) << std::endl;
 }

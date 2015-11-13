@@ -79,9 +79,15 @@ private:
 
 	float getAngleError(glm::quat probe, glm::quat target);
 
+	void updateTrainingTarget();
 	glm::quat getRandomOrientation();
 
 	glm::quat vecsToQuat(glm::vec3 u, glm::vec3 v);
+
+	bool fileExists( const std::string &fname );
+
+	void prepareOutput( std::string name );
+	void recordTrial( bool trainingTrial = false );
 
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
@@ -103,7 +109,7 @@ private:
 
 	Mode mode;
 
-	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top;
+	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top, training_target_random;
 
 	float density, jitter;
 
