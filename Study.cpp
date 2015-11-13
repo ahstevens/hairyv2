@@ -759,6 +759,7 @@ void Study::generateTrial( Trial::RenderMode renderMode )
 	targetCursor.setPosition(targSeed.x - windowWidth / 2.f, targSeed.y - windowHeight / 2.f, 0.f);
 	targetCursor.setSeed(targSeed);
 	//std::cout << "Trial generated" << std::endl;
+	if( !training_target_random ) updateTrainingTarget();
 }
 
 glm::quat Study::getAdjustedTargetCursorOrientation()

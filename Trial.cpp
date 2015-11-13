@@ -50,27 +50,11 @@ void Trial::init()
 
 void Trial::makeBiMap()
 {
-	// aspect ratio
-	//float ar = xSize / ySize;
-	//float bmMaxX, bmMaxY;
-
-	//if( ar > 1.0f ) {
-	//	bmMaxX = BIMAP_BASE_SIZE;
-	//	bmMaxY = BIMAP_BASE_SIZE / ar;
-	//}
-	//else {
-	//	bmMaxX = BIMAP_BASE_SIZE * ar;
-	//	bmMaxY = BIMAP_BASE_SIZE;
-	//}
-
 	// free memory held by any existing BiMap
 	if(bimap != NULL)
 		delete bimap;
 
-	//std::cout << "Generating " << bmMaxX << " x " << bmMaxY << " bimap (AR = " << ar << ")... ";
-	//bimap = new BiMap( bmMaxX, bmMaxY );
 	bimap = new BiMap( xSize, ySize );
-	//std::cout << "done" << std::endl;	
 }
 
 void Trial::sampleBiMap()
