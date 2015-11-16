@@ -214,5 +214,11 @@
     <None Include="target.vert">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="hedgehogs_rev.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="hedgehogs_rev.frag">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>

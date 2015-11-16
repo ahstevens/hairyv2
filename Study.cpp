@@ -42,7 +42,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = target_on_top = training_target_random = 0;
+	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = target_on_top = training_target_random = old_hog = 0;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -67,6 +67,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	lineShader = new Shader("lines.vert", "lines.frag");
 	haloShader = new Shader("halo.vert", "halo.frag");
 	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
+	hogShaderRev = new Shader("hedgehogs_rev.vert", "hedgehogs_rev.frag");
 	targetShader = new Shader("target.vert", "target.frag");
     normalShader = new Shader("normals.vert", "normals.frag", "normals.geom");
 }
@@ -74,8 +75,11 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 Study::~Study()
 {
 	delete lightingShader;
+	delete lineShader;
 	delete haloShader;
 	delete hogShader;
+	delete hogShaderRev;
+	delete targetShader;
 	delete normalShader;
 }
 
@@ -158,7 +162,7 @@ void Study::mainLoop()
 void Study::render()
 {	
 	// Change background for Shadowed Hedgehogs
-	if( trial.getRenderMode() == Trial::RenderMode::SHADOWED_HEDGEHOGS)
+	if( trial.getRenderMode() == Trial::RenderMode::SHADOWED_HEDGEHOGS && !probe_training )
 		bgColor = glm::vec3(1.f, 1.f, 1.f);
 	else
 		bgColor = BGCOLOR;
@@ -301,21 +305,24 @@ void Study::setupIL()
 
 void Study::setupSH()
 {
-	initGL(hogShader);
+	Shader *s = old_hog ? hogShader : hogShaderRev;
 
-	glUniform1f(glGetUniformLocation(hogShader->Program, "lengthMult"), (1 / density) / 2 / trial.getMaxLength());
+	initGL(s);
 
-	glUniform1f(glGetUniformLocation(hogShader->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
+	glUniform1f(glGetUniformLocation(s->Program, "lengthMult"), (1 / density) / 2 / trial.getMaxLength());
+
+	if(old_hog) glUniform1f(glGetUniformLocation(s->Program, "offset"), (-trial.getShadowOffset())*(1 / density) / 2 / trial.getMaxLength() + hedgehogOffset);
+	else glUniform1f(glGetUniformLocation(s->Program, "offset"), hedgehogOffset);
 
 	// first pass to render shadow plane
-	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), true);
+	glUniform1i(glGetUniformLocation(s->Program, "doShadows"), true);
 
-	trial.setShader(hogShader);
+	trial.setShader(s);
 
 	trial.redraw();
 
 	// second pass to render the glyph plane
-	glUniform1i(glGetUniformLocation(hogShader->Program, "doShadows"), false);
+	glUniform1i(glGetUniformLocation(s->Program, "doShadows"), false);
 }
 
 void Study::setupTubes()
@@ -589,6 +596,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					haloSize -= (haloSize > 0.01f) ? 0.01f : 0.f;
 				if (keys[GLFW_KEY_PERIOD])
 					haloSize += 0.01f;
+				if (keys[GLFW_KEY_SLASH])
+					old_hog = abs(old_hog - 1);
 				if (keys[GLFW_KEY_NUM_LOCK])
 					target_on_top = abs(target_on_top - 1);
 				if (keys[GLFW_KEY_KP_SUBTRACT])

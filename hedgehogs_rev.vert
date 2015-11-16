@@ -85,34 +85,76 @@ mat4 makeShadowMatrix(vec4 plane, vec4 L)
 }
 
 void main()
-{
-	vec3 u = normalize(cross(vec3(0.f, 1.f, 0.f), w));
-	vec3 v = normalize(cross(w, u));
+{		
+	vec3 w_towards;
+	bool glyphHead;
 
+	// reverse vector if facing away form viewer
+	if( w.z < 0.f )
+	{
+		w_towards = -w;
+		glyphHead = true;
+	}
+	else
+	{
+		w_towards = w;
+		glyphHead = false;
+	}
+
+	vec3 up = ( length( cross( vec3( 0.f, 1.f, 0.f ), w_towards ) ) < 0.001 ) ? vec3( 0.f, 0.f, -1.f ) : vec3( 0.f, 1.f, 0.f );
+
+	vec3 u = normalize( cross( up, w_towards ) );
+
+	vec3 v = normalize( cross( w_towards, u ) );
+
+	vec3 w_new, pos;
+
+	if ( directionalGeom )
+	{
+		u *= ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2;
+		v *= ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2;
+		w_new = normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
+		if( glyphHead ) 
+			pos = instanceLocation + w_towards * lengthMult + normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
+		else 
+			pos = instanceLocation;
+	}
+	else
+	{
+		u *= thicknessMult;
+		v *= thicknessMult;
+		if( glyphHead )
+		{
+			w_new = w_towards * lengthMult + normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
+			pos = instanceLocation;
+		}
+		else
+		{
+			w_new = w_towards * lengthMult + normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
+			pos = instanceLocation;
+		}
+	}
+		
 	// build CFTM for scaling the tubes
-	mat4 coordFrameTrans = mat4(vec4(u * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
-								vec4(v * (directionalGeom ? directionalGeomScale : thicknessMult), 0.f),
-								vec4(directionalGeom ? normalize(w) * directionalGeomScale : w * lengthMult, 0.f),
-								vec4(directionalGeom ? vec3(w * lengthMult) : vec3(0.f), 1.f));
-								
-	mat4 trans = mat4(1.f);
-	trans[3] = vec4(instanceLocation, 1.f);
+	mat4 coordFrameTrans = mat4(vec4(u, 0.f),
+								vec4(v, 0.f),
+								vec4(w_new, 0.f),
+								vec4(pos, 1.f));
 
 	if(doShadows)
 	{
-		mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset), light.position);
-		
-		coordFrameTrans = trans * shadow * coordFrameTrans;
+		//mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset + ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) ), light.position);
+		mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset + ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) ), light.position);
 
-		col = vec4(vec3(0.33f), 1.f); // light grey
+		coordFrameTrans = shadow * coordFrameTrans;
+
+		col = vec4(vec3(0.66f), 1.f); // light grey
 	}
 	else
 	{
 		//mat4 squish = mat4(1.f);
 		//squish[2] = vec4(0.f);		
-		//coordFrameTrans = trans * squish * coordFrameTrans;
-
-		coordFrameTrans = trans * coordFrameTrans;
+		//coordFrameTrans = squish * coordFrameTrans;
 
 		col = vec4(vec3(0.f), 1.f); // black
 	}	

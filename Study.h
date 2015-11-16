@@ -109,13 +109,13 @@ private:
 
 	Mode mode;
 
-	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top, training_target_random;
+	int draw_halos, cycle_light, probe_training, draw_probe, show_probe_hints, target_on_top, training_target_random, old_hog;
 
 	float density, jitter;
 
 	glm::vec3 bgColor;
 
-	Shader *lightingShader, *haloShader, *hogShader, *normalShader, *lineShader, *targetShader;
+	Shader *lightingShader, *haloShader, *hogShader, *hogShaderRev, *normalShader, *lineShader, *targetShader;
 
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
