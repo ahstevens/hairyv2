@@ -405,7 +405,7 @@ void Study::begin()
 			Trial::RenderMode rm = renders[j];
 			float d = densities[i];
 			float l = 1.f;
-			float t = 0.f;
+			float t = 1.f;
 			float gh = glyphHeads[i];
 				
 			if( rm == Trial::RenderMode::LINES_PLAIN ||

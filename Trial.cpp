@@ -480,7 +480,7 @@ void Trial::generateHairs()
 	vertices.clear();
 	indices.clear();
 
-	//std::cout << "Generating geometry for tube glyphs... ";
+	//std::cout << "Generating geometry for line glyphs... ";
 
 	//+++++++++++++++++++++++++++++++ GEOMETRY ++++++++++++++++++++++++++++++++
 
