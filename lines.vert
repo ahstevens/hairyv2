@@ -37,13 +37,13 @@ void main()
 		u *= directionalGeomScale;
 		v *= directionalGeomScale;
 		w_new = normalize( w ) * directionalGeomScale;
-		pos = instanceLocation + w * lengthMult;
+		pos = instanceLocation + w * lengthMult + normalize( w ) * directionalGeomScale;
 	}
 	else
 	{
 		u *= thicknessMult;
 		v *= thicknessMult;
-		w_new = w * lengthMult;
+		w_new = w * lengthMult + normalize( w ) * directionalGeomScale;
 		pos = instanceLocation;
 	}
 		

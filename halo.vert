@@ -5,7 +5,6 @@ layout (location = 2) in vec2 texCoord;
 layout (location = 3) in vec3 instanceLocation;
 layout (location = 4) in vec3 w;
 
-
 out vec3 Normal;
 out vec3 FragPos;
 out vec2 TexCoords;
@@ -37,19 +36,21 @@ void main()
 	vec3 w_new, pos;
 
 	if ( directionalGeom )
-	{
-		u *= directionalGeomScale + haloSize;
-		v *= directionalGeomScale + haloSize;
-		w_new = normalize( w ) * ( directionalGeomScale + haloSize );
-		if( glyphHead ) pos = instanceLocation + w * lengthMult;
-		else pos = instanceLocation;
+	{		
+		u *= ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + haloSize;
+		v *= ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + haloSize;
+		w_new = normalize( w ) * ( ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + haloSize );
+		if( glyphHead ) 
+			pos = instanceLocation + w * lengthMult + normalize( w ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
+		else 
+			pos = instanceLocation;
 	}
 	else
 	{
 		u *= thicknessMult + haloSize * 2;
 		v *= thicknessMult + haloSize * 2;
-		w_new = w * lengthMult;
-		pos = instanceLocation;
+		w_new = w * lengthMult + normalize( w ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + normalize( w ) * haloSize;
+		pos = instanceLocation - normalize( w ) * haloSize;
 	}
 
 	// build CFTM for scaling the tubes
