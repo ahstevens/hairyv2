@@ -87,18 +87,18 @@ mat4 makeShadowMatrix(vec4 plane, vec4 L)
 void main()
 {		
 	vec3 w_towards;
-	bool glyphHead;
+	bool glyphHeadAtPlane;
 
-	// reverse vector if facing away form viewer
+	// reverse vector if facing away from viewer
 	if( w.z < 0.f )
 	{
 		w_towards = -w;
-		glyphHead = true;
+		glyphHeadAtPlane = true;
 	}
 	else
 	{
 		w_towards = w;
-		glyphHead = false;
+		glyphHeadAtPlane = false;
 	}
 
 	vec3 up = ( length( cross( vec3( 0.f, 1.f, 0.f ), w_towards ) ) < 0.001 ) ? vec3( 0.f, 0.f, -1.f ) : vec3( 0.f, 1.f, 0.f );
@@ -114,16 +114,16 @@ void main()
 		u *= ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2;
 		v *= ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2;
 		w_new = normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
-		if( glyphHead ) 
-			pos = instanceLocation + w_towards * lengthMult + normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
-		else 
+		if( glyphHeadAtPlane ) 
 			pos = instanceLocation;
+		else 
+			pos = instanceLocation + w_towards * lengthMult + normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
 	}
 	else
 	{
 		u *= thicknessMult;
 		v *= thicknessMult;
-		if( glyphHead )
+		if( glyphHeadAtPlane )
 		{
 			w_new = w_towards * lengthMult + normalize( w_towards ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
 			pos = instanceLocation;
@@ -144,7 +144,7 @@ void main()
 	if(doShadows)
 	{
 		//mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset + ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) ), light.position);
-		mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset + ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) ), light.position);
+		mat4 shadow = makeShadowMatrix(vec4(0.f, 0.f, 1.f, offset), light.position);
 
 		coordFrameTrans = shadow * coordFrameTrans;
 
