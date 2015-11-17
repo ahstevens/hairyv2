@@ -387,6 +387,9 @@ void Study::training()
 void Study::begin()
 {
 	mode = Mode::STUDY;
+	probe_training = draw_probe = show_probe_hints = 0;
+
+
 	srand((unsigned int)time(NULL));
 
 	Trial::RenderMode renders[5] = { Trial::RenderMode::LINES_PLAIN, 
@@ -857,7 +860,7 @@ void Study::prepareOutput( std::string name )
 	if( outFile.is_open() )
 	{
 		std::cout << "Opened file " << outFileName << " for writing output" << std::endl;		
-		outFile << "participant,block,trial,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,error_degrees,time" << std::endl;
+		outFile << "participant,block,trial,probe_training,draw_probe,show_probe_hints,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,error_degrees,time" << std::endl;
 	}
 	else
 		std::cout << "Error opening file " << outFileName << " for writing output" << std::endl;
@@ -909,6 +912,9 @@ void Study::recordTrial( bool trainingTrial )
 	outFile << participant << ",";
 	outFile << ( trainingTrial ? 0 : ( NBLOCKS - conditions.size() ) ) << ",";
 	outFile << ( trainingTrial ? 0 : ( NTRIALSPERBLOCK - conditions.back().size() - 1 ) ) << ",";
+	outFile << probe_training << ",";
+	outFile << draw_probe << ",";
+	outFile << show_probe_hints << ",";
 	outFile << rm << ",";
 	outFile << ( trainingTrial ? 0 : density ) << ",";
 	outFile << ( trainingTrial ? 0 : lengthMultiplier ) << ",";
