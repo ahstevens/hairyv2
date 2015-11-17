@@ -39,6 +39,7 @@ void main()
 		u *= directionalGeomScale;
 		v *= directionalGeomScale;
 		w_new = normalize( w ) * directionalGeomScale;
+
 		if( glyphHead ) 
 			pos = instanceLocation + w * lengthMult + normalize( w ) * directionalGeomScale;
 		else 
@@ -48,16 +49,13 @@ void main()
 	{
 		u *= thicknessMult;
 		v *= thicknessMult;
+
 		if( glyphHead )
-		{
 			w_new = w * lengthMult + normalize( w ) * directionalGeomScale;
-			pos = instanceLocation;
-		}
 		else
-		{
 			w_new = w * lengthMult;
-			pos = instanceLocation;
-		}
+		
+		pos = instanceLocation;
 	}
 		
 	// build CFTM for scaling the tubes

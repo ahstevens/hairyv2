@@ -40,6 +40,7 @@ void main()
 		u *= directionalGeomScale + haloSize;
 		v *= directionalGeomScale + haloSize;
 		w_new = normalize( w ) * ( directionalGeomScale + haloSize );
+
 		if( glyphHead ) 
 			pos = instanceLocation + w * lengthMult + normalize( w ) * directionalGeomScale;
 		else 
@@ -49,7 +50,12 @@ void main()
 	{
 		u *= thicknessMult + haloSize * 2;
 		v *= thicknessMult + haloSize * 2;
-		w_new = w * lengthMult + normalize( w ) * ( directionalGeomScale + haloSize );
+
+		if( glyphHead )
+			w_new = w * lengthMult + normalize( w ) * ( directionalGeomScale + haloSize );			
+		else
+			w_new = w * lengthMult;
+
 		pos = instanceLocation - normalize( w ) * haloSize;
 	}
 
