@@ -37,11 +37,11 @@ void main()
 
 	if ( directionalGeom )
 	{		
-		u *= ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + haloSize;
-		v *= ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + haloSize;
-		w_new = normalize( w ) * ( ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + haloSize );
+		u *= directionalGeomScale + haloSize;
+		v *= directionalGeomScale + haloSize;
+		w_new = normalize( w ) * ( directionalGeomScale + haloSize );
 		if( glyphHead ) 
-			pos = instanceLocation + w * lengthMult + normalize( w ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 );
+			pos = instanceLocation + w * lengthMult + normalize( w ) * directionalGeomScale;
 		else 
 			pos = instanceLocation;
 	}
@@ -49,7 +49,7 @@ void main()
 	{
 		u *= thicknessMult + haloSize * 2;
 		v *= thicknessMult + haloSize * 2;
-		w_new = w * lengthMult + normalize( w ) * ( ( directionalGeomScale > thicknessMult / 2 ) ? directionalGeomScale : thicknessMult / 2 ) + normalize( w ) * haloSize;
+		w_new = w * lengthMult + normalize( w ) * ( directionalGeomScale + haloSize );
 		pos = instanceLocation - normalize( w ) * haloSize;
 	}
 

@@ -587,9 +587,13 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_LEFT_BRACKET])
 					thicknessMultiplier -= (thicknessMultiplier > 0.01f) ? 0.01f : 0.f;
 				if (keys[GLFW_KEY_RIGHT_BRACKET])
+				{
 					thicknessMultiplier += 0.01f;
+					if(directionalGeomScale < thicknessMultiplier / 2.f)
+						directionalGeomScale = thicknessMultiplier / 2.f;
+				}
 				if (keys[GLFW_KEY_SEMICOLON])
-					directionalGeomScale -= (directionalGeomScale > 0.01f) ? 0.01f : 0.f;
+					directionalGeomScale -= (directionalGeomScale > 0.01f && directionalGeomScale > thicknessMultiplier / 2) ? 0.01f : 0.f;
 				if (keys[GLFW_KEY_APOSTROPHE])
 					directionalGeomScale += 0.01f;
 				if (keys[GLFW_KEY_COMMA])
