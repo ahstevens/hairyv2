@@ -168,7 +168,7 @@ void main()
 
 		coordFrameTrans = shadow * coordFrameTrans;
 
-		col = vec4(vec3(0.66f), 1.f); // light grey
+		col = vec4(vec3(0.8f), 1.f); // light grey
 	}
 	else
 		col = vec4(vec3(0.f), 1.f); // black	
