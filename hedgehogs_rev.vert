@@ -5,6 +5,7 @@ layout (location = 2) in vec2 texCoord;
 layout (location = 3) in vec3 instanceLocation;
 layout (location = 4) in vec3 w;
 
+#define M_PI 3.1415926535f
 
 out vec3 Normal;
 out vec3 FragPos;
@@ -109,14 +110,14 @@ void main()
 
 	vec3 planeNormal = vec3(0.f, 0.f, 1.f);
 
-	vec3 glyphOffset;
+	float glyphOffset;
 	float dp = dot( planeNormal, normalize( w_towards ) );
 	
 	// offset glyph to anchor tip of 3D shape to the plane
 	if( glyphHeadAtPlane )
-		glyphOffset = vec3( 0.f, 0.f, 1.f ) * directionalGeomScale;
+		glyphOffset = directionalGeomScale;
 	else
-		glyphOffset = vec3( 0.f, 0.f, 1.f ) * sqrt( 1 - pow( dp, 2 ) ) * ( thicknessMult / 2 );
+		glyphOffset = sqrt( 1 - pow( dp, 2 ) ) * ( thicknessMult / 2 );
 				
 	vec3 w_new, pos;
 
@@ -127,9 +128,9 @@ void main()
 		w_new = normalize( w ) * directionalGeomScale;
 
 		if( glyphHeadAtPlane ) 
-			pos = instanceLocation + glyphOffset;
+			pos = instanceLocation + vec3( 0.f, 0.f, 1.f ) * glyphOffset;
 		else 
-			pos = instanceLocation + w_towards * lengthMult + normalize( w_towards ) * directionalGeomScale + glyphOffset;
+			pos = instanceLocation + w_towards * lengthMult + normalize( w_towards ) * directionalGeomScale + vec3( 0.f, 0.f, 1.f ) * glyphOffset;
 	}
 	else
 	{
@@ -138,9 +139,21 @@ void main()
 		w_new = w * lengthMult + normalize( w ) * directionalGeomScale;
 
 		if( glyphHeadAtPlane )
-			pos = instanceLocation + glyphOffset - w_new;
+			pos = instanceLocation + vec3( 0.f, 0.f, 1.f ) * glyphOffset - w_new;
 		else
-			pos = instanceLocation + glyphOffset;
+			pos = instanceLocation + vec3( 0.f, 0.f, 1.f ) * glyphOffset;
+	}
+
+	if( !glyphHeadAtPlane )
+	{ 
+		float alpha = acos( dp );
+		float beta = M_PI / 2.f - alpha;
+
+		float tipToPlane = sin( beta ) * length( w * lengthMult + normalize( w ) * directionalGeomScale );
+
+		float delta = directionalGeomScale - tipToPlane - glyphOffset;
+
+		if( delta > 0 ) pos += vec3( 0.f, 0.f, 1.f ) * delta;
 	}
 		
 	// build CFTM for scaling the tubes
