@@ -544,15 +544,27 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_M])
 					draw_halos = abs(draw_halos - 1);
 				if (keys[GLFW_KEY_P])
-				{
-					std::cout << "Angular Error to Target: " << glm::degrees( getAngleError( getAdjustedTargetCursorOrientation(), polhemus->getQuaternion() ) ) << std::endl;
-					std::cout << "density: " << density << std::endl;
-					std::cout << "jitter: " << jitter << std::endl;
-					std::cout << "lengthMultiplier: " << lengthMultiplier << std::endl;
-					std::cout << "thicknessMultiplier: " << thicknessMultiplier << std::endl;
-					std::cout << "directionalGeomScale: " << directionalGeomScale << std::endl;
-					std::cout << "haloSize: " << haloSize << std::endl;
-					std::cout << "hedgehogOffset: " << hedgehogOffset << std::endl;
+				{					
+					std::cout << std::endl;
+					std::cout << "########################################################" << std::endl;
+					std::cout << "####################### Accuracy #######################" << std::endl;
+					std::cout << "Angular Error to Target: " << glm::degrees( getAngleError( getAdjustedTargetCursorOrientation(), polhemus->getQuaternion() ) ) << std::endl;					
+					std::cout << "############### Calibration Axis Offsets ###############" << std::endl;
+					std::cout << "                     +x: " << glm::degrees( getAngleError( vecsToQuat( glm::vec3( 1.f, 0.f, 0.f ), glm::vec3( +1.f, 0.f, 0.f ) ), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "                     -x: " << glm::degrees( getAngleError( glm::quat( 0.f, 0.f, 1.f, 0.f ), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "                     +y: " << glm::degrees( getAngleError( vecsToQuat( glm::vec3( 1.f, 0.f, 0.f ), glm::vec3( 0.f, +1.f, 0.f ) ), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "                     -y: " << glm::degrees( getAngleError( vecsToQuat( glm::vec3( 1.f, 0.f, 0.f ), glm::vec3( 0.f, -1.f, 0.f ) ), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "                     +z: " << glm::degrees( getAngleError( vecsToQuat( glm::vec3( 1.f, 0.f, 0.f ), glm::vec3( 0.f, 0.f, +1.f ) ), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "                     -z: " << glm::degrees( getAngleError( vecsToQuat( glm::vec3( 1.f, 0.f, 0.f ), glm::vec3( 0.f, 0.f, -1.f ) ), polhemus->getQuaternion() ) ) << std::endl;
+					std::cout << "#################### Trial Settings ####################" << std::endl;
+					std::cout << "                density: " << density << std::endl;
+					std::cout << "                 jitter: " << jitter << std::endl;
+					std::cout << "       lengthMultiplier: " << lengthMultiplier << std::endl;
+					std::cout << "    thicknessMultiplier: " << thicknessMultiplier << std::endl;
+					std::cout << "   directionalGeomScale: " << directionalGeomScale << std::endl;
+					std::cout << "               haloSize: " << haloSize << std::endl;
+					std::cout << "         hedgehogOffset: " << hedgehogOffset << std::endl;
+					std::cout << "########################################################" << std::endl;
 					std::cout << std::endl;
 					std::cout << std::endl;
 				}
