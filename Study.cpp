@@ -783,7 +783,7 @@ glm::quat Study::getAdjustedTargetCursorOrientation()
 	glm::vec3 flowVec = targetCursor.getFlowVector();
 
 	glm::vec3 v1 = glm::vec3(1.f, 0.f, 0.f);
-	glm::vec3 v2 = glm::normalize( flowVec );
+	glm::vec3 v2 = glm::normalize( -flowVec );
 
 	return glm::normalize(vecsToQuat(v1, v2));
 }
@@ -801,13 +801,9 @@ float Study::getAngleError(glm::quat p, glm::quat q)
 void Study::updateTrainingTarget()
 {
 	if( training_target_random )
-		trainingTarget.setOrientation(getRandomOrientation());
+		trainingTarget.setOrientation( getRandomOrientation() );
 	else
-	{
-		glm::vec3 flowVec = normalize(targetCursor.getFlowVector());
-		glm::quat q = vecsToQuat(glm::vec3(1.f, 0.f, 0.f), flowVec);
-		trainingTarget.setOrientation(q);
-	}
+		trainingTarget.setOrientation( this->getAdjustedTargetCursorOrientation() );
 }
 glm::quat Study::getRandomOrientation()
 {

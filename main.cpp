@@ -55,7 +55,7 @@ int main()
 	if (retinaDisplayPresent)
 		window = glfwCreateWindow(WIDTH_RETINA_PX, HEIGHT_RETINA_PX, "Hairy Slices", monitor, nullptr);
 	else
-		window = glfwCreateWindow(WIDTH_DELL_PX, HEIGHT_DELL_PX, "Hairy Slices", nullptr, nullptr);
+		window = glfwCreateWindow(WIDTH_DELL_PX, HEIGHT_DELL_PX, "Hairy Slices", monitor, nullptr);
 
 	glfwMakeContextCurrent(window);
 
