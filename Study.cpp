@@ -680,7 +680,12 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				if (keys[GLFW_KEY_KP_DECIMAL])
 					polhemus->calibrateReset();
 				if (keys[GLFW_KEY_KP_ENTER])
+				{
+					std::cout << "Calibrating probe to correct " << glm::degrees( getAngleError( glm::quat(), polhemus->getQuaternion() ) ) << " degree error... ";
 					polhemus->calibrate();
+					polhemus->calibrateRollUp( 180.f );
+					std::cout << "done" << std::endl;
+				}
 				
 				if (keys[GLFW_KEY_SPACE] && probe_training)
 				{
