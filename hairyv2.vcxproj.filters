@@ -166,24 +166,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="normals.vert">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="normals.frag">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="normals.geom">
-      <Filter>Shaders</Filter>
-    </None>
-    <None Include="IL_cylinder_blinn.frag">
-      <Filter>Shaders\ILines</Filter>
-    </None>
-    <None Include="IL_cylinder_blinn.vert">
-      <Filter>Shaders\ILines</Filter>
-    </None>
-    <None Include="IL_cylinder_blinn_tangent.vert">
-      <Filter>Shaders\ILines</Filter>
-    </None>
     <None Include="halo.frag">
       <Filter>Shaders</Filter>
     </None>

@@ -70,7 +70,6 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
 	hogShaderRev = new Shader("hedgehogs_rev.vert", "hedgehogs_rev.frag");
 	targetShader = new Shader("target.vert", "target.frag");
-    normalShader = new Shader("normals.vert", "normals.frag", "normals.geom");
 }
 
 Study::~Study()
@@ -81,7 +80,6 @@ Study::~Study()
 	delete hogShader;
 	delete hogShaderRev;
 	delete targetShader;
-	delete normalShader;
 }
 
 void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm)

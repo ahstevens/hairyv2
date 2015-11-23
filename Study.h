@@ -115,7 +115,7 @@ private:
 
 	glm::vec3 bgColor;
 
-	Shader *lightingShader, *haloShader, *hogShader, *hogShaderRev, *normalShader, *lineShader, *targetShader;
+	Shader *lightingShader, *haloShader, *hogShader, *hogShaderRev, *lineShader, *targetShader;
 
 	GLfloat lengthMultiplier, thicknessMultiplier, directionalGeomScale, haloSize, hedgehogOffset;
 	
