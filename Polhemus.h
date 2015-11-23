@@ -29,6 +29,9 @@ public:
 	void calibrateYawUp( float degree = 1.f );
 	void calibrateYawDown( float degree = 1.f );
 
+	glm::quat getCalibration();
+	void setCalibration( glm::quat c );
+
 private:
 	static Polhemus* instance;
 	vrpn_Tracker_Remote* vrpnTracker;

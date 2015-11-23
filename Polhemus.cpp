@@ -111,3 +111,13 @@ void Polhemus::calibrateYawDown( float degree )
 {
 	this->calibration *= glm::angleAxis( -glm::radians( degree ), glm::vec3( 0.f, 0.f, 1.f ) );
 }
+
+glm::quat Polhemus::getCalibration()
+{
+	return calibration;
+}
+
+void Polhemus::setCalibration( glm::quat c )
+{
+	this->calibration = c;
+}

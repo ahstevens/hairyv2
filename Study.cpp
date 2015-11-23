@@ -7,10 +7,10 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
 
-#define NCALIBRATIONTRIALS 5
+#define POLHEMUS_CALIBRATION glm::quat( 0.999959, -0.0267551, -0.00644445, 0.0103233 )
 
-#define NBLOCKS 2
-#define NREPLICATESPERBLOCK 2
+#define NBLOCKS 4
+#define NREPLICATESPERBLOCK 5
 #define NDENSITYCONDITIONS 3
 #define NTHICKNESSCONDITIONS 3
 #define NRENDERINGCONDITIONS 5
@@ -92,6 +92,8 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	windowWidth = width_mm;
 	windowHeight = height_mm;
 	eyeDistance = dist_mm;
+
+	polhemus->setCalibration( POLHEMUS_CALIBRATION );
 
 	this->mode = Mode::NONE;
 	std::cout << "Press 'D' to enter demo/training mode, or <Enter> to begin the study" << std::endl;
@@ -719,10 +721,15 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					polhemus->calibrateReset();
 				if (keys[GLFW_KEY_KP_ENTER])
 				{
+					glm::vec3 errorAxis = glm::rotate( polhemus->getQuaternion(), glm::vec3( 1.f, 0.f, 0.f ) );
+					std::cout << "Uncalibrated x-axis: ( " << errorAxis.x << ", " << errorAxis.y << ", " << errorAxis.z << " )" << std::endl;
 					std::cout << "Calibrating probe to correct " << glm::degrees( getAngleError( glm::quat(), polhemus->getQuaternion() ) ) << " degree error... ";
 					polhemus->calibrate();
 					polhemus->calibrateRollUp( 180.f );
-					std::cout << "done" << std::endl;
+					std::cout << "done" << std::endl;		
+
+					glm::quat cal = polhemus->getCalibration();
+					std::cout << "Calibration quaternion ( w, x, y, z ): ( " << cal.w << ", " << cal.x << ", " << cal.y << ", " << cal.z << " )" << std::endl;
 				}
 				
 				if (keys[GLFW_KEY_SPACE] && probe_training)
