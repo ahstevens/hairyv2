@@ -9,8 +9,8 @@
 
 #define NCALIBRATIONTRIALS 5
 
-#define NBLOCKS 5
-#define NREPLICATESPERBLOCK 4
+#define NBLOCKS 2
+#define NREPLICATESPERBLOCK 2
 #define NDENSITYCONDITIONS 3
 #define NTHICKNESSCONDITIONS 3
 #define NRENDERINGCONDITIONS 5
@@ -42,7 +42,8 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = target_on_top = training_target_random = old_hog = 0;
+	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = training_target_random = old_hog = 0;
+	target_on_top = 1;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -101,7 +102,7 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	trainingTarget.setShader(lightingShader);
 	trainingTarget.init();
 
-	targetCursor.setSize(10.f, 10.f, 0.f);
+	targetCursor.setSize(20.f, 20.f, 0.f);
 	targetCursor.setShader(targetShader);
 
 	// set target color and opacity. Shader must be active to set the uniform
@@ -392,31 +393,39 @@ void Study::begin()
 
 	srand((unsigned int)time(NULL));
 
-	Trial::RenderMode renders[5] = { Trial::RenderMode::LINES_PLAIN, 
-									 Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, 
-									 Trial::RenderMode::SHADOWED_HEDGEHOGS, 
-									 Trial::RenderMode::TUBES_PLAIN, 
-									 Trial::RenderMode::TUBES_RINGED };
-	float densities[3]			 = { 0.4f, 
-									 0.3f, 
-									 0.2f };
-	float thicknesses[3]		 = { 2.f, 
-									 1.f, 
-									 0.5f };
-	float glyphHeads[3] 		 = { 1.15f, 
-									 0.75f, 
-									 0.5f };
-	
-	std::vector<Condition> block;
+	std::vector< Trial::RenderMode > renders;
+	renders.push_back( Trial::RenderMode::LINES_PLAIN ); 
+	renders.push_back( Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN );
+	renders.push_back( Trial::RenderMode::SHADOWED_HEDGEHOGS ); 
+	renders.push_back( Trial::RenderMode::TUBES_PLAIN );
+	renders.push_back( Trial::RenderMode::TUBES_RINGED );
 
-	for (int i = 0; i < NDENSITYCONDITIONS; ++i)
-		for (int j = 0; j < NRENDERINGCONDITIONS; ++j)
-		{
+	std::vector< float > densities;
+	densities.push_back( 0.4f ); 
+	densities.push_back( 0.3f );
+	densities.push_back( 0.2f );
+
+	std::vector< float > thicknesses;
+	thicknesses.push_back( 2.f );
+	thicknesses.push_back( 1.f );
+	thicknesses.push_back( 0.5f );
+
+	std::vector< float > glyphHeads;
+	glyphHeads.push_back( 1.15f );
+	glyphHeads.push_back( 0.75f );
+	glyphHeads.push_back( 0.5f );
+	std::vector< std::vector<Condition> > block;
+
+	for (int i = 0; i < densities.size(); ++i)
+		for (int j = 0; j < renders.size(); ++j)
+		{	
+			std::vector<Condition> replicates;
+
 			Trial::RenderMode rm = renders[j];
 			float d = densities[i];
 			float l = 1.f;
 			float t = 1.f;
-			float gh = glyphHeads[i];
+			float gh = 1.f;
 				
 			if( rm == Trial::RenderMode::LINES_PLAIN ||
 				rm == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
@@ -435,20 +444,30 @@ void Study::begin()
 				for( int m = 0; m < NTHICKNESSCONDITIONS; ++m)
 				{
 					t = thicknesses[m];
+					gh = glyphHeads[m];
 
 					for (int k = 0; k < NREPLICATESPERBLOCK; ++k)
-						block.push_back(Condition(rm, d, l, t, gh));
+						replicates.push_back(Condition(rm, d, l, t, gh));					
+
+					block.push_back( replicates );
+					replicates.clear();
 				}
 			}
 			else
+			{
 				for (int k = 0; k < NREPLICATESPERBLOCK; ++k)
-					block.push_back(Condition(rm, d, l, t, gh));
+					replicates.push_back(Condition(rm, d, l, t, gh));
+
+				block.push_back( replicates );
+			}
 		}
+
 
 	for (int i = 0; i < NBLOCKS; ++i)
 	{
 		std::random_shuffle(block.begin(), block.end());
-		conditions.push_back(block);
+
+		blocks.push_back(block);
 	}
 
 	std::cout << "Commencing study..." << std::endl;
@@ -460,40 +479,58 @@ void Study::begin()
 void Study::next()
 {	
 	// get current trial block from queue
-	std::vector<Condition> *block = &conditions.back();
+	std::vector< std::vector< Condition > > *block = &blocks.back();
+	std::vector< Condition > *cond = &block->back();
 
-	if (block->size() == 0)
+	if( cond->size() == 0 )
 	{
-		std::cout << "Block " << NBLOCKS - conditions.size() + 1 << " of " << NBLOCKS << " completed!" << std::endl;
-		std::cout << std::endl;
-		conditions.pop_back();
-		if (conditions.size() == 0)
-			end();
-		else
-			block = &conditions.back();		
-		
-		bgColor = glm::vec3(0.f, 0.5f, 0.f);
-		std::cout << "Please take a short break, then press the ENTER key when ready to begin the next block." << std::endl;
+		std::cout << "Block " << NBLOCKS - blocks.size() + 1 << ": Condition " << NCONDITIONS - block->size() + 1 << " of " << NCONDITIONS << " completed!" << std::endl;
 		mode = PAUSED;
+		block->pop_back();
+
+		if( block->size() == 0 )
+		{
+			std::cout << "Block " << NBLOCKS - blocks.size() + 1 << " of " << NBLOCKS << " completed!" << std::endl;
+			bgColor = glm::vec3(0.f, 0.5f, 0.f);
+			mode = PAUSED;
+			blocks.pop_back();
+
+			if( blocks.size() == 0 )
+				end();
+			else
+				block = &blocks.back();
+						
+			std::cout << "Please take a short break, then press the ENTER key when ready to begin the next block." << std::endl << std::endl;
+		}
+		else
+		{
+			std::cout << "Please take a short break, then press the ENTER key when ready to begin the next condition." << std::endl << std::endl;
+			bgColor = glm::vec3(0.8f, 0.596f, 0.f);
+		}
+
+		cond = &block->back();
 	}
 	else	
+	{
 		bgColor = glm::vec3(0.f, 0.f, 0.f);
+	}
+
+
+	Condition *repl = &cond->back();
+	cond->pop_back();
 
 	// Give blank screen immediately while processing new trial
 	glClearColor(bgColor.r, bgColor.g, bgColor.b, 1.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glfwSwapBuffers(window);
 
-	// get current trial condition from block queue
-	Condition curr = block->back();
-	block->pop_back();
 
-	density = curr.density;
-	lengthMultiplier = curr.lengthMultiplier;
-	thicknessMultiplier = curr.renderMode == Trial::RenderMode::SHADOWED_HEDGEHOGS ? 0.57f : curr.thicknessMultiplier;
-	directionalGeomScale = curr.renderMode == Trial::RenderMode::SHADOWED_HEDGEHOGS ? 0.47f : curr.thicknessMultiplier * 0.75;
+	density = repl->density;
+	lengthMultiplier = repl->lengthMultiplier;
+	thicknessMultiplier = repl->thicknessMultiplier;
+	directionalGeomScale = repl->glyphHeadMultiplier;
 
-	generateTrial(curr.renderMode);
+	generateTrial(repl->renderMode);
 
 	stopwatch.start();
 }
@@ -503,8 +540,9 @@ void Study::end()
 	std::cout << "Study Complete!" << std::endl;
 	mode = Mode::NONE;
 	
-	// Tell GLFW to kill the OpenGL window
-	glfwSetWindowShouldClose(window, GL_TRUE);
+	// Tell GLFW to kill the OpenGL window and exit
+	glfwTerminate();
+	exit( 0 );
 }
 
 
@@ -873,7 +911,7 @@ void Study::prepareOutput( std::string name )
 	if( outFile.is_open() )
 	{
 		std::cout << "Opened file " << outFileName << " for writing output" << std::endl;		
-		outFile << "participant,block,trial,probe_training,draw_probe,show_probe_hints,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,error_degrees,time" << std::endl;
+		outFile << "participant,block,trial,probe_training,draw_probe,show_probe_hints,render,density,lengthMulti,thicknessMulti,directGeomMulti,probe.x,probe.y,probe.z,target.x,target.y,target.z,target.length,error_degrees,time" << std::endl;
 	}
 	else
 		std::cout << "Error opening file " << outFileName << " for writing output" << std::endl;
@@ -923,8 +961,8 @@ void Study::recordTrial( bool trainingTrial )
 	
 	// Begin outputting trial into file
 	outFile << participant << ",";
-	outFile << ( trainingTrial ? 0 : ( NBLOCKS - conditions.size() ) ) << ",";
-	outFile << ( trainingTrial ? 0 : ( NTRIALSPERBLOCK - conditions.back().size() - 1 ) ) << ",";
+	outFile << ( trainingTrial ? 0 : ( NBLOCKS - blocks.size() ) ) << ",";
+	outFile << ( trainingTrial ? 0 : ( NTRIALSPERBLOCK - ( ( blocks.back().size() - 1 ) * NREPLICATESPERBLOCK + blocks.back().back().size() ) ) ) << ",";
 	outFile << probe_training << ",";
 	outFile << draw_probe << ",";
 	outFile << show_probe_hints << ",";
@@ -939,6 +977,7 @@ void Study::recordTrial( bool trainingTrial )
 	outFile << tVec.x << ",";
 	outFile << tVec.y << ",";
 	outFile << tVec.z << ",";
+	outFile << glm::length( targetCursor.getFlowVector() ) << ",";
 	outFile << glm::degrees( getAngleError( targetQuat, probeQuat ) ) << ",";
 	outFile << ( trainingTrial ? 0 : stopwatch.read() ) << std::endl;
 }

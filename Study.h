@@ -102,7 +102,7 @@ private:
 
 	Stopwatch stopwatch;
 
-	std::vector<std::vector<Condition>> conditions;
+	std::vector< std::vector< std::vector< Condition > > > blocks;
 
 	std::ofstream outFile;
 	std::string outFileName;
