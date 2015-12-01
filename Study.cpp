@@ -42,8 +42,8 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	deltaTime = 0.0f;	// Time between current frame and last frame
 	lastFrame = 0.0f;  	// Time of last frame
 
-	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = training_target_random = old_hog = 0;
-	target_on_top = 1;
+	draw_halos = cycle_light = probe_training = draw_probe = show_probe_hints = old_hog = 0;
+	training_target_random = target_on_top = 1;
 
 	density = 0.1f;
 	jitter = 0.25f;
@@ -93,8 +93,16 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 
 	polhemus->setCalibration( POLHEMUS_CALIBRATION );
 
-	this->mode = Mode::NONE;
-	std::cout << "Press 'D' to enter demo/training mode, or <Enter> to begin the study" << std::endl;
+	if( name == std::string("demo") )
+	{
+		this->mode = Mode::DEMO;
+		generateTrial(Trial::RenderMode::LINES_PLAIN);
+	}
+	else
+	{
+		this->mode = Mode::NONE;
+		std::cout << "Press 'T' to enter training mode, or <Enter> to begin the study" << std::endl;
+	}
 		
 	probe.setShader(lightingShader);
 	probe.init();
@@ -378,13 +386,6 @@ void Study::initGL(Shader *s)
 	glUniform1f(glGetUniformLocation(s->Program, "directionalGeomScale"), directionalGeomScale);
 }
 
-void Study::training()
-{	
-	float angleRad = getAngleError( probe.getOrientation(), trainingTarget.getOrientation() );
-	std::cout << "Angular error: " << glm::degrees( angleRad ) << " deg (" << angleRad << " rad)" << std::endl;
-	updateTrainingTarget();
-}
-
 void Study::begin()
 {
 	mode = Mode::STUDY;
@@ -606,8 +607,6 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					std::cout << std::endl;
 					std::cout << std::endl;
 				}
-				if (keys[GLFW_KEY_Q])
-					training();
 				if (keys[GLFW_KEY_R])
 					generateTrial(trial.getRenderMode());
 				if (keys[GLFW_KEY_BACKSPACE])
@@ -752,9 +751,14 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 			case NONE:
 				if (keys[GLFW_KEY_ENTER])
 					begin();
-				if (keys[GLFW_KEY_D])
+				//if (keys[GLFW_KEY_D])
+				//{
+				//	mode = Mode::DEMO;
+				//	generateTrial(Trial::RenderMode::LINES_PLAIN);
+				//}
+				if (keys[GLFW_KEY_T])
 				{
-					mode = Mode::DEMO;
+					mode = Mode::TRAINING;
 					generateTrial(Trial::RenderMode::LINES_PLAIN);
 				}
 				break;
@@ -765,10 +769,160 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					next();
 				}
 				break;
-			case TRAINING:
+			case TRAINING:		
+				if (keys[GLFW_KEY_1])
+				{
+					std::cout << "Rendering Mode: Plain Lines" << std::endl;
+					trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
+				}
+				if (keys[GLFW_KEY_2])
+				{
+					std::cout << "Rendering Mode: Illuminated Lines" << std::endl;
+					trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN, lengthMultiplier);		
+				}
+				if (keys[GLFW_KEY_3])
+				{
+					std::cout << "Rendering Mode: Plain Tubes" << std::endl;
+					trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
+				}
+				if (keys[GLFW_KEY_4])
+				{
+					std::cout << "Rendering Mode: Ringed Tubes" << std::endl;
+					trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
+				}
+				if (keys[GLFW_KEY_5])
+				{
+					std::cout << "Rendering Mode: Shadowed Hedgehogs" << std::endl;
+					trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
+				}
+				if (keys[GLFW_KEY_R])
+				{
+					if( probe_training )	
+					{
+						std::cout << "Refreshing Training Probe... ";
+						updateTrainingTarget();
+						std::cout << "done" << std::endl;
+					}
+					else
+					{
+						std::cout << "Refreshing Flow Field... ";
+						generateTrial(trial.getRenderMode());
+						std::cout << "done" << std::endl;
+					}
+				}
+				if (keys[GLFW_KEY_T])
+				{
+					probe_training = abs(probe_training - 1);					
+					std::cout << "Probe Training Mode: " << probe_training << std::endl;
+				}
+				if (keys[GLFW_KEY_P])
+				{
+					draw_probe = abs(draw_probe - 1);
+					std::cout << "Draw Polhemus Probe: " << draw_probe << std::endl;
+				}
+				if (keys[GLFW_KEY_H])
+				{
+					show_probe_hints = abs(show_probe_hints - 1);
+					std::cout << "Show Accuracy Hints: " << show_probe_hints << std::endl;
+				}
+				if (keys[GLFW_KEY_A])
+				{					
+					training_target_random = abs(training_target_random - 1);
+					updateTrainingTarget();
+					std::cout << "Random Training Probe Orientation: " << training_target_random << std::endl;
+				}
+				if (keys[GLFW_KEY_DOWN])
+				{
+					if (density > 0.1f + 0.0001f)
+					{
+						density -= 0.1f;
+						trial.setDensity(density);
+						trial.sampleBiMap();
+						if (trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+							trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+							trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG)
+							trial.setRenderMode(trial.getRenderMode(), lengthMultiplier);
+						std::cout << "Seeding Density: " << density << std::endl;
+					}
+					else						
+						std::cout << "Minimum Seeding Density of " << density << " reached" << std::endl;
+				}
+				if (keys[GLFW_KEY_UP])
+				{
+					density += 0.1f;
+					trial.setDensity(density);
+					trial.sampleBiMap();
+					if (trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_PHONG ||
+						trial.getRenderMode() == Trial::RenderMode::LINES_ILLUMINATED_MAXIMUM_PHONG)
+						trial.setRenderMode(trial.getRenderMode(), lengthMultiplier);
+					std::cout << "Seeding Density: " << density << std::endl;
+				}				
+				if (keys[GLFW_KEY_LEFT])
+				{
+					switch( trial.getRenderMode() )
+					{
+					case Trial::RenderMode::LINES_PLAIN:
+						trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
+						std::cout << "Rendering Mode: Shadowed Hedgehogs" << std::endl;
+						break;
+					case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+						trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
+						std::cout << "Rendering Mode: Plain Lines" << std::endl;
+						break;
+					case Trial::RenderMode::TUBES_PLAIN:
+						trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
+						std::cout << "Rendering Mode: Illuminated Lines" << std::endl;
+						break;
+					case Trial::RenderMode::TUBES_RINGED:
+						trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
+						std::cout << "Rendering Mode: Plain Tubes" << std::endl;
+						break;
+					case Trial::RenderMode::SHADOWED_HEDGEHOGS:
+						trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
+						std::cout << "Rendering Mode: Ringed Tubes" << std::endl;
+						break;
+					}
+				}				
+				if (keys[GLFW_KEY_RIGHT])
+				{
+					switch( trial.getRenderMode() )
+					{
+					case Trial::RenderMode::LINES_PLAIN:
+						trial.setRenderMode(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
+						std::cout << "Rendering Mode: Illuminated Lines" << std::endl;
+						break;
+					case Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN:
+						trial.setRenderMode(Trial::RenderMode::TUBES_PLAIN);
+						std::cout << "Rendering Mode: Plain Tubes" << std::endl;
+						break;
+					case Trial::RenderMode::TUBES_PLAIN:
+						trial.setRenderMode(Trial::RenderMode::TUBES_RINGED);
+						std::cout << "Rendering Mode: Ringed Tubes" << std::endl;
+						break;
+					case Trial::RenderMode::TUBES_RINGED:
+						trial.setRenderMode(Trial::RenderMode::SHADOWED_HEDGEHOGS);
+						std::cout << "Rendering Mode: Shadowed Hedgehogs" << std::endl;
+						break;
+					case Trial::RenderMode::SHADOWED_HEDGEHOGS:
+						trial.setRenderMode(Trial::RenderMode::LINES_PLAIN);
+						std::cout << "Rendering Mode: Plain Lines" << std::endl;
+						break;
+					}
+				}
 				if (keys[GLFW_KEY_SPACE])
-					training();
-				break;
+				{
+					if( probe_training && training_target_random )
+					{
+						std::cout << "Angular Error to Training Probe: " << glm::degrees( getAngleError( trainingTarget.getOrientation(), polhemus->getQuaternion() ) ) << std::endl;
+						recordTrial( true );
+						updateTrainingTarget();
+					}
+					else
+						std::cout << "Angular Error to Flow at Target Cursor: " << glm::degrees( getAngleError( getAdjustedTargetCursorOrientation(), polhemus->getQuaternion() ) ) << std::endl;
+				}
+				if (keys[GLFW_KEY_ENTER])
+					begin();
 			}
 		}
         else if (action == GLFW_RELEASE)
@@ -834,8 +988,8 @@ void Study::generateTrial( Trial::RenderMode renderMode )
 
 	targetCursor.setPosition(targSeed.x - windowWidth / 2.f, targSeed.y - windowHeight / 2.f, 0.f);
 	targetCursor.setSeed(targSeed);
-	//std::cout << "Trial generated" << std::endl;
-	if( !training_target_random ) updateTrainingTarget();
+	
+	updateTrainingTarget();
 }
 
 glm::quat Study::getAdjustedTargetCursorOrientation()

@@ -20,7 +20,6 @@ public:
 	static Study* getInstance( GLFWwindow* window );
 
 	void init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat dist_mm);
-	void training();
 	void begin();
 	void next();
 	void end();
