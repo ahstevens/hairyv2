@@ -88,10 +88,12 @@ private:
 	void prepareOutput( std::string name );
 	void recordTrial( bool trainingTrial = false );
 
+	bool snapshotTGA( std::string filename, bool append_timestamp = true );
+
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
 
-	bool keys[1024], firstMouse;
+	bool keys[1024], firstMouse, snapshotRequested;
 	
 	GLfloat lastX, lastY;
 	GLfloat deltaTime;		// Time between current frame and last frame

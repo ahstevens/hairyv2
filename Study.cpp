@@ -7,6 +7,8 @@
 #define _USE_MATH_DEFINES
 #include <math.h> // M_PI
 
+#include <ctime> // for tm struct
+
 #define POLHEMUS_CALIBRATION glm::quat( 0.999959, -0.0267551, -0.00644445, 0.0103233 )
 
 #define NBLOCKS 4
@@ -36,6 +38,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	int width_px, height_px;
 	glfwGetWindowSize(window, &width_px, &height_px);
 	this->window = window;
+	snapshotRequested = false;
 	firstMouse = true;
 	lastX  =  width_px  / 2.0f;
     lastY  =  height_px / 2.0f;
@@ -161,6 +164,16 @@ void Study::mainLoop()
 
 			// Swap the screen buffers
 			glfwSwapBuffers(window);
+
+			if ( snapshotRequested )
+			{
+				std::string fname = "snapshot";
+
+				std::cout << "Saving snapshot " << fname << std::endl;
+
+				snapshotTGA( fname );
+				snapshotRequested = false;
+			}
 		}
 	}
 
@@ -739,6 +752,9 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					training_target_random = abs(training_target_random - 1);
 					updateTrainingTarget();
 				}
+
+				if (keys[GLFW_KEY_PRINT_SCREEN])
+					snapshotRequested = true;
 				
 				if (keys[GLFW_KEY_ENTER])
 					begin();
@@ -1139,4 +1155,53 @@ void Study::recordTrial( bool trainingTrial )
 	outFile << glm::length( targetCursor.getFlowVector() ) << ",";
 	outFile << glm::degrees( getAngleError( targetQuat, probeQuat ) ) << ",";
 	outFile << ( trainingTrial ? 0 : stopwatch.read() ) << std::endl;
+}
+
+bool Study::snapshotTGA( std::string filename, bool append_timestamp )
+{
+	// get frame buffer size
+	int w, h;	
+	glfwGetFramebufferSize(window, &w, &h);
+
+	//This prevents the images getting padded 
+	// when the width multiplied by 3 is not a multiple of 4
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+
+	int nSize = w*h * 3;
+	// First let's create our buffer, 3 channels per Pixel
+	char* dataBuffer = (char*)malloc(nSize*sizeof(char));
+
+	if (!dataBuffer) return false;
+
+	// Let's fetch them from the backbuffer	
+	// We request the pixels in GL_BGR format, thanks to Berzeger for the tip
+	glReadPixels((GLint)0, (GLint)0,
+		(GLint)w, (GLint)h,
+		GL_BGR, GL_UNSIGNED_BYTE, dataBuffer);
+
+	if (append_timestamp)
+	{
+		time_t t = time(0);   // get time now
+		struct tm *now = localtime(&t);
+		filename += "_" + std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday);
+		filename += "_" + std::to_string(now->tm_hour) + "-" + std::to_string(now->tm_min) + "-" + std::to_string(now->tm_sec);
+	}
+
+	//Now the file creation
+	FILE *filePtr = fopen(std::string( "snapshots\\" + filename + ".tga" ).c_str(), "wb");
+	if (!filePtr) return false;
+
+
+	unsigned char TGAheader[12] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	unsigned char header[6] = { w % 256, w / 256,
+		h % 256, h / 256,
+		24, 0 };
+	// We write the headers
+	fwrite(TGAheader, sizeof(unsigned char), 12, filePtr);
+	fwrite(header, sizeof(unsigned char), 6, filePtr);
+	// And finally our image data
+	fwrite(dataBuffer, sizeof(GLubyte), nSize, filePtr);
+	fclose(filePtr);
+
+	return true;
 }
