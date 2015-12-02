@@ -90,6 +90,8 @@ private:
 
 	bool snapshotTGA( std::string filename, bool append_timestamp = true );
 
+	std::string intToString( int i, unsigned int pad_to_magnitude = 0 );
+
 	GLFWwindow* window;
 	GLfloat windowWidth, windowHeight, eyeDistance;
 

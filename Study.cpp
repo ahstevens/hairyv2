@@ -167,11 +167,7 @@ void Study::mainLoop()
 
 			if ( snapshotRequested )
 			{
-				std::string fname = "snapshot";
-
-				std::cout << "Saving snapshot " << fname << std::endl;
-
-				snapshotTGA( fname );
+				snapshotTGA( "snapshot" );
 				snapshotRequested = false;
 			}
 		}
@@ -1183,13 +1179,38 @@ bool Study::snapshotTGA( std::string filename, bool append_timestamp )
 	{
 		time_t t = time(0);   // get time now
 		struct tm *now = localtime(&t);
-		filename += "_" + std::to_string(now->tm_year + 1900) + "-" + std::to_string(now->tm_mon + 1) + "-" + std::to_string(now->tm_mday);
-		filename += "_" + std::to_string(now->tm_hour) + "-" + std::to_string(now->tm_min) + "-" + std::to_string(now->tm_sec);
+
+		/*** DATE ***/
+		// year
+		filename += "_" + intToString(now->tm_year + 1900, 3) + "-";
+
+		// month
+		filename += intToString(now->tm_mon + 1, 1) + "-";
+		
+		// day
+		filename += intToString(now->tm_mday, 1);
+
+		/*** TIME ***/
+		// hour
+		filename += "_" + intToString(now->tm_hour, 1);
+		
+		// minute
+		filename += "-" + intToString(now->tm_min, 1);
+		
+		// second
+		filename += "-" + intToString(now->tm_sec, 1);
 	}
 
+	filename = "snapshots\\" + filename + ".tga";
+
 	//Now the file creation
-	FILE *filePtr = fopen(std::string( "snapshots\\" + filename + ".tga" ).c_str(), "wb");
-	if (!filePtr) return false;
+	FILE *filePtr = fopen(std::string( filename ).c_str(), "wb");
+	if (!filePtr)
+	{
+		std::cerr << "ERROR: Could not save snapshot to " << filename << std::endl;
+		std::cerr << "Make sure the path is valid and that the 'snapshots' directory exists and try again." << std::endl;
+		return false;
+	}
 
 
 	unsigned char TGAheader[12] = { 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -1203,5 +1224,24 @@ bool Study::snapshotTGA( std::string filename, bool append_timestamp )
 	fwrite(dataBuffer, sizeof(GLubyte), nSize, filePtr);
 	fclose(filePtr);
 
+	std::cout << "Snapshot saved to " << filename << std::endl;
+
 	return true;
+}
+
+std::string Study::intToString( int i, unsigned int pad_to_magnitude )
+{
+	if( pad_to_magnitude < 1 )
+		return std::to_string( i );
+
+	std::string ret;
+
+	int mag = i == 0 ? 0 : (int) log10( i );
+
+	for( int j = pad_to_magnitude - mag; j > 0; --j )
+		ret += std::to_string( 0 );
+	
+	ret += std::to_string( i );
+
+	return ret;
 }
