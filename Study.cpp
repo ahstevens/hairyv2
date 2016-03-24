@@ -25,6 +25,8 @@
 // Initialize class variables
 Study* Study::instance = NULL;
 
+bool showTargetCursor = true;
+
 // Returns singleton Study instance
 Study* Study::getInstance( GLFWwindow* window )
 {
@@ -282,30 +284,33 @@ void Study::render()
 		// Display the trial slice
 		trial.redraw();
 			
-		// Now display target cursor
-		initGL(targetShader);
+		if (showTargetCursor)
+		{
+			// Now display target cursor
+			initGL(targetShader);
 
-		// Should we render the target atop everything else, or render it on the slice?
-		if(target_on_top) glDisable( GL_DEPTH_TEST );
+			// Should we render the target atop everything else, or render it on the slice?
+			if (target_on_top) glDisable(GL_DEPTH_TEST);
 
-		// Turn off writing to the depth mask for transparency effects
-		glDepthMask( GL_FALSE );
-				
-		// First draw target cursor as a filled object
-		glUniform1f(glGetUniformLocation(targetShader->Program, "opacity"), 0.1f);
-		targetCursor.redraw(); // draw target cursor		
+			// Turn off writing to the depth mask for transparency effects
+			glDepthMask(GL_FALSE);
 
-		// Now draw target cursor outline slightly darker
-		glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-		glUniform1f(glGetUniformLocation(targetShader->Program, "opacity"), 0.25f);
-		targetCursor.redraw();
-		glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+			// First draw target cursor as a filled object
+			glUniform1f(glGetUniformLocation(targetShader->Program, "opacity"), 0.1f);
+			targetCursor.redraw(); // draw target cursor		
 
-		// Reenable writing to the depth mask
-		glDepthMask( GL_TRUE );
+			// Now draw target cursor outline slightly darker
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glUniform1f(glGetUniformLocation(targetShader->Program, "opacity"), 0.25f);
+			targetCursor.redraw();
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-		// Turn the depth test back on if it was turned off previously
-		if(target_on_top) glEnable( GL_DEPTH_TEST );
+			// Reenable writing to the depth mask
+			glDepthMask(GL_TRUE);
+
+			// Turn the depth test back on if it was turned off previously
+			if (target_on_top) glEnable(GL_DEPTH_TEST);
+		}
 	}
 }
 
@@ -591,6 +596,8 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 					cycle_light = abs(cycle_light - 1);
 				if (keys[GLFW_KEY_M])
 					draw_halos = abs(draw_halos - 1);
+				if (keys[GLFW_KEY_T])
+					showTargetCursor = !showTargetCursor;
 				if (keys[GLFW_KEY_P])
 				{					
 					std::cout << std::endl;
