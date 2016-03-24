@@ -25,8 +25,6 @@
 // Initialize class variables
 Study* Study::instance = NULL;
 
-bool showTargetCursor = true;
-
 // Returns singleton Study instance
 Study* Study::getInstance( GLFWwindow* window )
 {
@@ -41,6 +39,7 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	glfwGetWindowSize(window, &width_px, &height_px);
 	this->window = window;
 	snapshotRequested = false;
+	showTargetCursor = true;
 	firstMouse = true;
 	lastX  =  width_px  / 2.0f;
     lastY  =  height_px / 2.0f;
@@ -75,6 +74,26 @@ Study::Study( GLFWwindow* window ) : probe(Probe(80.f, 20.f)), trainingTarget(Pr
 	hogShader = new Shader("hedgehogs.vert", "hedgehogs.frag");
 	hogShaderRev = new Shader("hedgehogs_rev.vert", "hedgehogs_rev.frag");
 	targetShader = new Shader("target.vert", "target.frag");
+	
+	renders.push_back(Trial::RenderMode::LINES_PLAIN);
+	renders.push_back(Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN);
+	renders.push_back(Trial::RenderMode::SHADOWED_HEDGEHOGS);
+	renders.push_back(Trial::RenderMode::TUBES_PLAIN);
+	renders.push_back(Trial::RenderMode::TUBES_RINGED);
+
+	densities.push_back(0.2f);
+	densities.push_back(0.3f);
+	densities.push_back(0.4f);
+
+	thicknesses.push_back(0.5f);
+	thicknesses.push_back(1.f);
+	thicknesses.push_back(2.f);
+
+	glyphHeads.push_back(0.5f);
+	glyphHeads.push_back(0.75f);
+	glyphHeads.push_back(1.15f);
+
+	curDensityIndex = curDiamIndex = curRenderIndex = curGlyphHeadIndex = 0;
 }
 
 Study::~Study()
@@ -101,7 +120,10 @@ void Study::init(std::string name, GLfloat width_mm, GLfloat height_mm, GLfloat 
 	if( name == std::string("demo") )
 	{
 		this->mode = Mode::DEMO;
-		generateTrial(Trial::RenderMode::LINES_PLAIN);
+
+		directionalGeomScale = 0.75f;
+		density = densities[0];
+		generateTrial(renders[0]);
 	}
 	else
 	{
@@ -408,27 +430,6 @@ void Study::begin()
 
 	srand((unsigned int)time(NULL));
 
-	std::vector< Trial::RenderMode > renders;
-	renders.push_back( Trial::RenderMode::LINES_PLAIN ); 
-	renders.push_back( Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN );
-	renders.push_back( Trial::RenderMode::SHADOWED_HEDGEHOGS ); 
-	renders.push_back( Trial::RenderMode::TUBES_PLAIN );
-	renders.push_back( Trial::RenderMode::TUBES_RINGED );
-
-	std::vector< float > densities;
-	densities.push_back( 0.4f ); 
-	densities.push_back( 0.3f );
-	densities.push_back( 0.2f );
-
-	std::vector< float > thicknesses;
-	thicknesses.push_back( 2.f );
-	thicknesses.push_back( 1.f );
-	thicknesses.push_back( 0.5f );
-
-	std::vector< float > glyphHeads;
-	glyphHeads.push_back( 1.15f );
-	glyphHeads.push_back( 0.75f );
-	glyphHeads.push_back( 0.5f );
 	std::vector< std::vector<Condition> > block;
 
 	for (int i = 0; i < densities.size(); ++i)
@@ -707,10 +708,127 @@ void Study::key_process(GLFWwindow* window, int key, int scancode, int action, i
 				}
 				if (keys[GLFW_KEY_END])
 					show_probe_hints = abs(show_probe_hints - 1);
+				//if (keys[GLFW_KEY_PAGE_DOWN])
+				//	hedgehogOffset -= (hedgehogOffset > 0.1f) ? 0.1f : 0.f;
+				//if (keys[GLFW_KEY_PAGE_UP])
+				//	hedgehogOffset += 0.1f;
+
 				if (keys[GLFW_KEY_PAGE_DOWN])
-					hedgehogOffset -= (hedgehogOffset > 0.1f) ? 0.1f : 0.f;
+				{
+					if (trial.getRenderMode() == Trial::RenderMode::TUBES_PLAIN ||
+						trial.getRenderMode() == Trial::RenderMode::TUBES_RINGED)
+					{
+						if (curDiamIndex == 0)
+							curDiamIndex = thicknesses.size() - 1;
+						else
+							curDiamIndex = --curDiamIndex % thicknesses.size();
+
+						thicknessMultiplier = thicknesses[curDiamIndex];
+						directionalGeomScale = glyphHeads[curDiamIndex];
+					}
+				}
 				if (keys[GLFW_KEY_PAGE_UP])
-					hedgehogOffset += 0.1f;
+				{
+					if (trial.getRenderMode() == Trial::RenderMode::TUBES_PLAIN ||
+						trial.getRenderMode() == Trial::RenderMode::TUBES_RINGED)
+					{
+						if (curDiamIndex == thicknesses.size() -1)
+							curDiamIndex = 0;
+						else
+							curDiamIndex = ++curDiamIndex % thicknesses.size();
+
+						thicknessMultiplier = thicknesses[curDiamIndex];
+						directionalGeomScale = glyphHeads[curDiamIndex];
+					}
+				}
+				if (keys[GLFW_KEY_DOWN])
+				{
+					if (curDensityIndex == 0)
+						curDensityIndex = densities.size() - 1;
+					else
+						curDensityIndex = --curDensityIndex % densities.size();
+
+					trial.setDensity(densities[curDensityIndex]);
+					trial.sampleBiMap();
+
+					if (densities[curDensityIndex] == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN)
+						trial.setRenderMode(renders[curRenderIndex], lengthMultiplier);
+					else
+						trial.setRenderMode(renders[curRenderIndex]);
+				}
+				if (keys[GLFW_KEY_UP])
+				{
+					if (curDensityIndex == densities.size() - 1)
+						curDensityIndex = 0;
+					else
+						curDensityIndex = ++curDensityIndex % densities.size();
+
+					trial.setDensity(densities[curDensityIndex]);
+					trial.sampleBiMap();
+
+					if (densities[curDensityIndex] == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN)
+						trial.setRenderMode(renders[curRenderIndex], lengthMultiplier);
+					else
+						trial.setRenderMode(renders[curRenderIndex]);
+				}
+				if (keys[GLFW_KEY_LEFT])
+				{
+					if (curRenderIndex == 0)
+						curRenderIndex = renders.size() - 1;
+					else
+						curRenderIndex = --curRenderIndex % renders.size();
+
+					if (renders[curRenderIndex] == Trial::RenderMode::SHADOWED_HEDGEHOGS)
+					{
+						thicknessMultiplier = 0.57f;
+						directionalGeomScale = 0.47f;
+					}
+					else if (renders[curRenderIndex] == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+						renders[curRenderIndex] == Trial::RenderMode::LINES_PLAIN)
+					{
+						thicknessMultiplier = 1.f;
+						directionalGeomScale = 0.75f;
+					}
+					else
+					{
+						thicknessMultiplier = thicknesses[curDiamIndex];
+						directionalGeomScale = glyphHeads[curDiamIndex];
+					}
+
+					if (renders[curRenderIndex] == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN)
+						trial.setRenderMode(renders[curRenderIndex], lengthMultiplier);
+					else
+						trial.setRenderMode(renders[curRenderIndex]);
+				}
+				if (keys[GLFW_KEY_RIGHT])
+				{
+					if (curRenderIndex == renders.size() - 1)
+						curRenderIndex = 0;
+					else
+						curRenderIndex = ++curRenderIndex % renders.size();
+
+					if (renders[curRenderIndex] == Trial::RenderMode::SHADOWED_HEDGEHOGS)
+					{
+						thicknessMultiplier = 0.57f;
+						directionalGeomScale = 0.47f;
+					}
+					else if (renders[curRenderIndex] == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN ||
+						renders[curRenderIndex] == Trial::RenderMode::LINES_PLAIN)
+					{
+						thicknessMultiplier = 1.f;
+						directionalGeomScale = 0.75f;
+					}
+					else
+					{
+						thicknessMultiplier = thicknesses[curDiamIndex];
+						directionalGeomScale = glyphHeads[curDiamIndex];
+					}
+
+					if (renders[curRenderIndex] == Trial::RenderMode::LINES_ILLUMINATED_CYLINDER_BLINN)
+						trial.setRenderMode(renders[curRenderIndex], lengthMultiplier);
+					else
+						trial.setRenderMode(renders[curRenderIndex]);
+				}
 
 				if (keys[GLFW_KEY_KP_1])
 					glLineWidth(1.f);

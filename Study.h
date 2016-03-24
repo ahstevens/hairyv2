@@ -107,6 +107,14 @@ private:
 
 	std::vector< std::vector< std::vector< Condition > > > blocks;
 
+	std::vector< Trial::RenderMode > renders;
+	std::vector< float > densities;
+	std::vector< float > thicknesses;
+	std::vector< float > glyphHeads;
+	int curDensityIndex, curRenderIndex, curDiamIndex, curGlyphHeadIndex;
+
+	bool showTargetCursor;
+
 	std::ofstream outFile;
 	std::string outFileName;
 
